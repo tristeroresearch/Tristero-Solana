@@ -14,7 +14,7 @@ use endpoint::{
 
 #[event_cpi]
 #[derive(CpiContext, Accounts)]
-#[instruction(params: SendParams)]
+#[instruction(params: TristeroSendParams)]
 pub struct TristeroSend<'info> {
     pub sender: Signer<'info>,
     /// CHECK: assert this program in assert_send_library()
@@ -57,9 +57,8 @@ pub struct TristeroSend<'info> {
     pub nonce: Account<'info, Nonce>,
 }
 
-pub fn tristero_send(ctx: Context<TristeroSend>, params: &TristeroSendParams) -> Result<()> {
+pub fn tristero_send(ctx: Context<TristeroSend>, params: TristeroSendParams) -> Result<()> {
     // Solana endpoints: 76y77prsiCMvXMjuoZ5VRrhG5qYBrUMYTE5WgHqgjEn6
-    msg!("tristero_send progress 1");
     let cpi_param = SendParams {
         dst_eid: params.dst_eid,
         receiver: params.receiver,
@@ -68,16 +67,10 @@ pub fn tristero_send(ctx: Context<TristeroSend>, params: &TristeroSendParams) ->
         native_fee: params.native_fee,
         lz_token_fee: params.lz_token_fee,
     };
-    msg!("tristero_send progress 2");
-    /// call the send library
-    let seeds: &[&[&[u8]]] =
-    &[&[MESSAGE_LIB_SEED, &[ctx.accounts.send_library_info.bump]]];
-
-    msg!("tristero_send progress 4");
+    let cpi_refs: Vec<&[u8]> = params.seeds.iter().map(|v| v.as_slice()).collect();
+    let cpi_seeds: &[&[u8]] = &cpi_refs;
     let cpi_ctx = Send::construct_context(params.endpoint_program, &ctx.accounts.to_account_infos())?;
-    msg!("tristero_send progress 5");
-    endpoint::cpi::send(cpi_ctx.with_signer(seeds), cpi_param);
-    msg!("tristero_send progress 6");
+    endpoint::cpi::send(cpi_ctx.with_signer(&[cpi_seeds]), cpi_param);
     Ok(())
 }
 
@@ -85,10 +78,11 @@ pub fn tristero_send(ctx: Context<TristeroSend>, params: &TristeroSendParams) ->
 pub struct TristeroSendParams {
     pub endpoint_program: Pubkey,
     pub sender: Pubkey,
+    pub seeds: Vec<Vec<u8>>,
     pub dst_eid: u32,
     pub receiver: [u8; 32],
-    pub message: [u8; 32],
-    pub options: [u8; 32],
+    pub message: Vec<u8>,
+    pub options: Vec<u8>,
     pub native_fee: u64,
     pub lz_token_fee: u64,
 }

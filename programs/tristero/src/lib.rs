@@ -31,6 +31,10 @@ pub mod tristero {
     }
 
     pub fn tristero_send(ctx: Context<TristeroSend>, params: TristeroSendParams) -> Result<()> {
-        instructions::tristero_send(ctx, &params)
+        instructions::tristero_send(ctx, params)
     }
-}
+
+    pub fn tristero_init_send_library(ctx: Context<TristeroInitSendLibrary>, params: TristeroInitSendLibraryParams) -> Result<()> {
+        instructions::tristero_init_send_library(ctx, &params)
+    }
+} 

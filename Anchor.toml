@@ -8,6 +8,7 @@ skip-lint = false
 
 [programs.localnet]
 tristero = "BeGgJzgrshaSYVzS4Ut9CPWMHFPWfnJgfGUqiFDztGYe"
+endpoint = "2PKFUuGQdpsVt8U4RpuFY373gXiubsen8VSzP7NWyexe"
 
 [programs.testnet]
 tristero = "BeGgJzgrshaSYVzS4Ut9CPWMHFPWfnJgfGUqiFDztGYe"

@@ -11,7 +11,7 @@ pub struct InitSendLibrary<'info> {
         bump = oapp_registry.bump,
         has_one = delegate
     )]
-    pub oapp_registry: Account<'info, OAppRegistry>,
+    pub oapp_registry: Box<Account<'info, OAppRegistry>>,
     #[account(
         init,
         payer = delegate,
@@ -19,7 +19,7 @@ pub struct InitSendLibrary<'info> {
         seeds = [SEND_LIBRARY_CONFIG_SEED, &params.sender.to_bytes(), &params.eid.to_be_bytes()],
         bump
     )]
-    pub send_library_config: Account<'info, SendLibraryConfig>,
+    pub send_library_config: Box<Account<'info, SendLibraryConfig>>,
     pub system_program: Program<'info, System>,
 }
 
