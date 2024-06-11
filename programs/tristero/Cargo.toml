@@ -16,4 +16,10 @@ cpi = ["no-entrypoint"]
 default = []
 
 [dependencies]
-anchor-lang = "0.29.0"
+anchor-lang = { version = "0.29.0", features = ["event-cpi"] }
+solana-program = "=1.17.31"
+solana-helper = { path = "../../solana-helper" }
+cpi-helper = { path = "../../libs/cpi-helper" }
+messagelib-interface = { path = "../messagelib-interface", features = ["cpi"] }
+utils = { path = "../../libs/utils" }
+endpoint = { path = "../../programs/endpoint", features = ["cpi"]}

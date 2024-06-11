@@ -2007,6 +2007,7 @@ dependencies = [
 name = "solana-helper"
 version = "0.1.0"
 dependencies = [
+ "anchor-lang",
  "bs58 0.5.1",
  "proc-macro2",
  "quote",
@@ -2578,6 +2579,19 @@ dependencies = [
  "indexmap",
  "toml_datetime",
  "winnow",
+]
+
+[[package]]
+name = "tristero"
+version = "0.1.0"
+dependencies = [
+ "anchor-lang",
+ "cpi-helper",
+ "endpoint",
+ "messagelib-interface",
+ "solana-helper",
+ "solana-program",
+ "utils",
 ]
 
 [[package]]
