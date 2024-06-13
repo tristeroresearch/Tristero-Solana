@@ -9,7 +9,7 @@ pub use messagelib_interface::{
 use instructions::*;
 use errors::*;
 
-declare_id!("BeGgJzgrshaSYVzS4Ut9CPWMHFPWfnJgfGUqiFDztGYe");
+declare_id!("58nEPFCuebJsxjcyg6p6q2fXNLY2ApMiSQ619wZHe88h");
 
 pub const ENDPOINT_SEED: &[u8] = b"Endpoint";
 pub const MESSAGE_LIB_SEED: &[u8] = b"MessageLib";
@@ -24,14 +24,19 @@ pub const OAPP_SEED: &[u8] = b"OApp";
 pub const DEFAULT_MESSAGE_LIB: Pubkey = Pubkey::new_from_array([0u8; 32]);
 #[program]
 pub mod tristero {
+    use endpoint::instructions::SendParams;
+
     use super::*;
 
     pub fn register_tristero_oapp(ctx: Context<RegisterTristeroOApp>, params: RegisterTristeroOAppParams) -> Result<()> {
         instructions::register_tristero_oapp(ctx, &params)
     }
 
+    // pub fn tristero_send(ctx: Context<TristeroSend>, params: TristeroSendParams) -> Result<()> {
+    //     instructions::tristero_send(ctx, params)
+    // }
     pub fn tristero_send(ctx: Context<TristeroSend>, params: TristeroSendParams) -> Result<()> {
-        instructions::tristero_send(ctx, params)
+        instructions::tristero_send(&ctx, &params)
     }
 
     pub fn tristero_init_send_library(ctx: Context<TristeroInitSendLibrary>, params: TristeroInitSendLibraryParams) -> Result<()> {
