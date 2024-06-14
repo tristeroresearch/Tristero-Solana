@@ -25,17 +25,6 @@ use endpoint::{
 #[derive(Accounts)]
 #[instruction(params: CreateMatchParams)]
 pub struct CreateMatch<'info> {
-    // /// CHECK:
-    // #[account(
-    //     mut,
-    //     seeds = [b"TristeroOapp"],
-    //     bump
-    // )]
-    // pub sender: UncheckedAccount<'info>,
-
-    // /// CHECK:
-    // #[account(executable)]
-    // pub endpoint_program: UncheckedAccount<'info>,
 
     #[account(mut)]
     pub authority: Signer<'info>,
@@ -92,16 +81,10 @@ pub struct CreateMatch<'info> {
 
 #[derive(AnchorSerialize, AnchorDeserialize, Clone)]
 pub struct CreateMatchParams {
-    // pub source_token_mint: Pubkey,
     pub source_sell_amount: u64,
     pub dest_token_mint: Pubkey,
     pub dest_buy_amount: u64,
     pub eid: u32,
-    // pub receiver: [u8; 32],
-    // pub message: Box<Vec<u8>>,
-    // pub options: Box<Vec<u8>>,
-    // pub native_fee: u64,
-    // pub lz_token_fee: u64,
     pub tristero_oapp_bump: u8, 
 }
 
@@ -118,31 +101,24 @@ pub fn create_match(ctx: Context<CreateMatch>, params: &CreateMatchParams) -> Re
     trade_match.match_bump = ctx.bumps.trade_match;
     trade_match.trade_match_id = user.match_count;
     trade_match.source_token_account = ctx.accounts.token_account.key();
-    
     user.match_count += 1;
 
-    let system_program = ctx.accounts.system_program.to_account_info();
-
     // --------------------------Send message through Oapp-----------------------------
-    // let cpi_ctx = Send::construct_context(ctx.accounts.endpoint_program.key(), ctx.remaining_accounts).unwrap();
     let cpi_ctx = Send::construct_context(ctx.remaining_accounts[9].key(), ctx.remaining_accounts).unwrap();
     msg!("4 ====> constructing context good");
 
-    // let signer_seeds: &[&[&[u8]]] = &[&[b"TristeroOapp", &[ctx.bumps.sender]]];
     let signer_seeds: &[&[&[u8]]] = &[&[b"TristeroOapp", &[params.tristero_oapp_bump]]];
 
     let receive_options= [0u8, 3u8, 1u8, 0u8, 17u8, 1u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 100u8]; // For lzReceiveOption
-    let receiver:[u8; 32] = [1u8; 32]; //have to set receiver
+    let receiver:[u8; 32] = [1u8; 32]; //have to change. This should be receiver
     let cpi_params = SendParams {
         dst_eid: params.eid,
         receiver: receiver,
-        message: vec![],
+        message: vec![], // have to change, have to contain message.
         options: receive_options.to_vec(),
         native_fee: LAMPORTS_PER_SOL * 3,
         lz_token_fee: 0,
     };
-
-    // msg!("options => {:?}", cpi_params.options.clone());
     
     endpoint::cpi::send(cpi_ctx.with_signer(signer_seeds), cpi_params)?;
 
@@ -158,7 +134,6 @@ pub fn create_match(ctx: Context<CreateMatch>, params: &CreateMatchParams) -> Re
     let signer_seeds: &[&[&[u8]]] = &[&[b"user", &[ctx.bumps.user]]];
     
     token::transfer(cpi_context.with_signer(signer_seeds), params.source_sell_amount)?;
-    // -------------------------------------------------------
 
     Ok(())
 }

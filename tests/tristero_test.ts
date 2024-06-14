@@ -44,9 +44,7 @@ const programId = program.programId;
 const user = anchor.web3.Keypair.fromSecretKey(Uint8Array.from(userJson))
 const otherUser = anchor.web3.Keypair.fromSecretKey(Uint8Array.from(otherJson))
 const admin = anchor.web3.Keypair.fromSecretKey(Uint8Array.from(adminJson))
-// const receiverPubKey = Buffer.from("5C105836fAa55A42957D2cC1b86e880f")
-const receiverPubKey = Buffer.from(Array(32).fill(1))
-// [5u8, 12u8, 1u8, 0u8, 4u8, 8u8, 3u8, 6u8, fu8, ]
+const receiverPubKey = Buffer.from(Array(32).fill(1)) // have to change to arbitrum side
 const arbitrumEID = 40231;
 
 describe("# test scenario - tristero ", () => {
@@ -107,10 +105,6 @@ describe("# test scenario - tristero ", () => {
             const tristeroOappPubkey = getTristeroOapp();
             const endpointEventPdaDeriver = new EventPDADeriver(endpoint)
             const uldEventPdaDeriver = new EventPDADeriver(sendLibraryProgram)
-
-            // const signature1 = await connection.requestAirdrop(tristeroOappPubkey, 5 * LAMPORTS_PER_SOL)
-            // await connection.confirmTransaction(signature1)
-            // console.log("Airdrop successful: ", signature1)
 
             console.log("------------------------Register New Oapp(Sender)------------------------");
 
@@ -258,7 +252,7 @@ describe("# test scenario - tristero ", () => {
                 console.log("-------------------------------------------------------------------------------")
             }
 
-            console.log("------------------------------mint new spl token-------------------------------------------------");
+            console.log("------------------------------mint new spl token(only need in localnet)-------------------------------------------------");
             const mint = await createMint(
                 connection,
                 user,
@@ -268,8 +262,6 @@ describe("# test scenario - tristero ", () => {
             )
 
             console.log("Mint Address: ", mint.toBase58());
-
-            console.log("-------------------------Mint Spl Token(Don't need in testnet)-----------------------------------");
 
             // Create a token account for the mint
             const tokenAccount = await getOrCreateAssociatedTokenAccount(
@@ -298,275 +290,189 @@ describe("# test scenario - tristero ", () => {
 
             console.log("------------------------Create Match------------------------");
 
-            //for message
-            const sendLibraryConfig = getSendLibraryConfigPDA(tristeroOappPubkey, arbitrumEID);
-            const defaultSendLibraryConfig = getDefaultSendLibraryConfig(arbitrumEID);
-            const sendLibraryInfo = await getSendLibraryInfoPDA(sendLibraryConfig, defaultSendLibraryConfig);
-            const ulnPdaDeriver = new UlnPDADeriver(sendLibraryProgram);
-            let sendConfig = ulnPdaDeriver.sendConfig(arbitrumEID, tristeroOappPubkey)[0];
-            let defaultSendConfig = ulnPdaDeriver.defaultSendConfig(arbitrumEID)[0]; //until here
-            const sendInstructionRemainingAccounts = [
-                { //0
-                    pubkey: endpoint,
-                    isSigner: false,
-                    isWritable: true
-                },
-                { //1
-                    pubkey: tristeroOappPubkey,
-                    isSigner: false,
-                    isWritable: true
-                },
-                { //2
-                    pubkey: sendLibraryProgram,
-                    isSigner: false,
-                    isWritable: true
-                },
-                { //3
-                    pubkey: sendLibraryConfig,
-                    isSigner: false,
-                    isWritable: true
-                },
-                { //4
-                    pubkey: defaultSendLibraryConfig,
-                    isSigner: false,
-                    isWritable: true
-                },
-                { //5
-                    pubkey: sendLibraryInfo,
-                    isSigner: false,
-                    isWritable: true
-                },
-                { //6
-                    pubkey: getEndpointPDA(arbitrumEID),
-                    isSigner: false,
-                    isWritable: true
-                },
-                { //7
-                    pubkey: getNoncePDA(tristeroOappPubkey, arbitrumEID, receiverPubKey),
-                    isSigner: false,
-                    isWritable: true
-                },
-                { //8
-                    pubkey: endpointEventPdaDeriver.eventAuthority()[0],
-                    isSigner: false,
-                    isWritable: true
-                },
-                { //9
-                    pubkey: endpoint,
-                    isSigner: false,
-                    isWritable: true
-                },
-                { //10
-                    pubkey: getUlnPDA(),
-                    isSigner: false,
-                    isWritable: true
-                },
-                { //11
-                    pubkey: sendConfig,
-                    isSigner: false,
-                    isWritable: true
-                },
-                { //12
-                    pubkey: defaultSendConfig,
-                    isSigner: false,
-                    isWritable: true
-                },
-                { //13
-                    pubkey: user.publicKey,
-                    isSigner: false,
-                    isWritable: true
-                },
-                { //14
-                    pubkey: user.publicKey,
-                    isSigner: false,
-                    isWritable: true
-                },
-                { //15
-                    pubkey: SystemProgram.programId,
-                    isSigner: false,
-                    isWritable: true
-                },
-                { //16
-                    pubkey: uldEventPdaDeriver.eventAuthority()[0],
-                    isSigner: false,
-                    isWritable: true
-                },
-                { //17
-                    pubkey: sendLibraryProgram,
-                    isSigner: false,
-                    isWritable: true
-                },
-                { //18
-                    pubkey: executorProgramId,
-                    isSigner: false,
-                    isWritable: true
-                },
-                { //19
-                    pubkey: new ExecutorPDADeriver(executorProgramId).config()[0],
-                    isSigner: false,
-                    isWritable: true
-                },
-                { //20
-                    pubkey: priceFeeProgramId,
-                    isSigner: false,
-                    isWritable: true
-                },
-                { //21
-                    pubkey: new PriceFeedPDADeriver(priceFeeProgramId).priceFeed()[0],
-                    isSigner: false,
-                    isWritable: true
-                },
-                { //22
-                    pubkey: dvnProgramId,
-                    isSigner: false,
-                    isWritable: true
-                },
-                { //23
-                    pubkey: new DVNDeriver(dvnProgramId).config()[0],
-                    isSigner: false,
-                    isWritable: true
-                },
-                { //24
-                    pubkey: priceFeeProgramId,
-                    isSigner: false,
-                    isWritable: true
-                },
-                { //25
-                    pubkey: new PriceFeedPDADeriver(priceFeeProgramId).priceFeed()[0],
-                    isSigner: false,
-                    isWritable: true
-                },
-            ]
-            const sellAmount = new BN(100000)
-            const buyAmount = new BN(10000)
-            const sourceTokenAddressInArbitrumChain = Array(40).fill(0); //have to input arbitrum wallet address of user
-            //messageToSend: matchId, sourceTokenMint, sourceSellAmount, destTokenMint, destBuyAmount, sourceTokenAddress
-            const messageToSend = selectedUser.matchCount.toString(16) //2
-                + mint.toString() // 32
-                + sellAmount.toString(16).padStart(32, '0') // 32
-                + usdCoinMintAddress.toString() //32
-                + buyAmount.toString(16).padStart(32, '0') //32
-                + Buffer.from(sourceTokenAddressInArbitrumChain) //40
-            
-            const additionalComputeBudgetInstruction =
-                anchor.web3.ComputeBudgetProgram.requestUnits({
-                units: 800000,
-                additionalFee: 0,
-            });
+            {
+                const sendLibraryConfig = getSendLibraryConfigPDA(tristeroOappPubkey, arbitrumEID);
+                const defaultSendLibraryConfig = getDefaultSendLibraryConfig(arbitrumEID);
+                const sendLibraryInfo = await getSendLibraryInfoPDA(sendLibraryConfig, defaultSendLibraryConfig);
+                const ulnPdaDeriver = new UlnPDADeriver(sendLibraryProgram);
+                let sendConfig = ulnPdaDeriver.sendConfig(arbitrumEID, tristeroOappPubkey)[0];
+                let defaultSendConfig = ulnPdaDeriver.defaultSendConfig(arbitrumEID)[0]; //until here
+                const sendInstructionRemainingAccounts = [
+                    { //0
+                        pubkey: endpoint,
+                        isSigner: false,
+                        isWritable: true
+                    },
+                    { //1
+                        pubkey: tristeroOappPubkey,
+                        isSigner: false,
+                        isWritable: true
+                    },
+                    { //2
+                        pubkey: sendLibraryProgram,
+                        isSigner: false,
+                        isWritable: true
+                    },
+                    { //3
+                        pubkey: sendLibraryConfig,
+                        isSigner: false,
+                        isWritable: true
+                    },
+                    { //4
+                        pubkey: defaultSendLibraryConfig,
+                        isSigner: false,
+                        isWritable: true
+                    },
+                    { //5
+                        pubkey: sendLibraryInfo,
+                        isSigner: false,
+                        isWritable: true
+                    },
+                    { //6
+                        pubkey: getEndpointPDA(arbitrumEID),
+                        isSigner: false,
+                        isWritable: true
+                    },
+                    { //7
+                        pubkey: getNoncePDA(tristeroOappPubkey, arbitrumEID, receiverPubKey),
+                        isSigner: false,
+                        isWritable: true
+                    },
+                    { //8
+                        pubkey: endpointEventPdaDeriver.eventAuthority()[0],
+                        isSigner: false,
+                        isWritable: true
+                    },
+                    { //9
+                        pubkey: endpoint,
+                        isSigner: false,
+                        isWritable: true
+                    },
+                    { //10
+                        pubkey: getUlnPDA(),
+                        isSigner: false,
+                        isWritable: true
+                    },
+                    { //11
+                        pubkey: sendConfig,
+                        isSigner: false,
+                        isWritable: true
+                    },
+                    { //12
+                        pubkey: defaultSendConfig,
+                        isSigner: false,
+                        isWritable: true
+                    },
+                    { //13
+                        pubkey: user.publicKey,
+                        isSigner: false,
+                        isWritable: true
+                    },
+                    { //14
+                        pubkey: user.publicKey,
+                        isSigner: false,
+                        isWritable: true
+                    },
+                    { //15
+                        pubkey: SystemProgram.programId,
+                        isSigner: false,
+                        isWritable: true
+                    },
+                    { //16
+                        pubkey: uldEventPdaDeriver.eventAuthority()[0],
+                        isSigner: false,
+                        isWritable: true
+                    },
+                    { //17
+                        pubkey: sendLibraryProgram,
+                        isSigner: false,
+                        isWritable: true
+                    },
+                    { //18
+                        pubkey: executorProgramId,
+                        isSigner: false,
+                        isWritable: true
+                    },
+                    { //19
+                        pubkey: new ExecutorPDADeriver(executorProgramId).config()[0],
+                        isSigner: false,
+                        isWritable: true
+                    },
+                    { //20
+                        pubkey: priceFeeProgramId,
+                        isSigner: false,
+                        isWritable: true
+                    },
+                    { //21
+                        pubkey: new PriceFeedPDADeriver(priceFeeProgramId).priceFeed()[0],
+                        isSigner: false,
+                        isWritable: true
+                    },
+                    { //22
+                        pubkey: dvnProgramId,
+                        isSigner: false,
+                        isWritable: true
+                    },
+                    { //23
+                        pubkey: new DVNDeriver(dvnProgramId).config()[0],
+                        isSigner: false,
+                        isWritable: true
+                    },
+                    { //24
+                        pubkey: priceFeeProgramId,
+                        isSigner: false,
+                        isWritable: true
+                    },
+                    { //25
+                        pubkey: new PriceFeedPDADeriver(priceFeeProgramId).priceFeed()[0],
+                        isSigner: false,
+                        isWritable: true
+                    },
+                ]
+                const sellAmount = new BN(100000)
+                const buyAmount = new BN(10000)
+                const sourceTokenAddressInArbitrumChain = Array(40).fill(0); //have to input arbitrum wallet address of user
+                const messageToSend = selectedUser.matchCount.toString(16) //2
+                    + mint.toString() // 32
+                    + sellAmount.toString(16).padStart(32, '0') // 32
+                    + usdCoinMintAddress.toString() //32
+                    + buyAmount.toString(16).padStart(32, '0') //32
+                    + Buffer.from(sourceTokenAddressInArbitrumChain) //40
 
-            let tx = new Transaction();
-            tx.add(ComputeBudgetProgram.setComputeUnitLimit({ units: 2000000 }))
+                const additionalComputeBudgetInstruction =
+                    anchor.web3.ComputeBudgetProgram.requestUnits({
+                        units: 800000,
+                        additionalFee: 0,
+                    });
 
-            let instruction = await program.methods.createMatch({
-                // sourceTokenMint: mint,
-                sourceSellAmount: sellAmount,
-                destTokenMint: usdCoinMintAddress,
-                destBuyAmount: buyAmount,
-                eid: arbitrumEID,
-                // receiver: Array.from(receiverPubKey), // from here, all for message
-                // message: Buffer.from(messageToSend),
-                // options: Buffer.from(Options.newOptions().addExecutorLzReceiveOption(100, 0).toBytes()),
-                // nativeFee: new BN(LAMPORTS_PER_SOL * 3),
-                // lzTokenFee: new BN(0),
-                tristeroOappBump: getTristeroOappBump()
-            })
-                .accounts({
-                    authority: user.publicKey,
-                    adminPanel: getAdminPanel(),
-                    tokenMint: mint,
-                    tokenAccount: tokenAccount.address,
-                    stakingAccount: getStakingPanel(mint),
-                    user: getUserPDA(user.publicKey),
-                    tradeMatch: getTradeMatchPDA(user.publicKey, selectedUser.matchCount),
-                    tokenProgram: TOKEN_PROGRAM_ID,
-                    systemProgram: SystemProgram.programId
+                let tx = new Transaction();
+                tx.add(ComputeBudgetProgram.setComputeUnitLimit({ units: 2000000 }))
+
+                let instruction = await program.methods.createMatch({
+                    sourceSellAmount: sellAmount,
+                    destTokenMint: usdCoinMintAddress,
+                    destBuyAmount: buyAmount,
+                    eid: arbitrumEID,
+                    tristeroOappBump: getTristeroOappBump()
                 })
-                .remainingAccounts(sendInstructionRemainingAccounts)
-                .instruction();
-            tx.add(instruction)
-            const createMatchTx = await sendAndConfirmTransaction(connection, tx, [user])
-            
-            
-            // const createMatchTx = await program.methods.createMatch({
-            //     // sourceTokenMint: mint,
-            //     sourceSellAmount: sellAmount,
-            //     destTokenMint: usdCoinMintAddress,
-            //     destBuyAmount: buyAmount,
-            //     eid: arbitrumEID,
-            //     // receiver: Array.from(receiverPubKey), // from here, all for message
-            //     // message: Buffer.from(messageToSend),
-            //     // options: Buffer.from(Options.newOptions().addExecutorLzReceiveOption(100, 0).toBytes()),
-            //     // nativeFee: new BN(LAMPORTS_PER_SOL * 3),
-            //     // lzTokenFee: new BN(0),
-            //     tristeroOappBump: getTristeroOappBump()
-            // })
-            //     .accounts({
-            //         authority: user.publicKey,
-            //         adminPanel: getAdminPanel(),
-            //         tokenMint: mint,
-            //         tokenAccount: tokenAccount.address,
-            //         stakingAccount: getStakingPanel(mint),
-            //         user: getUserPDA(user.publicKey),
-            //         tradeMatch: getTradeMatchPDA(user.publicKey, selectedUser.matchCount),
-            //         tokenProgram: TOKEN_PROGRAM_ID,
-            //         systemProgram: SystemProgram.programId
-            //     })
-            //     .remainingAccounts(sendInstructionRemainingAccounts)
-            //     .signers([user])
-            //     // .preInstructions(additionalComputeBudgetInstruction)
-            //     .rpc();
-            console.log("createMatchTx = ", createMatchTx)
+                    .accounts({
+                        authority: user.publicKey,
+                        adminPanel: getAdminPanel(),
+                        tokenMint: mint,
+                        tokenAccount: tokenAccount.address,
+                        stakingAccount: getStakingPanel(mint),
+                        user: getUserPDA(user.publicKey),
+                        tradeMatch: getTradeMatchPDA(user.publicKey, selectedUser.matchCount),
+                        tokenProgram: TOKEN_PROGRAM_ID,
+                        systemProgram: SystemProgram.programId
+                    })
+                    .remainingAccounts(sendInstructionRemainingAccounts)
+                    .instruction();
+                tx.add(instruction)
+                const createMatchTx = await sendAndConfirmTransaction(connection, tx, [user])
 
-            console.log("----------------------------Send through Oapp-------------------------------")
-            // {
-            //     const sendLibraryConfig = getSendLibraryConfigPDA(tristeroOappPubkey, arbitrumEID);
-            //     const defaultSendLibraryConfig = getDefaultSendLibraryConfig(arbitrumEID);
-            //     const sendLibraryInfo = await getSendLibraryInfoPDA(sendLibraryConfig, defaultSendLibraryConfig);
-            //     const ulnPdaDeriver = new UlnPDADeriver(sendLibraryProgram);
-            //     let sendConfig = ulnPdaDeriver.sendConfig(arbitrumEID, tristeroOappPubkey)[0];
-            //     let defaultSendConfig = ulnPdaDeriver.defaultSendConfig(arbitrumEID)[0];
-
-            //     console.log("------------------------------------------------------------------------")
-
-
-            //     const sendInstructionAccounts = {
-            //         sender: tristeroOappPubkey,
-            //         endpointProgram: endpoint,
-            //     }
-
-
-            //     const sendParams1 = {
-            //         dstEid: arbitrumEID,
-            //         receiver: Array.from(receiverPubKey),
-            //         message: Buffer.from(messageToSend),
-            //         options: Buffer.from(Options.newOptions().addExecutorLzReceiveOption(100, 0).toBytes()),
-            //         nativeFee: new BN(LAMPORTS_PER_SOL * 3),
-            //         lzTokenFee: new BN(0),
-            //     }
-
-            //     // console.log("accounts => ", JSON.stringify(sendInstructionRemainingAccounts))
-            //     // console.log("params => ", JSON.stringify(sendParams1))
-
-            //     let tx = new Transaction()
-            //     tx.add(ComputeBudgetProgram.setComputeUnitLimit({ units: 90000000 }))
-
-            //     const tristeroSendInstruction = await program.methods.tristeroSend(sendParams1)
-            //         .accounts(sendInstructionAccounts)
-            //         .remainingAccounts(sendInstructionRemainingAccounts)
-            //         .instruction();
-
-            //     tx.add(tristeroSendInstruction)
-
-
-            //     const tx5 = await sendAndConfirmTransaction(connection, tx, [user])
-
-            //     // const tx5 = await program.methods.tristeroSend(sendParams1)
-            //     //     .accounts(sendInstructionAccounts)
-            //     //     .rpc();
-            //     console.log("tx5 = ", tx5)
-            //     console.log("-------------------------------------------------------------------------------")
-            // }
-
+                console.log("createMatchTx = ", createMatchTx)
+            }
 
         } catch (err) {
             console.log(err)
