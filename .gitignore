@@ -2,7 +2,6 @@ target/debug/
 target/release/
 target/sbf-solana-solana/
 target/tmp/
-target/types/
 
 .anchor
 test-ledger
