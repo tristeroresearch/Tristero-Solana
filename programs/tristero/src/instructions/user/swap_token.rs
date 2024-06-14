@@ -20,8 +20,12 @@ use endpoint::events::LzReceiveAlertEvent;
 #[instruction(params: SwapTokenParams)]
 pub struct SwapToken<'info> {
 
-    #[account(mut)]
-    pub authority: Signer<'info>,
+    #[account(
+        mut,
+        seeds = [b"admin_panel"],
+        bump,
+    )]
+    pub admin_panel: Box<Account<'info, AdminPanel>>,
 
     /// token mint address
     pub token_mint: Box<Account<'info, Mint>>,
@@ -40,27 +44,27 @@ pub struct SwapToken<'info> {
             &params.nonce.to_be_bytes()
         ],
         bump = payload_hash.bump,
-        //close = endpoint
+        close = endpoint
     )]
     pub payload_hash: Box<Account<'info, PayloadHash>>,
 
     #[account(
         mut,
-        seeds = [b"staking_account", authority.key().as_ref(), token_mint.key().as_ref()],
+        seeds = [b"staking_account", token_mint.key().as_ref()],
         bump,
     )]
     pub staking_account: Box<Account<'info, TokenAccount>>,
 
     #[account(
         mut,
-        seeds = [b"user", authority.key().as_ref()],
+        seeds = [b"user", params.receiver.key().as_ref()],
         bump,
     )]
     pub user: Box<Account<'info, User>>,
 
     #[account(
         mut,
-        seeds = [b"trade_match", authority.key().as_ref(), token_mint.key().as_ref(), &trade_match.trade_match_id.to_be_bytes()],
+        seeds = [b"trade_match", params.receiver.key().as_ref(), token_mint.key().as_ref(), &trade_match.trade_match_id.to_be_bytes()],
         bump,
     )]
     pub trade_match: Box<Account<'info, TradeMatch>>,
@@ -70,6 +74,9 @@ pub struct SwapToken<'info> {
     /// CHECK: This is not dangerous because we don't read or write from this account
     #[account(constraint = token_program.key() == TOKEN_PROGRAM_ID @ CustomError::InvalidTokenStandard)]
     pub token_program: AccountInfo<'info>,
+
+    #[account(mut, seeds = [ENDPOINT_SEED], bump = endpoint.bump)]
+    pub endpoint: Account<'info, EndpointSettings>,
 }
 
 #[derive(AnchorSerialize, AnchorDeserialize, Clone)]
@@ -99,7 +106,7 @@ pub fn swap_token(ctx: Context<SwapToken>, params: &SwapTokenParams) -> Result<(
     let cpi_accounts = Transfer {
         from: ctx.accounts.token_account.to_account_info(),
         to: ctx.accounts.staking_account.to_account_info(),
-        authority: ctx.accounts.authority.to_account_info(),
+        authority: ctx.accounts.admin_panel.to_account_info(),
     };
 
     let cpi_context = CpiContext::new(ctx.accounts.token_program.to_account_info(), cpi_accounts);

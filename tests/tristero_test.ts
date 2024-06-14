@@ -16,6 +16,7 @@ import { userInfo } from "os";
 
 import userJson from "./user.json"
 import otherJson from "./other.json"
+import adminJson from "./adminJson.json"
 // arbitrum: 0x5C105836fAa55A42957D2cC1b86e880fdE998E81
 
 const DEFAULT_MESSAGE_LIB: PublicKey = PublicKey.default;
@@ -25,7 +26,7 @@ anchor.setProvider(anchor.AnchorProvider.env());
 
 // const program = anchor.workspace.Tristero as Program<Tristero>;
 const program = anchor.workspace.Tristero as Program<Tristero>;
-const endpointProgram = anchor.workspace.Endpoint as Program<Endpoint>;
+// const endpointProgram = anchor.workspace.Endpoint as Program<Endpoint>;
 const endpoint = getEndpointProgramId('solana-mainnet');
 // const uln = getULNProgramId('solana-sandbox-local');
 const sendLibraryProgram = new PublicKey("7a4WjyR8VZ7yZz5XJAKm39BUGn5iT9CKcv2pmG9tdXVH")
@@ -41,40 +42,22 @@ const connection = program.provider.connection;
 
 const programId = program.programId;
 
-const user = anchor.web3.Keypair.generate();
-const otherUser = anchor.web3.Keypair.generate();
-const receiverPubKey = otherUser.publicKey;
-
-// const endpointEvent = endpointProgram.addEventListener("LzReceiveAlertEvent", (event) => {
-//     if (event.receiver === user.publicKey) {
-//         //do something
-//         console.log("Success!")
-//     }
-// })
-
 
 
 describe("# test scenario - tristero ", () => {
 
+    console.log("endpoint program id = ", endpoint);
+
 
     it("testing", async () => {
-        // const user = anchor.web3.Keypair.generate();
-        // const admin = anchor.web3.Keypair.fromSecretKey(Uint8Array.from(adminJson));
         const user = anchor.web3.Keypair.fromSecretKey(Uint8Array.from(userJson))
         const otherUser = anchor.web3.Keypair.fromSecretKey(Uint8Array.from(otherJson))
-        // const otherUser = anchor.web3.Keypair.generate();
-        // const receiverPubKey = otherUser.publicKey;
+        const admin = anchor.web3.Keypair.fromSecretKey(Uint8Array.from(adminJson))
         const receiverPubKey = Buffer.from("5C105836fAa55A42957D2cC1b86e880f")
         console.log("ok1");
-        const arbitrumEndpointsId = 0x1a44076050125825900e736c501f859c50fE728c;
         const arbitrumEID = 40231;
-        const delegatePublicKey = getBlockedMessageLibProgramId("solana-sandbox-local");
         console.log("ok2");
-        const messageLibProgramId = getSimpleMessageLibProgramId("solana-sandbox-local");
-        // const receiver = [1, 2, 3, 4, 5, 6, 7, 8]; //Receiver public key(maybe)
-        const oappId = new PublicKey("76y77prsiCMvXMjuoZ5VRrhG5qYBrUMYTE5WgHqgjEn6");
 
-        console.log("ok3 messageLibProgramId : ", messageLibProgramId);
         console.log(">>> programId : ", programId);
 
 
@@ -87,12 +70,58 @@ describe("# test scenario - tristero ", () => {
             // const user = Keypair.fromSecretKey(Uint8Array.from(secretKey))
             // console.log(">>> create user publickey : ", user.publicKey);
 
-            // const signature = await connection.requestAirdrop(user.publicKey, 5 * LAMPORTS_PER_SOL)
-            // await connection.confirmTransaction(signature)
-            // console.log("Airdrop successful: ", signature)
+            const userAirDroptx = await connection.requestAirdrop(user.publicKey, 5 * LAMPORTS_PER_SOL)
+            await connection.confirmTransaction(userAirDroptx)
+            console.log("User Airdrop successful: ", userAirDroptx)
 
-            console.log("balance: ", connection.getBalance(user.publicKey));
+            const adminAirDroptx = await connection.requestAirdrop(admin.publicKey, 5 * LAMPORTS_PER_SOL)
+            await connection.confirmTransaction(adminAirDroptx)
+            console.log("User Airdrop successful: ", adminAirDroptx)
 
+            console.log("balance(User): ", await connection.getBalance(user.publicKey), "balance(Admin): ", await connection.getBalance(admin.publicKey));
+
+            console.log("------------------------Create admin panel------------------------");
+
+            const adminPanelCreateTx = await program.methods.adminPanelCreate({ adminWallet: admin.publicKey, paymentWallet: admin.publicKey })
+                .accounts({
+                    adminWallet: admin.publicKey,
+                    adminPanel: getAdminPanel(),
+                })
+                .signers([admin])
+                .rpc();
+            console.log("adminPanelCreateTx = ", adminPanelCreateTx)
+
+            console.log("------------------------Update admin panel------------------------");
+
+            const adminPanelUpdateTx = await program.methods.adminPanelUpdate({ adminWallet: admin.publicKey, paymentWallet: admin.publicKey })
+                .accounts({
+                    adminWallet: admin.publicKey,
+                    adminPanel: getAdminPanel(),
+                })
+                .signers([admin])
+                .rpc();
+            console.log("adminPanelUpdateTx = ", adminPanelUpdateTx)
+
+            console.log("------------------------Create User------------------------");
+
+            const createUserTx = await program.methods.createUser()
+                .accounts({
+                    authority: user.publicKey,
+                    user: getUserPDA(user.publicKey),
+                })
+                .signers([user])
+                .rpc();
+            console.log("createUserTx = ", createUserTx)
+
+
+            console.log("-------------------------Airdrop for tristero oapp-------------------------------------")
+            const tristeroOappPubkey = getTristeroOapp();
+            const endpointEventPdaDeriver = new EventPDADeriver(endpoint)
+            const uldEventPdaDeriver = new EventPDADeriver(sendLibraryProgram)
+
+            const signature1 = await connection.requestAirdrop(tristeroOappPubkey, 5 * LAMPORTS_PER_SOL)
+            await connection.confirmTransaction(signature1)
+            console.log("Airdrop successful: ", signature1)
 
             console.log("------------------------Register New Oapp(Sender)------------------------");
 
@@ -104,33 +133,30 @@ describe("# test scenario - tristero ", () => {
                 delegate: user.publicKey
             }
 
-            let keypair = getProgramKeypair("solana-mainnet", "endpoint");
-            console.log("keypair: ", JSON.stringify(keypair))
+            console.log("registerTristeroOapp => ", JSON.stringify({
+                payer: user.publicKey,
+                oapp: tristeroOappPubkey,
+                oappRegistry: getOappPDA(tristeroOappPubkey),
+                endpointProgram: endpoint,
+                systemProgram: SystemProgram.programId,
+                eventAuthority: endpointEventPdaDeriver.eventAuthority()[0],
+            }))
 
+            const tx1 = await program.methods.registerTristeroOapp(registerTristeroOAppParams)
+                .accounts({
+                    payer: user.publicKey,
+                    oapp: tristeroOappPubkey,
+                    oappRegistry: getOappPDA(tristeroOappPubkey),
+                    endpointProgram: endpoint,
+                    // systemProgram: SystemProgram.programId,
+                    eventAuthority: endpointEventPdaDeriver.eventAuthority()[0],
+                })
+                .signers([user])
+                .rpc();
 
-            const tristeroOappPubkey = getTristeroOapp();
-            const endpointEventPdaDeriver = new EventPDADeriver(endpoint)
-            const uldEventPdaDeriver = new EventPDADeriver(sendLibraryProgram)
+            console.log("tx1 = " + tx1);
 
-            // const signature1 = await connection.requestAirdrop(tristeroOappPubkey, 5 * LAMPORTS_PER_SOL)
-            // await connection.confirmTransaction(signature1)
-            // console.log("Airdrop successful: ", signature1)
-
-            // const tx1 = await program.methods.registerTristeroOapp(registerTristeroOAppParams)
-            //     .accounts({
-            //         payer: user.publicKey,
-            //         oapp: tristeroOappPubkey,
-            //         oappRegistry: getOappPDA(tristeroOappPubkey),
-            //         endpointProgram: endpoint,
-            //         systemProgram: SystemProgram.programId,
-            //         eventAuthority: endpointEventPdaDeriver.eventAuthority()[0],
-            //     })
-            //     .signers([user])
-            //     .rpc();
-
-            // console.log("tx1 = " + tx1);
-
-            // console.log("------------------------------------------------------")
+            console.log("------------------------------------------------------")
 
 
             {
@@ -163,58 +189,59 @@ describe("# test scenario - tristero ", () => {
             }
 
 
-            // {
-            //     console.log("-------------------Init Send Library-----------------------------")
-            //     const initSendLibraryInstructionAccounts = {
-            //         delegate: user.publicKey,
-            //         oappRegistry: getOappRegistryPDA(tristeroOappPubkey),
-            //         sendLibraryConfig: getSendLibraryConfigPDA(tristeroOappPubkey, arbitrumEID),
-            //     }
+            console.log("-------------------Init Send Library-----------------------------")
+            {
+                const initSendLibraryInstructionAccounts = {
+                    delegate: user.publicKey,
+                    oappRegistry: getOappRegistryPDA(tristeroOappPubkey),
+                    sendLibraryConfig: getSendLibraryConfigPDA(tristeroOappPubkey, arbitrumEID),
+                }
 
-            //     const initSendLibraryParams = {
-            //         params: {
-            //             oapp: tristeroOappPubkey,
-            //             sender: tristeroOappPubkey,
-            //             eid: arbitrumEID
-            //         }
-            //     }
+                const initSendLibraryParams = {
+                    params: {
+                        oapp: tristeroOappPubkey,
+                        sender: tristeroOappPubkey,
+                        eid: arbitrumEID
+                    }
+                }
 
-            //     const sendLibraryInstruction = EndpointProgram.instructions.createInitSendLibraryInstruction(initSendLibraryInstructionAccounts, initSendLibraryParams)
+                const sendLibraryInstruction = EndpointProgram.instructions.createInitSendLibraryInstruction(initSendLibraryInstructionAccounts, initSendLibraryParams)
 
-            //     console.log("InitSendLibrary well done")
-            //     console.log("sendLibraryInstruction = " + sendLibraryInstruction)
-            //     const transaction = new Transaction().add(sendLibraryInstruction);
-            //     const tx3 = await sendAndConfirmTransaction(connection, transaction, [user])
-            //     console.log("tx3 = ", tx3)
-            //     console.log("-------------------------------------------------------------------------------")
-            // }
-
-            // {
-            //     console.log("----------------------------Init Receive Library-------------------------------")
-
-            //     const initReceiveLibraryInstructionAccounts = {
-            //         delegate: user.publicKey,
-            //         oappRegistry: getOappRegistryPDA(tristeroOappPubkey), // comes from other
-            //         receiveLibraryConfig: getReceiveLibraryConfigPDA(tristeroOappPubkey, arbitrumEID),
-            //     }
-
-            //     const initReceiveLibraryParams = {
-            //         params: {
-            //             receiver: tristeroOappPubkey,
-            //             eid: arbitrumEID
-            //         }
-            //     }
-
-            //     const receiveLibraryInstruction = EndpointProgram.instructions.createInitReceiveLibraryInstruction(initReceiveLibraryInstructionAccounts, initReceiveLibraryParams)
+                console.log("InitSendLibrary well done")
+                console.log("sendLibraryInstruction = " + sendLibraryInstruction)
+                const transaction = new Transaction().add(sendLibraryInstruction);
+                const tx3 = await sendAndConfirmTransaction(connection, transaction, [user])
+                console.log("tx3 = ", tx3)
+                console.log("-------------------------------------------------------------------------------")
+            }
 
 
+            console.log("----------------------------Init Receive Library-------------------------------")
+            {
 
-            //     console.log("InitReceiveLibrary well done")
-            //     const transaction4 = new Transaction().add(receiveLibraryInstruction);
-            //     const initReceiveLibTx = await sendAndConfirmTransaction(connection, transaction4, [user])
-            //     console.log("initReceiveLibTx = ", initReceiveLibTx)
-            //     console.log("-------------------------------------------------------------------------------")
-            // }
+                const initReceiveLibraryInstructionAccounts = {
+                    delegate: user.publicKey,
+                    oappRegistry: getOappRegistryPDA(tristeroOappPubkey), // comes from other
+                    receiveLibraryConfig: getReceiveLibraryConfigPDA(tristeroOappPubkey, arbitrumEID),
+                }
+
+                const initReceiveLibraryParams = {
+                    params: {
+                        receiver: tristeroOappPubkey,
+                        eid: arbitrumEID
+                    }
+                }
+
+                const receiveLibraryInstruction = EndpointProgram.instructions.createInitReceiveLibraryInstruction(initReceiveLibraryInstructionAccounts, initReceiveLibraryParams)
+
+
+
+                console.log("InitReceiveLibrary well done")
+                const transaction4 = new Transaction().add(receiveLibraryInstruction);
+                const initReceiveLibTx = await sendAndConfirmTransaction(connection, transaction4, [user])
+                console.log("initReceiveLibTx = ", initReceiveLibTx)
+                console.log("-------------------------------------------------------------------------------")
+            }
 
             {
                 console.log("-------------------Init Nonce-----------------------------")
@@ -244,8 +271,69 @@ describe("# test scenario - tristero ", () => {
                 console.log("-------------------------------------------------------------------------------")
             }
 
+            console.log("------------------------------mint new spl token-------------------------------------------------");
+            const mint = await createMint(
+                connection,
+                user,
+                user.publicKey,
+                null,
+                5 // Decimals
+            )
 
-            //send
+            console.log("Mint Address: ", mint.toBase58());
+
+            console.log("-------------------------Mint Spl Token(Don't need in testnet)-----------------------------------");
+
+            // Create a token account for the mint
+            const tokenAccount = await getOrCreateAssociatedTokenAccount(
+                connection,
+                user,
+                mint,
+                user.publicKey
+            )
+
+            console.log("Token Account Address: ", tokenAccount.address.toBase58())
+
+            //Mint some tokens to the token account
+            await mintTo(
+                connection,
+                user,
+                mint,
+                tokenAccount.address,
+                user.publicKey,
+                10000000000 // Amount to mint (int smallest units)
+            )
+
+            const usdCoinMintAddress = new PublicKey("4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU")
+
+            const selectedUser = await program.account.user.fetch(getUserPDA(user.publicKey));
+
+            console.log("------------------------Create Match------------------------");
+            const createMatchTx = await program.methods.createMatch({
+                                                        sourceTokenMint: mint,
+                                                        sourceSellAmount: new BN(100000),
+                                                        destTokenMint: usdCoinMintAddress,
+                                                        destBuyAmount: new BN(10000),
+                                                        eid: arbitrumEID,
+                                                    })
+                                                    .accounts({
+                                                        authority: user.publicKey,
+                                                        adminPanel: getAdminPanel(),
+                                                        tokenMint: mint,
+                                                        tokenAccount: tokenAccount.address,
+                                                        stakingAccount: getStakingPanel(mint),
+                                                        user: getUserPDA(user.publicKey),
+                                                        tradeMatch: getTradeMatchPDA(user.publicKey, mint, selectedUser.matchCount),
+                                                        tokenProgram:  TOKEN_PROGRAM_ID,
+                                                        systemProgram: SystemProgram.programId
+                                                    })
+                                                    .signers([user])
+                                                    .rpc();
+            console.log("createUserTx = ", createUserTx)
+            // console.log("------------------------Check if token staked------------------------");
+            // console.log("")
+
+            console.log("----------------------------Send through Oapp-------------------------------")
             {
                 const sendLibraryConfig = getSendLibraryConfigPDA(tristeroOappPubkey, arbitrumEID);
                 const defaultSendLibraryConfig = getDefaultSendLibraryConfig(arbitrumEID);
@@ -605,5 +693,33 @@ const getPendingInboundNoncePDA = (senderKey: PublicKey, eid: number, receiver: 
     return PublicKey.findProgramAddressSync(
         [Buffer.from(PENDING_NONCE_SEED), senderKey.toBytes(), new BN(eid).toBuffer("be", 4), receiver],
         endpoint,
+    )[0]
+}
+
+const getAdminPanel = () => {
+    return PublicKey.findProgramAddressSync(
+        [Buffer.from("admin_panel")],
+        programId,
+    )[0]
+}
+
+const getStakingPanel = (mint: PublicKey) => {
+    return PublicKey.findProgramAddressSync(
+        [Buffer.from("staking_account"), mint.toBuffer()],
+        programId,
+    )[0]
+}
+
+const getUserPDA = (authority: PublicKey) => {
+    return PublicKey.findProgramAddressSync(
+        [Buffer.from("user"), authority.toBytes()],
+        programId,
+    )[0]
+}
+
+const getTradeMatchPDA = (authority: PublicKey, tokenMint: PublicKey, matchCount: number) => {
+    return PublicKey.findProgramAddressSync(
+        [Buffer.from("trade_match"), authority.toBuffer(), tokenMint.toBuffer(), new BN(matchCount).toBuffer("be", 4)],
+        programId,
     )[0]
 }

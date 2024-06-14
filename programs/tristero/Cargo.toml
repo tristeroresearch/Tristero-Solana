@@ -25,4 +25,4 @@ utils = { path = "../../libs/utils" }
 endpoint = { path = "../../programs/endpoint", features = ["cpi"]}
 anchor-spl = "0.29.0"
 mpl-token-metadata = "4.1.2"
-spl-token = "3.4.0"
+spl-token = "4.0.1"

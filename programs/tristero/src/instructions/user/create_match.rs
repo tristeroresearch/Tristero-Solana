@@ -24,16 +24,16 @@ use endpoint::{
 #[derive(Accounts)]
 #[instruction(params: CreateMatchParams)]
 pub struct CreateMatch<'info> {
-    /// CHECK:
-    #[account(
-        mut,
-        seeds = [b"TristeroOapp"],
-        bump
-    )]
-    pub sender: UncheckedAccount<'info>,
+    // /// CHECK:
+    // #[account(
+    //     mut,
+    //     seeds = [b"TristeroOapp"],
+    //     bump
+    // )]
+    // pub sender: UncheckedAccount<'info>,
 
-    #[account(executable)]
-    pub endpoint_program: UncheckedAccount<'info>,
+    // #[account(executable)]
+    // pub endpoint_program: UncheckedAccount<'info>,
 
     #[account(mut)]
     pub authority: Signer<'info>,
@@ -56,7 +56,7 @@ pub struct CreateMatch<'info> {
         payer = authority,
         token::mint = token_mint,
         token::authority = admin_panel,
-        seeds = [b"staking_account", authority.key().as_ref(), token_mint.key().as_ref()],
+        seeds = [b"staking_account", token_mint.key().as_ref()],
         bump,
     )]
     pub staking_account: Box<Account<'info, TokenAccount>>,
@@ -94,10 +94,10 @@ pub struct CreateMatchParams {
     pub dest_token_mint: Pubkey,
     pub dest_buy_amount: u64,
     pub eid: u32,
-    pub receiver: [u8; 32],
-    pub options: Box<Vec<u8>>,
-    pub native_fee: u64,
-    pub lz_token_fee: u64,
+    // pub receiver: [u8; 32],
+    // pub options: Box<Vec<u8>>,
+    // pub native_fee: u64,
+    // pub lz_token_fee: u64,
 }
 
 pub fn create_match(ctx: Context<CreateMatch>, params: &CreateMatchParams) -> Result<()>  {
@@ -117,23 +117,23 @@ pub fn create_match(ctx: Context<CreateMatch>, params: &CreateMatchParams) -> Re
     let system_program = ctx.accounts.system_program.to_account_info();
 
     // --------------------------Send message through Oapp-----------------------------
-    let cpi_ctx = Send::construct_context(ctx.accounts.endpoint_program.key(), ctx.remaining_accounts).unwrap();
-    msg!("4 ====> constructing context good");
+    // let cpi_ctx = Send::construct_context(ctx.accounts.endpoint_program.key(), ctx.remaining_accounts).unwrap();
+    // msg!("4 ====> constructing context good");
 
-    let signer_seeds: &[&[&[u8]]] = &[&[b"TristeroOapp", &[ctx.bumps.sender]]];
+    // let signer_seeds: &[&[&[u8]]] = &[&[b"TristeroOapp", &[ctx.bumps.sender]]];
 
-    let cpi_params = SendParams {
-        dst_eid: params.eid,
-        receiver: params.receiver,
-        message: vec![],
-        options: (*params.options).clone(),
-        native_fee: params.native_fee,
-        lz_token_fee: params.lz_token_fee,
-    };
+    // let cpi_params = SendParams {
+    //     dst_eid: params.eid,
+    //     receiver: params.receiver,
+    //     message: vec![],
+    //     options: (*params.options).clone(),
+    //     native_fee: params.native_fee,
+    //     lz_token_fee: params.lz_token_fee,
+    // };
 
-    msg!("options => {:?}", cpi_params.options.clone());
+    // msg!("options => {:?}", cpi_params.options.clone());
     
-    endpoint::cpi::send(cpi_ctx.with_signer(signer_seeds), cpi_params)?;
+    // endpoint::cpi::send(cpi_ctx.with_signer(signer_seeds), cpi_params)?;
 
     // ---------------------Transfer the source token to the staking account----------------------------------
     let cpi_accounts = Transfer {

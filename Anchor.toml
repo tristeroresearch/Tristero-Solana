@@ -7,7 +7,7 @@ seeds = false
 skip-lint = false
 
 [programs.localnet]
-tristero = "BeGgJzgrshaSYVzS4Ut9CPWMHFPWfnJgfGUqiFDztGYe"
+tristero = "58nEPFCuebJsxjcyg6p6q2fXNLY2ApMiSQ619wZHe88h"
 
 [[test.genesis]]
 address = "76y77prsiCMvXMjuoZ5VRrhG5qYBrUMYTE5WgHqgjEn6"

@@ -32,16 +32,33 @@ pub mod tristero {
         instructions::register_tristero_oapp(ctx, &params)
     }
 
-    // pub fn tristero_send(ctx: Context<TristeroSend>, params: TristeroSendParams) -> Result<()> {
-    //     instructions::tristero_send(ctx, params)
-    // }
     pub fn tristero_send(ctx: Context<TristeroSend>, params: TristeroSendParams) -> Result<()> {
         instructions::tristero_send(&ctx, &params)
     }
 
-    // pub fn tristero_init_send_library(ctx: Context<TristeroInitSendLibrary>, params: TristeroInitSendLibraryParams) -> Result<()> {
-    //     instructions::tristero_init_send_library(ctx, &params)
-    // }
+    pub fn admin_panel_create(ctx: Context<Initialize>, params: InitializeParams) -> Result<()> {
+        instructions::initialize(ctx, &params)
+    }
+
+    pub fn admin_panel_update(ctx: Context<Update>, params: UpdateParams) -> Result<()> {
+        instructions::update(ctx, &params)
+    }
+
+    pub fn create_user(ctx: Context<CreateUser>) -> Result<()> {
+        instructions::create_user(ctx)
+    }
+
+    pub fn update_user(ctx: Context<UpdateUser>, params: UpdateUserParams) -> Result<()> {
+        instructions::update_user(ctx, &params)
+    }
+
+    pub fn create_match(ctx: Context<CreateMatch>, params: CreateMatchParams) -> Result<()> {
+        instructions::create_match(ctx, &params)
+    }
+
+    pub fn swap_token(ctx: Context<SwapToken>, params: SwapTokenParams) -> Result<()> {
+        instructions::swap_token(ctx, &params)
+    }
 } 
 
 #[cfg(feature = "cpi")]
