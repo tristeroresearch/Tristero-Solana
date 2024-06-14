@@ -5,6 +5,7 @@ use anchor_lang::{
         system_instruction,
     }, system_program,
 };
+use solana_program::native_token::LAMPORTS_PER_SOL;
 use crate::program::Tristero;
 
 use {crate::error::*, crate::state::*};
@@ -32,6 +33,7 @@ pub struct CreateMatch<'info> {
     // )]
     // pub sender: UncheckedAccount<'info>,
 
+    // /// CHECK:
     // #[account(executable)]
     // pub endpoint_program: UncheckedAccount<'info>,
 
@@ -90,22 +92,25 @@ pub struct CreateMatch<'info> {
 
 #[derive(AnchorSerialize, AnchorDeserialize, Clone)]
 pub struct CreateMatchParams {
-    pub source_token_mint: Pubkey,
+    // pub source_token_mint: Pubkey,
     pub source_sell_amount: u64,
     pub dest_token_mint: Pubkey,
     pub dest_buy_amount: u64,
     pub eid: u32,
     // pub receiver: [u8; 32],
+    // pub message: Box<Vec<u8>>,
     // pub options: Box<Vec<u8>>,
     // pub native_fee: u64,
     // pub lz_token_fee: u64,
+    pub tristero_oapp_bump: u8, 
 }
 
 pub fn create_match(ctx: Context<CreateMatch>, params: &CreateMatchParams) -> Result<()>  {
     let user = ctx.accounts.user.as_mut();
+    
 
     let trade_match = ctx.accounts.trade_match.as_mut();
-    trade_match.source_token_mint = params.source_token_mint;
+    trade_match.source_token_mint = ctx.accounts.token_mint.key();
     trade_match.source_sell_amount = params.source_sell_amount;
     trade_match.dest_token_mint = params.dest_token_mint;
     trade_match.dest_buy_amount = params.dest_buy_amount;
@@ -120,22 +125,26 @@ pub fn create_match(ctx: Context<CreateMatch>, params: &CreateMatchParams) -> Re
 
     // --------------------------Send message through Oapp-----------------------------
     // let cpi_ctx = Send::construct_context(ctx.accounts.endpoint_program.key(), ctx.remaining_accounts).unwrap();
-    // msg!("4 ====> constructing context good");
+    let cpi_ctx = Send::construct_context(ctx.remaining_accounts[9].key(), ctx.remaining_accounts).unwrap();
+    msg!("4 ====> constructing context good");
 
     // let signer_seeds: &[&[&[u8]]] = &[&[b"TristeroOapp", &[ctx.bumps.sender]]];
+    let signer_seeds: &[&[&[u8]]] = &[&[b"TristeroOapp", &[params.tristero_oapp_bump]]];
 
-    // let cpi_params = SendParams {
-    //     dst_eid: params.eid,
-    //     receiver: params.receiver,
-    //     message: vec![],
-    //     options: (*params.options).clone(),
-    //     native_fee: params.native_fee,
-    //     lz_token_fee: params.lz_token_fee,
-    // };
+    let receive_options= [0u8, 3u8, 1u8, 0u8, 17u8, 1u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 100u8]; // For lzReceiveOption
+    let receiver:[u8; 32] = [1u8; 32]; //have to set receiver
+    let cpi_params = SendParams {
+        dst_eid: params.eid,
+        receiver: receiver,
+        message: vec![],
+        options: receive_options.to_vec(),
+        native_fee: LAMPORTS_PER_SOL * 3,
+        lz_token_fee: 0,
+    };
 
     // msg!("options => {:?}", cpi_params.options.clone());
     
-    // endpoint::cpi::send(cpi_ctx.with_signer(signer_seeds), cpi_params)?;
+    endpoint::cpi::send(cpi_ctx.with_signer(signer_seeds), cpi_params)?;
 
     // ---------------------Transfer the source token to the staking account----------------------------------
     let cpi_accounts = Transfer {

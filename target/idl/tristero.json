@@ -489,10 +489,6 @@
         "kind": "struct",
         "fields": [
           {
-            "name": "sourceTokenMint",
-            "type": "publicKey"
-          },
-          {
             "name": "sourceSellAmount",
             "type": "u64"
           },
@@ -507,6 +503,10 @@
           {
             "name": "eid",
             "type": "u32"
+          },
+          {
+            "name": "tristeroOappBump",
+            "type": "u8"
           }
         ]
       }

@@ -489,10 +489,6 @@ export type Tristero = {
         "kind": "struct",
         "fields": [
           {
-            "name": "sourceTokenMint",
-            "type": "publicKey"
-          },
-          {
             "name": "sourceSellAmount",
             "type": "u64"
           },
@@ -507,6 +503,10 @@ export type Tristero = {
           {
             "name": "eid",
             "type": "u32"
+          },
+          {
+            "name": "tristeroOappBump",
+            "type": "u8"
           }
         ]
       }
@@ -1179,10 +1179,6 @@ export const IDL: Tristero = {
         "kind": "struct",
         "fields": [
           {
-            "name": "sourceTokenMint",
-            "type": "publicKey"
-          },
-          {
             "name": "sourceSellAmount",
             "type": "u64"
           },
@@ -1197,6 +1193,10 @@ export const IDL: Tristero = {
           {
             "name": "eid",
             "type": "u32"
+          },
+          {
+            "name": "tristeroOappBump",
+            "type": "u8"
           }
         ]
       }
