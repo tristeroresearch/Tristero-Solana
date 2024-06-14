@@ -9,6 +9,9 @@ skip-lint = false
 [programs.localnet]
 tristero = "58nEPFCuebJsxjcyg6p6q2fXNLY2ApMiSQ619wZHe88h"
 
+[programs.testnet]
+tristero = "58nEPFCuebJsxjcyg6p6q2fXNLY2ApMiSQ619wZHe88h"
+
 [[test.genesis]]
 address = "76y77prsiCMvXMjuoZ5VRrhG5qYBrUMYTE5WgHqgjEn6"
 program = "./tests/endpoint-dump.so"
@@ -70,7 +73,7 @@ filename = "./tests/dvn_config.json"
 url = "https://api.apr.dev"
 
 [provider]
-cluster = "localnet"
+cluster = "testnet"
 wallet = "~/.config/solana/id.json"
 
 [scripts]
