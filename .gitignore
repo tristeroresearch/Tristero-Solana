@@ -1,0 +1,8 @@
+target/debug/
+target/release/
+target/sbf-solana-solana/
+target/tmp/
+
+.anchor
+test-ledger
+node_modules

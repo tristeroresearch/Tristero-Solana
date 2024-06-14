@@ -1,0 +1,83 @@
+[toolchain]
+anchor_version = "0.29.0"
+solana_version = "1.17.31"
+
+[features]
+seeds = false
+skip-lint = false
+
+[programs.localnet]
+tristero = "58nEPFCuebJsxjcyg6p6q2fXNLY2ApMiSQ619wZHe88h"
+
+[programs.testnet]
+tristero = "58nEPFCuebJsxjcyg6p6q2fXNLY2ApMiSQ619wZHe88h"
+
+[[test.genesis]]
+address = "76y77prsiCMvXMjuoZ5VRrhG5qYBrUMYTE5WgHqgjEn6"
+program = "./tests/endpoint-dump.so"
+
+[[test.genesis]]
+address = "6doghB248px58JSSwG4qejQ46kFMW4AMj7vzJnWZHNZn"
+program = "./tests/executor.so"
+
+[[test.genesis]]
+address = "HtEYV4xB4wvsj5fgTkcfuChYpvGYzgzwvNhgDZQNh7wW"
+program = "./tests/dvn.so"
+
+[[test.genesis]]
+address = "8ahPGPjEbpgGaZx2NV1iG5Shj7TDwvsjkEDcGWjt94TP"
+program = "./tests/price_fee.so"
+
+[[test.genesis]]
+address = "7a4WjyR8VZ7yZz5XJAKm39BUGn5iT9CKcv2pmG9tdXVH"
+program = "./tests/send_library.so"
+
+[[test.validator.account]]
+address = "9wgwtfS2NbYariF6kFCV4ifj4fVYQ5bNtQ7pj4jWrE2T"
+filename = "./tests/default_send_library_config.json"
+
+[[test.validator.account]]
+address = "2XgGZG4oP29U3w5h4nTk1V2LFHL23zKDPJjs3psGzLKQ"
+filename = "./tests/default_send_library_messagelib.json"
+
+[[test.validator.account]]
+address = "526PeNZfw8kSnDU4nmzJFVJzJWNhwmZykEyJr5XWz5Fv"
+filename = "./tests/default_send_library_info.json"
+
+[[test.validator.account]]
+address = "2uk9pQh3tB5ErV7LGQJcbWjb4KeJ2UJki5qJZ8QG56G3"
+filename = "./tests/endpoint.json"
+
+[[test.validator.account]]
+address = "2XgGZG4oP29U3w5h4nTk1V2LFHL23zKDPJjs3psGzLKQ"
+filename = "./tests/uln.json"
+
+[[test.validator.account]]
+address = "3y4LwxWFPhMNc4w8P4CfH5WVqwUnAm21PA4Pf7UMoxej"
+filename = "./tests/default_send_config.json"
+
+[[test.validator.account]]
+address = "AwrbHeCyniXaQhiJZkLhgWdUCteeWSGaSN1sTfLiY7xK"
+filename = "./tests/executor_config.json"
+
+[[test.validator.account]]
+address = "CSFsUupvJEQQd1F4SsXGACJaxQX4eropQMkGV2696eeQ"
+filename = "./tests/price_feed.json"
+
+[[test.validator.account]]
+address = "4VDjp6XQaxoZf5RGwiPU9NR1EXSZn2TP4ATMmiSzLfhb"
+filename = "./tests/dvn_config.json"
+
+
+[registry]
+url = "https://api.apr.dev"
+
+[provider]
+cluster = "localnet"
+wallet = "~/.config/solana/id.json"
+
+[scripts]
+test = "yarn run ts-mocha -b -p ./tsconfig.json -t 10000000 tests/**/*.ts"
+
+[test]
+startup_wait = 40000
