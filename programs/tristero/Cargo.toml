@@ -23,3 +23,6 @@ cpi-helper = { path = "../../libs/cpi-helper" }
 messagelib-interface = { path = "../messagelib-interface", features = ["cpi"] }
 utils = { path = "../../libs/utils" }
 endpoint = { path = "../../programs/endpoint", features = ["cpi"]}
+anchor-spl = "0.29.0"
+mpl-token-metadata = "4.1.2"
+spl-token = "3.4.0"

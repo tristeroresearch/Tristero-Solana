@@ -63,8 +63,8 @@ describe("# test scenario - tristero ", () => {
         const user = anchor.web3.Keypair.fromSecretKey(Uint8Array.from(userJson))
         const otherUser = anchor.web3.Keypair.fromSecretKey(Uint8Array.from(otherJson))
         // const otherUser = anchor.web3.Keypair.generate();
-        const receiverPubKey = otherUser.publicKey;
-
+        // const receiverPubKey = otherUser.publicKey;
+        const receiverPubKey = Buffer.from("5C105836fAa55A42957D2cC1b86e880f")
         console.log("ok1");
         const arbitrumEndpointsId = 0x1a44076050125825900e736c501f859c50fE728c;
         const arbitrumEID = 40231;
@@ -116,21 +116,21 @@ describe("# test scenario - tristero ", () => {
             // await connection.confirmTransaction(signature1)
             // console.log("Airdrop successful: ", signature1)
 
-            const tx1 = await program.methods.registerTristeroOapp(registerTristeroOAppParams)
-                .accounts({
-                    payer: user.publicKey,
-                    oapp: tristeroOappPubkey,
-                    oappRegistry: getOappPDA(tristeroOappPubkey),
-                    endpointProgram: endpoint,
-                    systemProgram: SystemProgram.programId,
-                    eventAuthority: endpointEventPdaDeriver.eventAuthority()[0],
-                })
-                .signers([user])
-                .rpc();
+            // const tx1 = await program.methods.registerTristeroOapp(registerTristeroOAppParams)
+            //     .accounts({
+            //         payer: user.publicKey,
+            //         oapp: tristeroOappPubkey,
+            //         oappRegistry: getOappPDA(tristeroOappPubkey),
+            //         endpointProgram: endpoint,
+            //         systemProgram: SystemProgram.programId,
+            //         eventAuthority: endpointEventPdaDeriver.eventAuthority()[0],
+            //     })
+            //     .signers([user])
+            //     .rpc();
 
-            console.log("tx1 = " + tx1);
+            // console.log("tx1 = " + tx1);
 
-            console.log("------------------------------------------------------")
+            // console.log("------------------------------------------------------")
 
 
             {
@@ -163,58 +163,58 @@ describe("# test scenario - tristero ", () => {
             }
 
 
-            {
-                console.log("-------------------Init Send Library-----------------------------")
-                const initSendLibraryInstructionAccounts = {
-                    delegate: user.publicKey,
-                    oappRegistry: getOappRegistryPDA(tristeroOappPubkey),
-                    sendLibraryConfig: getSendLibraryConfigPDA(tristeroOappPubkey, arbitrumEID),
-                }
+            // {
+            //     console.log("-------------------Init Send Library-----------------------------")
+            //     const initSendLibraryInstructionAccounts = {
+            //         delegate: user.publicKey,
+            //         oappRegistry: getOappRegistryPDA(tristeroOappPubkey),
+            //         sendLibraryConfig: getSendLibraryConfigPDA(tristeroOappPubkey, arbitrumEID),
+            //     }
 
-                const initSendLibraryParams = {
-                    params: {
-                        oapp: tristeroOappPubkey,
-                        sender: tristeroOappPubkey,
-                        eid: arbitrumEID
-                    }
-                }
+            //     const initSendLibraryParams = {
+            //         params: {
+            //             oapp: tristeroOappPubkey,
+            //             sender: tristeroOappPubkey,
+            //             eid: arbitrumEID
+            //         }
+            //     }
 
-                const sendLibraryInstruction = EndpointProgram.instructions.createInitSendLibraryInstruction(initSendLibraryInstructionAccounts, initSendLibraryParams)
+            //     const sendLibraryInstruction = EndpointProgram.instructions.createInitSendLibraryInstruction(initSendLibraryInstructionAccounts, initSendLibraryParams)
 
-                console.log("InitSendLibrary well done")
-                console.log("sendLibraryInstruction = " + sendLibraryInstruction)
-                const transaction = new Transaction().add(sendLibraryInstruction);
-                const tx3 = await sendAndConfirmTransaction(connection, transaction, [user])
-                console.log("tx3 = ", tx3)
-                console.log("-------------------------------------------------------------------------------")
-            }
+            //     console.log("InitSendLibrary well done")
+            //     console.log("sendLibraryInstruction = " + sendLibraryInstruction)
+            //     const transaction = new Transaction().add(sendLibraryInstruction);
+            //     const tx3 = await sendAndConfirmTransaction(connection, transaction, [user])
+            //     console.log("tx3 = ", tx3)
+            //     console.log("-------------------------------------------------------------------------------")
+            // }
 
-            {
-                console.log("----------------------------Init Receive Library-------------------------------")
+            // {
+            //     console.log("----------------------------Init Receive Library-------------------------------")
 
-                const initReceiveLibraryInstructionAccounts = {
-                    delegate: user.publicKey,
-                    oappRegistry: getOappRegistryPDA(tristeroOappPubkey), // comes from other
-                    receiveLibraryConfig: getReceiveLibraryConfigPDA(tristeroOappPubkey, arbitrumEID),
-                }
+            //     const initReceiveLibraryInstructionAccounts = {
+            //         delegate: user.publicKey,
+            //         oappRegistry: getOappRegistryPDA(tristeroOappPubkey), // comes from other
+            //         receiveLibraryConfig: getReceiveLibraryConfigPDA(tristeroOappPubkey, arbitrumEID),
+            //     }
 
-                const initReceiveLibraryParams = {
-                    params: {
-                        receiver: tristeroOappPubkey,
-                        eid: arbitrumEID
-                    }
-                }
+            //     const initReceiveLibraryParams = {
+            //         params: {
+            //             receiver: tristeroOappPubkey,
+            //             eid: arbitrumEID
+            //         }
+            //     }
 
-                const receiveLibraryInstruction = EndpointProgram.instructions.createInitReceiveLibraryInstruction(initReceiveLibraryInstructionAccounts, initReceiveLibraryParams)
+            //     const receiveLibraryInstruction = EndpointProgram.instructions.createInitReceiveLibraryInstruction(initReceiveLibraryInstructionAccounts, initReceiveLibraryParams)
 
 
 
-                console.log("InitReceiveLibrary well done")
-                const transaction4 = new Transaction().add(receiveLibraryInstruction);
-                const initReceiveLibTx = await sendAndConfirmTransaction(connection, transaction4, [user])
-                console.log("initReceiveLibTx = ", initReceiveLibTx)
-                console.log("-------------------------------------------------------------------------------")
-            }
+            //     console.log("InitReceiveLibrary well done")
+            //     const transaction4 = new Transaction().add(receiveLibraryInstruction);
+            //     const initReceiveLibTx = await sendAndConfirmTransaction(connection, transaction4, [user])
+            //     console.log("initReceiveLibTx = ", initReceiveLibTx)
+            //     console.log("-------------------------------------------------------------------------------")
+            // }
 
             {
                 console.log("-------------------Init Nonce-----------------------------")
@@ -230,7 +230,7 @@ describe("# test scenario - tristero ", () => {
                     params: {
                         localOapp: tristeroOappPubkey,
                         remoteEid: arbitrumEID,
-                        remoteOapp: Array.from(receiverPubKey.toBytes())
+                        remoteOapp: Array.from(receiverPubKey)
                     }
                 }
 
@@ -450,7 +450,7 @@ describe("# test scenario - tristero ", () => {
 
                 const sendParams1 = {
                     dstEid: arbitrumEID,
-                    receiver: Array.from(receiverPubKey.toBytes()),
+                    receiver: Array.from(receiverPubKey),
                     message: Buffer.from("Hello World"),
                     options: Buffer.from(Options.newOptions().addExecutorLzReceiveOption(100, 0).toBytes()),
                     nativeFee: new BN(LAMPORTS_PER_SOL * 3),
@@ -594,16 +594,16 @@ const getPriceFeedPDA = () => {
     )[0]
 }
 
-const getNoncePDA = (senderKey: PublicKey, eid: number, receiver: PublicKey) => {
+const getNoncePDA = (senderKey: PublicKey, eid: number, receiver: Buffer) => {
     return PublicKey.findProgramAddressSync(
-        [Buffer.from(NONCE_SEED), senderKey.toBytes(), new BN(eid).toBuffer("be", 4), receiver.toBytes()],
+        [Buffer.from(NONCE_SEED), senderKey.toBytes(), new BN(eid).toBuffer("be", 4), receiver],
         endpoint,
     )[0]
 }
 
-const getPendingInboundNoncePDA = (senderKey: PublicKey, eid: number, receiver: PublicKey) => {
+const getPendingInboundNoncePDA = (senderKey: PublicKey, eid: number, receiver: Buffer) => {
     return PublicKey.findProgramAddressSync(
-        [Buffer.from(PENDING_NONCE_SEED), senderKey.toBytes(), new BN(eid).toBuffer("be", 4), receiver.toBytes()],
+        [Buffer.from(PENDING_NONCE_SEED), senderKey.toBytes(), new BN(eid).toBuffer("be", 4), receiver],
         endpoint,
     )[0]
 }

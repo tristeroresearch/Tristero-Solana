@@ -1,5 +1,5 @@
 use anchor_lang::prelude::*;
-pub mod errors;
+pub mod error;
 pub mod instructions;
 pub mod state;
 
@@ -7,7 +7,7 @@ pub use messagelib_interface::{
     self, InitConfigParams, MessageLibType, MessagingFee, MessagingReceipt, Packet, SetConfigParams,
 };
 use instructions::*;
-use errors::*;
+use error::*;
 
 declare_id!("58nEPFCuebJsxjcyg6p6q2fXNLY2ApMiSQ619wZHe88h");
 
@@ -39,7 +39,20 @@ pub mod tristero {
         instructions::tristero_send(&ctx, &params)
     }
 
-    pub fn tristero_init_send_library(ctx: Context<TristeroInitSendLibrary>, params: TristeroInitSendLibraryParams) -> Result<()> {
-        instructions::tristero_init_send_library(ctx, &params)
-    }
+    // pub fn tristero_init_send_library(ctx: Context<TristeroInitSendLibrary>, params: TristeroInitSendLibraryParams) -> Result<()> {
+    //     instructions::tristero_init_send_library(ctx, &params)
+    // }
 } 
+
+#[cfg(feature = "cpi")]
+pub trait ConstructCPIContext<'a, 'b, 'c, 'info, T>
+where
+    T: ToAccountMetas + ToAccountInfos<'info>,
+{
+    const MIN_ACCOUNTS_LEN: usize;
+
+    fn construct_context(
+        program_id: Pubkey,
+        accounts: &[AccountInfo<'info>],
+    ) -> Result<CpiContext<'a, 'b, 'c, 'info, T>>;
+}

@@ -12,7 +12,8 @@ use endpoint::{
 
 /// MESSAGING STEP 1
 
-#[derive(Accounts)]
+#[event_cpi]
+#[derive(CpiContext, Accounts)]
 #[instruction(params: TristeroSendParams)]
 pub struct TristeroSend<'info> {
     /// CHECK:
