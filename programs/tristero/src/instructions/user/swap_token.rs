@@ -31,6 +31,7 @@ pub struct SwapToken<'info> {
     pub token_mint: Box<Account<'info, Mint>>,
 
     /// user's token account address
+    #[account(mut)]
     pub token_account: Box<Account<'info, TokenAccount>>,
 
     /// close the account and return the lamports to endpoint settings account
@@ -64,7 +65,7 @@ pub struct SwapToken<'info> {
 
     #[account(
         mut,
-        seeds = [b"trade_match", params.receiver.key().as_ref(), token_mint.key().as_ref(), &trade_match.trade_match_id.to_be_bytes()],
+        seeds = [b"trade_match", params.receiver.key().as_ref(), &trade_match.trade_match_id.to_be_bytes()],
         bump,
     )]
     pub trade_match: Box<Account<'info, TradeMatch>>,
@@ -102,9 +103,9 @@ pub fn swap_token(ctx: Context<SwapToken>, params: &SwapTokenParams) -> Result<(
     );
     // have to remove Account
 
-    // ---------------------Transfer the source token to the staking account----------------------------------
+    // ---------------------Transfer the staking token to the dest account----------------------------------
     let cpi_accounts = Transfer {
-        from: ctx.accounts.token_account.to_account_info(),
+        from: ctx.accounts.staking_account.to_account_info(),
         to: ctx.accounts.staking_account.to_account_info(),
         authority: ctx.accounts.admin_panel.to_account_info(),
     };

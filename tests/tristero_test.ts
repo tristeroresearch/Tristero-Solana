@@ -1,6 +1,6 @@
 import * as anchor from "@coral-xyz/anchor";
 import { BN, Program } from "@coral-xyz/anchor";
-import { getExecutorProgramId, ExecutorPDADeriver, getBlockedMessageLibProgramId, OAPP_SEED, getProgramKeypair, oappIDPDA, OftPDADeriver, OftTools, OPTIONS_SEED, SEND_LIBRARY_CONFIG_SEED, NONCE_SEED, ENDPOINT_SEED, EndpointProgram, MESSAGE_LIB_SEED, SupportedPrograms, getEndpointProgramId, EventPDADeriver, BaseOApp, getSimpleMessageLibProgramId, RECEIVE_LIBRARY_CONFIG_SEED, PENDING_NONCE_SEED, UlnProgram, getULNProgramId, UlnPDADeriver, getDVNProgramId, ULN_SEED, SEND_CONFIG_SEED, ULN_CONFIG_SEED, getPricefeedProgramId, PriceFeedPDADeriver, PRICE_FEED_SEED, EXECUTOR_CONFIG_SEED, DVNDeriver } from "@layerzerolabs/lz-solana-sdk-v2";
+import { getExecutorProgramId, ExecutorPDADeriver, getBlockedMessageLibProgramId, OAPP_SEED, getProgramKeypair, oappIDPDA, OftPDADeriver, OftTools, OPTIONS_SEED, SEND_LIBRARY_CONFIG_SEED, NONCE_SEED, ENDPOINT_SEED, EndpointProgram, MESSAGE_LIB_SEED, SupportedPrograms, getEndpointProgramId, EventPDADeriver, BaseOApp, getSimpleMessageLibProgramId, RECEIVE_LIBRARY_CONFIG_SEED, PENDING_NONCE_SEED, UlnProgram, getULNProgramId, UlnPDADeriver, getDVNProgramId, ULN_SEED, SEND_CONFIG_SEED, ULN_CONFIG_SEED, getPricefeedProgramId, PriceFeedPDADeriver, PRICE_FEED_SEED, EXECUTOR_CONFIG_SEED, DVNDeriver, PAYLOAD_HASH_SEED } from "@layerzerolabs/lz-solana-sdk-v2";
 import { Options } from "@layerzerolabs/lz-v2-utilities";
 import { ChainKey, EndpointVersion, networkToEndpointId } from '@layerzerolabs/lz-definitions';
 
@@ -26,7 +26,7 @@ anchor.setProvider(anchor.AnchorProvider.env());
 
 // const program = anchor.workspace.Tristero as Program<Tristero>;
 const program = anchor.workspace.Tristero as Program<Tristero>;
-// const endpointProgram = anchor.workspace.Endpoint as Program<Endpoint>;
+const endpointProgram = anchor.workspace.Endpoint as Program<Endpoint>;
 const endpoint = getEndpointProgramId('solana-mainnet');
 // const uln = getULNProgramId('solana-sandbox-local');
 const sendLibraryProgram = new PublicKey("7a4WjyR8VZ7yZz5XJAKm39BUGn5iT9CKcv2pmG9tdXVH")
@@ -41,8 +41,11 @@ const provider = program.provider;
 const connection = program.provider.connection;
 
 const programId = program.programId;
-
-
+const user = anchor.web3.Keypair.fromSecretKey(Uint8Array.from(userJson))
+const otherUser = anchor.web3.Keypair.fromSecretKey(Uint8Array.from(otherJson))
+const admin = anchor.web3.Keypair.fromSecretKey(Uint8Array.from(adminJson))
+const receiverPubKey = Buffer.from("5C105836fAa55A42957D2cC1b86e880f")
+const arbitrumEID = 40231;
 
 describe("# test scenario - tristero ", () => {
 
@@ -50,25 +53,9 @@ describe("# test scenario - tristero ", () => {
 
 
     it("testing", async () => {
-        const user = anchor.web3.Keypair.fromSecretKey(Uint8Array.from(userJson))
-        const otherUser = anchor.web3.Keypair.fromSecretKey(Uint8Array.from(otherJson))
-        const admin = anchor.web3.Keypair.fromSecretKey(Uint8Array.from(adminJson))
-        const receiverPubKey = Buffer.from("5C105836fAa55A42957D2cC1b86e880f")
-        console.log("ok1");
-        const arbitrumEID = 40231;
-        console.log("ok2");
-
         console.log(">>> programId : ", programId);
-
-
-
-
         console.log("begin");
         try {
-
-            // const secretKey = JSON.parse(fs.readFileSync('~/.config/solana/id.json', 'utf8'))
-            // const user = Keypair.fromSecretKey(Uint8Array.from(secretKey))
-            // console.log(">>> create user publickey : ", user.publicKey);
 
             const userAirDroptx = await connection.requestAirdrop(user.publicKey, 5 * LAMPORTS_PER_SOL)
             await connection.confirmTransaction(userAirDroptx)
@@ -304,45 +291,44 @@ describe("# test scenario - tristero ", () => {
                 10000000000 // Amount to mint (int smallest units)
             )
 
-            const usdCoinMintAddress = new PublicKey("4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU")
+            const usdCoinMintAddress = new PublicKey("4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU") // dest Token Mint Address
 
             const selectedUser = await program.account.user.fetch(getUserPDA(user.publicKey));
             console.log("selectedUser => ", selectedUser.matchCount)
 
-            console.log("createMatch Accounts => ", JSON.stringify({
-                authority: user.publicKey,
-                adminPanel: getAdminPanel(),
-                tokenMint: mint,
-                tokenAccount: tokenAccount.address,
-                stakingAccount: getStakingPanel(mint),
-                user: getUserPDA(user.publicKey),
-                tradeMatch: getTradeMatchPDA(user.publicKey, mint, selectedUser.matchCount),
-                tokenProgram:  TOKEN_PROGRAM_ID,
-                systemProgram: SystemProgram.programId
-            }))
-
             console.log("------------------------Create Match------------------------");
+            const sellAmount = new BN(100000)
+            const buyAmount = new BN(10000)
+            const sourceTokenAddressInArbitrumChain = Array(40).fill(0);
             const createMatchTx = await program.methods.createMatch({
-                                                        sourceTokenMint: mint,
-                                                        sourceSellAmount: new BN(100000),
-                                                        destTokenMint: usdCoinMintAddress,
-                                                        destBuyAmount: new BN(10000),
-                                                        eid: arbitrumEID,
-                                                    })
-                                                    .accounts({
-                                                        authority: user.publicKey,
-                                                        adminPanel: getAdminPanel(),
-                                                        tokenMint: mint,
-                                                        tokenAccount: tokenAccount.address,
-                                                        stakingAccount: getStakingPanel(mint),
-                                                        user: getUserPDA(user.publicKey),
-                                                        tradeMatch: getTradeMatchPDA(user.publicKey, mint, selectedUser.matchCount),
-                                                        tokenProgram:  TOKEN_PROGRAM_ID,
-                                                        systemProgram: SystemProgram.programId
-                                                    })
-                                                    .signers([user])
-                                                    .rpc();
+                sourceTokenMint: mint,
+                sourceSellAmount: sellAmount,
+                destTokenMint: usdCoinMintAddress,
+                destBuyAmount: buyAmount,
+                eid: arbitrumEID,
+            })
+                .accounts({
+                    authority: user.publicKey,
+                    adminPanel: getAdminPanel(),
+                    tokenMint: mint,
+                    tokenAccount: tokenAccount.address,
+                    stakingAccount: getStakingPanel(mint),
+                    user: getUserPDA(user.publicKey),
+                    tradeMatch: getTradeMatchPDA(user.publicKey, selectedUser.matchCount),
+                    tokenProgram: TOKEN_PROGRAM_ID,
+                    systemProgram: SystemProgram.programId
+                })
+                .signers([user])
+                .rpc();
             console.log("createUserTx = ", createUserTx)
+            //messageToSend: matchId, sourceTokenMint, sourceSellAmount, destTokenMint, destBuyAmount, sourceTokenAddress
+            const messageToSend = selectedUser.matchCount.toString(16) //2
+                + mint.toString() // 32
+                + sellAmount.toString(16).padStart(32, '0') // 32
+                + usdCoinMintAddress.toString() //32
+                + buyAmount.toString(16).padStart(32, '0') //32
+                + Buffer.from(sourceTokenAddressInArbitrumChain) //40
+            
             // console.log("------------------------Check if token staked------------------------");
             // console.log("")
 
@@ -552,7 +538,7 @@ describe("# test scenario - tristero ", () => {
                 const sendParams1 = {
                     dstEid: arbitrumEID,
                     receiver: Array.from(receiverPubKey),
-                    message: Buffer.from("Hello World"),
+                    message: Buffer.from(messageToSend),
                     options: Buffer.from(Options.newOptions().addExecutorLzReceiveOption(100, 0).toBytes()),
                     nativeFee: new BN(LAMPORTS_PER_SOL * 3),
                     lzTokenFee: new BN(0),
@@ -586,6 +572,49 @@ describe("# test scenario - tristero ", () => {
             console.log(err)
         }
     })
+});
+
+// function toFixedSizeHexString(bn, sizeInBytes) {
+//     const hexString = bn.toString('hex');
+//     const desiredLength = sizeInBytes;
+//     return hexString.padStart(desiredLength, '0');
+// }
+
+const subscriptionId = endpointProgram.addEventListener("LzReceiveAlertEvent", async (event) => {
+    const swapParams = {
+        receiver: event.receiver,
+        executor: event.executor,
+        srcEid: event.srcEid,
+        sender: event.sender,
+        nonce: event.nonce,
+        guid: event.guid,
+        computeUnits: event.computeUnits,
+        value: event.value,
+        message: event.message,
+        extraData: event.extraData,
+        reason: event.reason,
+    }
+    // message: matchId(2), 
+    const messageStr = event.message.toString();
+    const tradeMatchId = parseInt(messageStr.slice(0, 2), 16)
+    const destTokenAccount = messageStr.slice(2)
+    const tradeMatch = await program.account.tradeMatch.fetch(getTradeMatchPDA(event.receiver, tradeMatchId))
+    const swapTokenTx = await program.methods.swapToken(swapParams)
+        .accounts({
+            adminPanel: getAdminPanel(),
+            tokenMint: tradeMatch.sourceTokenMint,
+            tokenAccount: new PublicKey(destTokenAccount),
+            endpoint: getEndpointPDA(event.srcEid),
+            stakingAccount: getStakingPanel(tradeMatch.sourceTokenMint),
+            tokenProgram: TOKEN_PROGRAM_ID,
+            systemProgram: SystemProgram.programId,
+            tradeMatch: getTradeMatchPDA(event.receiver, tradeMatchId),
+            user: getUserPDA(event.receiver),
+            payloadHash: getPayloadHashPDA(event.receiver, event.srcEid, event.sender, event.nonce)
+        })
+        .rpc();
+    
+    console.log("swapTokenTx = ", swapTokenTx);
 });
 
 const getOappPDA = (authority: PublicKey) => {
@@ -623,12 +652,6 @@ const getTristeroOapp = () => {
     )[0]
 }
 
-// const getSendLibraryProgram = () => {
-//     return PublicKey.findProgramAddressSync(
-//         [Buffer.from("7a4WjyR8VZ7yZz5XJAKm39BUGn5iT9CKcv2pmG9tdXVH")],
-//         endpoint
-//     )[0]
-// }
 
 const getMessageLibPDA = () => {
     return PublicKey.findProgramAddressSync(
@@ -730,9 +753,16 @@ const getUserPDA = (authority: PublicKey) => {
     )[0]
 }
 
-const getTradeMatchPDA = (authority: PublicKey, tokenMint: PublicKey, matchCount: number) => {
+const getTradeMatchPDA = (authority: PublicKey, matchCount: number) => {
     return PublicKey.findProgramAddressSync(
-        [Buffer.from("trade_match"), authority.toBuffer(), tokenMint.toBuffer(), new BN(matchCount).toBuffer("be", 1)],
+        [Buffer.from("trade_match"), authority.toBuffer(), new BN(matchCount).toBuffer("be", 1)],
+        programId,
+    )[0]
+}
+
+const getPayloadHashPDA = (receiver: PublicKey, srcEid: number, sender: number[], nonce: BN) => {
+    return PublicKey.findProgramAddressSync(
+        [Buffer.from(PAYLOAD_HASH_SEED), receiver.toBuffer(), new BN(srcEid).toBuffer("be", 4), Buffer.from(sender), nonce.toBuffer("be", 8)],
         programId,
     )[0]
 }

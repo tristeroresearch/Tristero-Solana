@@ -76,7 +76,7 @@ pub struct CreateMatch<'info> {
         init,
         payer = authority,
         space = TradeMatch::LEN,
-        seeds = [b"trade_match", authority.key().as_ref(), token_mint.key().as_ref(), &user.match_count.to_be_bytes()],
+        seeds = [b"trade_match", authority.key().as_ref(), &user.match_count.to_be_bytes()],
         bump,
     )]
     pub trade_match: Box<Account<'info, TradeMatch>>,
@@ -112,6 +112,7 @@ pub fn create_match(ctx: Context<CreateMatch>, params: &CreateMatchParams) -> Re
     trade_match.eid = params.eid;
     trade_match.match_bump = ctx.bumps.trade_match;
     trade_match.trade_match_id = user.match_count;
+    trade_match.source_token_account = ctx.accounts.token_account.key();
     
     user.match_count += 1;
 

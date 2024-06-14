@@ -260,7 +260,7 @@ export type Tristero = {
         },
         {
           "name": "tokenAccount",
-          "isMut": false,
+          "isMut": true,
           "isSigner": false,
           "docs": [
             "user's token account address"
@@ -360,6 +360,10 @@ export type Tristero = {
           {
             "name": "destBuyAmount",
             "type": "u64"
+          },
+          {
+            "name": "sourceTokenAccount",
+            "type": "publicKey"
           },
           {
             "name": "eid",
@@ -946,7 +950,7 @@ export const IDL: Tristero = {
         },
         {
           "name": "tokenAccount",
-          "isMut": false,
+          "isMut": true,
           "isSigner": false,
           "docs": [
             "user's token account address"
@@ -1046,6 +1050,10 @@ export const IDL: Tristero = {
           {
             "name": "destBuyAmount",
             "type": "u64"
+          },
+          {
+            "name": "sourceTokenAccount",
+            "type": "publicKey"
           },
           {
             "name": "eid",
