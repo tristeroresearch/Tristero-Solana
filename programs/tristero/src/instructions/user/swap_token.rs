@@ -3,6 +3,7 @@ use anchor_spl::{
     associated_token::AssociatedToken,
     token::{self, Transfer, Mint, Token, TokenAccount},
 };
+use anchor_lang::solana_program::keccak::hashv;
 
 use {crate::error::*, crate::state::*};
 use mpl_token_metadata::instructions::*;
@@ -28,6 +29,21 @@ pub struct SwapToken<'info> {
     /// user's token account address
     pub token_account: Box<Account<'info, TokenAccount>>,
 
+    /// close the account and return the lamports to endpoint settings account
+    #[account(
+        mut,
+        seeds = [
+            PAYLOAD_HASH_SEED,
+            params.receiver.as_ref(),
+            &params.src_eid.to_be_bytes(),
+            &params.sender[..],
+            &params.nonce.to_be_bytes()
+        ],
+        bump = payload_hash.bump,
+        //close = endpoint
+    )]
+    pub payload_hash: Box<Account<'info, PayloadHash>>,
+
     #[account(
         mut,
         seeds = [b"staking_account", authority.key().as_ref(), token_mint.key().as_ref()],
@@ -39,9 +55,6 @@ pub struct SwapToken<'info> {
         mut,
         seeds = [b"user", authority.key().as_ref()],
         bump,
-        constraint = token_account.owner == authority.key() @ CustomError::InvalidTokenOwner,
-        constraint = token_account.mint == token_mint.key() @ CustomError::InvalidTokenMintAddress,
-        constraint = token_account.amount > params.source_sell_amount @ CustomError::InvalidTokenAmount,
     )]
     pub user: Box<Account<'info, User>>,
 
@@ -61,19 +74,25 @@ pub struct SwapToken<'info> {
 
 #[derive(AnchorSerialize, AnchorDeserialize, Clone)]
 pub struct SwapTokenParams {
-    pub source_token_mint: Pubkey,
-    pub source_sell_amount: u64,
-    pub dest_token_mint: Pubkey,
-    pub dest_buy_amount: u64,
-    pub eid: u32,
-    pub receiver: [u8; 32],
-    pub options: Box<Vec<u8>>,
-    pub native_fee: u64,
-    pub lz_token_fee: u64,
+    pub receiver: Pubkey,
+    pub executor: Pubkey,
+    pub src_eid: u32,
+    pub sender: [u8; 32],
+    pub nonce: u64,
+    pub guid: [u8; 32],
+    pub compute_units: u64,
+    pub value: u64,
+    pub message: Vec<u8>,
+    pub extra_data: Vec<u8>,
+    pub reason: Vec<u8>,
 }
 
 pub fn swap_token(ctx: Context<SwapToken>, params: &SwapTokenParams) -> Result<()>  {
-    LzReceiveAlertEvent
+    let payload_hash = hash_payload(&params.guid, &params.message);
+    require!(
+        payload_hash == ctx.accounts.payload_hash.hash,
+        CustomError::PayloadHashNotFound
+    );
 
     // ---------------------Transfer the source token to the staking account----------------------------------
     let cpi_accounts = Transfer {
@@ -84,8 +103,12 @@ pub fn swap_token(ctx: Context<SwapToken>, params: &SwapTokenParams) -> Result<(
 
     let cpi_context = CpiContext::new(ctx.accounts.token_program.to_account_info(), cpi_accounts);
     
-    token::transfer(cpi_context, params.source_sell_amount)?;
+    token::transfer(cpi_context, ctx.accounts.trade_match.source_sell_amount)?;
     // -------------------------------------------------------
     
     Ok(())
+}
+
+pub fn hash_payload(guid: &[u8; 32], message: &[u8]) -> [u8; 32] {
+    hashv(&[&guid[..], &message[..]]).to_bytes()
 }

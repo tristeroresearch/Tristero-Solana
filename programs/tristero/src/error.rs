@@ -17,6 +17,9 @@ pub enum CustomError {
     #[msg("InvalidTokenStandard")]
     InvalidTokenStandard,
 
+    #[msg("PayloadHashNotFound")]
+    PayloadHashNotFound,
+
     InvalidSendLibrary,
     InvalidReceiveLibrary,
     SameValue,
@@ -28,7 +31,6 @@ pub enum CustomError {
     InvalidAmount,
     InvalidNonce,
     Unauthorized,
-    PayloadHashNotFound,
     ComposeNotFound,
     InvalidPayloadHash,
     LzTokenUnavailable,
