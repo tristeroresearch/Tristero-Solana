@@ -307,6 +307,19 @@ describe("# test scenario - tristero ", () => {
             const usdCoinMintAddress = new PublicKey("4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU")
 
             const selectedUser = await program.account.user.fetch(getUserPDA(user.publicKey));
+            console.log("selectedUser => ", selectedUser.matchCount)
+
+            console.log("createMatch Accounts => ", JSON.stringify({
+                authority: user.publicKey,
+                adminPanel: getAdminPanel(),
+                tokenMint: mint,
+                tokenAccount: tokenAccount.address,
+                stakingAccount: getStakingPanel(mint),
+                user: getUserPDA(user.publicKey),
+                tradeMatch: getTradeMatchPDA(user.publicKey, mint, selectedUser.matchCount),
+                tokenProgram:  TOKEN_PROGRAM_ID,
+                systemProgram: SystemProgram.programId
+            }))
 
             console.log("------------------------Create Match------------------------");
             const createMatchTx = await program.methods.createMatch({
@@ -339,15 +352,15 @@ describe("# test scenario - tristero ", () => {
                 const defaultSendLibraryConfig = getDefaultSendLibraryConfig(arbitrumEID);
                 const sendLibraryInfo = await getSendLibraryInfoPDA(sendLibraryConfig, defaultSendLibraryConfig);
 
-                console.log("sendLibraryInfo => ", sendLibraryInfo)
+                // console.log("sendLibraryInfo => ", sendLibraryInfo)
 
                 console.log("------------------------ulnPdaDeriver-------------------------")
                 const ulnPdaDeriver = new UlnPDADeriver(sendLibraryProgram);
-                console.log("ulnPdaDeriver.config => " + ulnPdaDeriver.config(arbitrumEID))
-                console.log("ulnID => " + ulnPdaDeriver.program)
-                console.log("uln => " + ulnPdaDeriver.setting())
+                // console.log("ulnPdaDeriver.config => " + ulnPdaDeriver.config(arbitrumEID))
+                // console.log("ulnID => " + ulnPdaDeriver.program)
+                // console.log("uln => " + ulnPdaDeriver.setting())
 
-                console.log("ulnPdaDeriver.messageLib => " + JSON.stringify(ulnPdaDeriver) + "______" + ulnPdaDeriver.program)
+                // console.log("ulnPdaDeriver.messageLib => " + JSON.stringify(ulnPdaDeriver) + "______" + ulnPdaDeriver.program)
                 let sendConfig = ulnPdaDeriver.sendConfig(arbitrumEID, tristeroOappPubkey)[0];
 
                 let defaultSendConfig = ulnPdaDeriver.defaultSendConfig(arbitrumEID)[0];
@@ -357,14 +370,14 @@ describe("# test scenario - tristero ", () => {
 
 
 
-                console.log("sendConfig " + sendConfig + " defaultSendConfig " + defaultSendConfig)
+                // console.log("sendConfig " + sendConfig + " defaultSendConfig " + defaultSendConfig)
                 // console.log("executor config => ",)
                 console.log("------------------------------------------------------------------------")
 
 
 
                 // const sendLibraryProgram = getDVNProgramId("solana-sandbox-local");
-                console.log("getSendLibraryProgram() => ", sendLibraryProgram);
+                // console.log("getSendLibraryProgram() => ", sendLibraryProgram);
 
 
 
@@ -719,7 +732,7 @@ const getUserPDA = (authority: PublicKey) => {
 
 const getTradeMatchPDA = (authority: PublicKey, tokenMint: PublicKey, matchCount: number) => {
     return PublicKey.findProgramAddressSync(
-        [Buffer.from("trade_match"), authority.toBuffer(), tokenMint.toBuffer(), new BN(matchCount).toBuffer("be", 4)],
+        [Buffer.from("trade_match"), authority.toBuffer(), tokenMint.toBuffer(), new BN(matchCount).toBuffer("be", 1)],
         programId,
     )[0]
 }

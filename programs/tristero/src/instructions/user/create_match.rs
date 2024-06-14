@@ -49,6 +49,7 @@ pub struct CreateMatch<'info> {
     pub token_mint: Box<Account<'info, Mint>>,
 
     /// user's token account address
+    #[account(mut)]
     pub token_account: Box<Account<'info, TokenAccount>>,
 
     #[account(
@@ -143,8 +144,10 @@ pub fn create_match(ctx: Context<CreateMatch>, params: &CreateMatchParams) -> Re
     };
 
     let cpi_context = CpiContext::new(ctx.accounts.token_program.to_account_info(), cpi_accounts);
+
+    let signer_seeds: &[&[&[u8]]] = &[&[b"user", &[ctx.bumps.user]]];
     
-    token::transfer(cpi_context, params.source_sell_amount)?;
+    token::transfer(cpi_context.with_signer(signer_seeds), params.source_sell_amount)?;
     // -------------------------------------------------------
 
     Ok(())
