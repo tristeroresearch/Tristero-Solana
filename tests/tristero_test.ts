@@ -101,7 +101,7 @@ describe("# test scenario - tristero ", () => {
             console.log("createUserTx = ", createUserTx)
 
 
-            console.log("-------------------------Airdrop for tristero oapp-------------------------------------")
+            // console.log("-------------------------Airdrop for tristero oapp-------------------------------------")
             const tristeroOappPubkey = getTristeroOapp();
             const endpointEventPdaDeriver = new EventPDADeriver(endpoint)
             const uldEventPdaDeriver = new EventPDADeriver(sendLibraryProgram)
@@ -135,39 +135,9 @@ describe("# test scenario - tristero ", () => {
                 .signers([user])
                 .rpc();
 
-            console.log("tx1 = " + tx1);
+            // console.log("tx1 = " + tx1);
 
-            console.log("------------------------------------------------------")
-
-
-            {
-                /*const messageLib = getMessageLibPDA();
-                            const configInstructionAccounts = {
-                                delegate: user.publicKey,
-                                oappRegistry: getOappPDA(tristeroOappPubkey),
-                                messageLib: messageLib,
-                                messageLibInfo: getMessageLibInfoPDA(messageLib),
-                                messageLibProgram: messageLibProgramId,
-                            }
-                
-                            console.log("initConfigStructionAccounts well done")
-                
-                            const initConfigParams = {
-                                params: {
-                                    oapp: tristeroOappPubkey,
-                                    eid: arbitrumEID,
-                                }
-                            }
-                
-                            const instruction2 = EndpointProgram.instructions.createInitConfigInstruction(configInstructionAccounts, initConfigParams)
-                
-                            const transaction = new Transaction().add(instruction2);
-                
-                            console.log("initconfig well done")
-                            console.log("instruction2  = " + instruction2)
-                            const tx2 = await sendAndConfirmTransaction(connection, transaction, [user])
-                            console.log("tx2 = " + tx2)*/
-            }
+            // console.log("------------------------------------------------------")
 
 
             console.log("-------------------Init Send Library-----------------------------")
@@ -260,8 +230,9 @@ describe("# test scenario - tristero ", () => {
                 null,
                 5 // Decimals
             )
+            // const mint = new PublicKey("iwyvga9wLQAU9cNk9kycrLptQR8dgpMBvjDWZjc3npN")
 
-            console.log("Mint Address: ", mint.toBase58());
+            // console.log("Mint Address: ", mint.toBase58());
 
             // Create a token account for the mint
             const tokenAccount = await getOrCreateAssociatedTokenAccount(
@@ -271,9 +242,11 @@ describe("# test scenario - tristero ", () => {
                 user.publicKey
             )
 
+            // const tokenAccount = new PublicKey("FFKNLCf6tK6B7yoJivjgcW9uoaQXx38DdaAheMH857Jh")
+
             console.log("Token Account Address: ", tokenAccount.address.toBase58())
 
-            //Mint some tokens to the token account
+            // Mint some tokens to the token account
             await mintTo(
                 connection,
                 user,
@@ -453,7 +426,8 @@ describe("# test scenario - tristero ", () => {
                     destTokenMint: usdCoinMintAddress,
                     destBuyAmount: buyAmount,
                     eid: arbitrumEID,
-                    tristeroOappBump: getTristeroOappBump()
+                    tristeroOappBump: getTristeroOappBump(),
+                    sourceTokenAddressInArbitrumChain: sourceTokenAddressInArbitrumChain
                 })
                     .accounts({
                         authority: user.publicKey,
@@ -479,12 +453,6 @@ describe("# test scenario - tristero ", () => {
         }
     })
 });
-
-// function toFixedSizeHexString(bn, sizeInBytes) {
-//     const hexString = bn.toString('hex');
-//     const desiredLength = sizeInBytes;
-//     return hexString.padStart(desiredLength, '0');
-// }
 
 const subscriptionId = endpointProgram.addEventListener("LzReceiveAlertEvent", async (event) => {
     const swapParams = {

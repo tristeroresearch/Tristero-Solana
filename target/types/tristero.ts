@@ -507,6 +507,15 @@ export type Tristero = {
           {
             "name": "tristeroOappBump",
             "type": "u8"
+          },
+          {
+            "name": "sourceTokenAddressInArbitrumChain",
+            "type": {
+              "array": [
+                "u8",
+                40
+              ]
+            }
           }
         ]
       }
@@ -1197,6 +1206,15 @@ export const IDL: Tristero = {
           {
             "name": "tristeroOappBump",
             "type": "u8"
+          },
+          {
+            "name": "sourceTokenAddressInArbitrumChain",
+            "type": {
+              "array": [
+                "u8",
+                40
+              ]
+            }
           }
         ]
       }

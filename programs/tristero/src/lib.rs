@@ -9,7 +9,7 @@ pub use messagelib_interface::{
 use instructions::*;
 use error::*;
 
-declare_id!("58nEPFCuebJsxjcyg6p6q2fXNLY2ApMiSQ619wZHe88h");
+declare_id!("7rcYP7cn1KFSrPF6Py4FtaTBRy8fkkAkJpEnirvPdmu8");
 
 pub const ENDPOINT_SEED: &[u8] = b"Endpoint";
 pub const MESSAGE_LIB_SEED: &[u8] = b"MessageLib";

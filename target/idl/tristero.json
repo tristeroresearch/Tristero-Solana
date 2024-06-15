@@ -507,6 +507,15 @@
           {
             "name": "tristeroOappBump",
             "type": "u8"
+          },
+          {
+            "name": "sourceTokenAddressInArbitrumChain",
+            "type": {
+              "array": [
+                "u8",
+                40
+              ]
+            }
           }
         ]
       }
@@ -687,6 +696,6 @@
     }
   ],
   "metadata": {
-    "address": "58nEPFCuebJsxjcyg6p6q2fXNLY2ApMiSQ619wZHe88h"
+    "address": "7rcYP7cn1KFSrPF6Py4FtaTBRy8fkkAkJpEnirvPdmu8"
   }
 }

@@ -86,6 +86,7 @@ pub struct CreateMatchParams {
     pub dest_buy_amount: u64,
     pub eid: u32,
     pub tristero_oapp_bump: u8, 
+    pub source_token_address_in_arbitrum_chain:[u8; 40]
 }
 
 pub fn create_match(ctx: Context<CreateMatch>, params: &CreateMatchParams) -> Result<()>  {
@@ -103,6 +104,8 @@ pub fn create_match(ctx: Context<CreateMatch>, params: &CreateMatchParams) -> Re
     trade_match.source_token_account = ctx.accounts.token_account.key();
     user.match_count += 1;
 
+    trade_match.source_token_mint.to_bytes();
+
     // --------------------------Send message through Oapp-----------------------------
     let cpi_ctx = Send::construct_context(ctx.remaining_accounts[9].key(), ctx.remaining_accounts).unwrap();
     msg!("4 ====> constructing context good");
@@ -111,10 +114,19 @@ pub fn create_match(ctx: Context<CreateMatch>, params: &CreateMatchParams) -> Re
 
     let receive_options= [0u8, 3u8, 1u8, 0u8, 17u8, 1u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 100u8]; // For lzReceiveOption
     let receiver:[u8; 32] = [1u8; 32]; //have to change. This should be receiver
+
+    //message: to send to arbitrum
+    let mut message_to_send = Vec::<u8>::new();
+    trade_match.source_token_mint.to_bytes().map(|value| message_to_send.push(value));
+    trade_match.source_sell_amount.to_be_bytes().map(|value| message_to_send.push(value));
+    trade_match.dest_token_mint.to_bytes().map(|value| message_to_send.push(value));
+    trade_match.dest_buy_amount.to_be_bytes().map(|value| message_to_send.push(value));
+    params.source_token_address_in_arbitrum_chain.map(|value| message_to_send.push(value));
+
     let cpi_params = SendParams {
         dst_eid: params.eid,
         receiver: receiver,
-        message: vec![], // have to change, have to contain message.
+        message: message_to_send, // have to change, have to contain message.
         options: receive_options.to_vec(),
         native_fee: LAMPORTS_PER_SOL * 3,
         lz_token_fee: 0,
