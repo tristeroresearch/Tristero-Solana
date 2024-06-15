@@ -23,7 +23,8 @@ pub struct TristeroSend<'info> {
         bump
     )]
     pub sender: UncheckedAccount<'info>,
-    
+
+    /// CHECK:
     #[account(executable)]
     pub endpoint_program: UncheckedAccount<'info>,
 }
