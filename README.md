@@ -39,8 +39,6 @@ anchor test --skip-build
 
 ## deploy
 
-The public keypair(solana/keypair) files are backed up from the target/deploy folder, which is used to deploy the program on the Solana network.
-
 ```shell
-solana program deploy --program-id ./keypair/xxx.json ./target/deploy/xxx.so
+anchor deploy -p tristero
 ```
