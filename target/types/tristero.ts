@@ -243,6 +243,70 @@ export type Tristero = {
       ]
     },
     {
+      "name": "cancelMatch",
+      "accounts": [
+        {
+          "name": "authority",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "adminPanel",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "tokenMint",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "token mint address"
+          ]
+        },
+        {
+          "name": "tokenAccount",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "user's token account address"
+          ]
+        },
+        {
+          "name": "stakingAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "user",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "tradeMatch",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "params",
+          "type": {
+            "defined": "CancelMatchParams"
+          }
+        }
+      ]
+    },
+    {
       "name": "swapToken",
       "accounts": [
         {
@@ -263,7 +327,7 @@ export type Tristero = {
           "isMut": true,
           "isSigner": false,
           "docs": [
-            "user's token account address"
+            "dest's token account address"
           ]
         },
         {
@@ -376,6 +440,10 @@ export type Tristero = {
           {
             "name": "tradeMatchId",
             "type": "u8"
+          },
+          {
+            "name": "isValiable",
+            "type": "bool"
           }
         ]
       }
@@ -479,6 +547,22 @@ export type Tristero = {
           {
             "name": "lzTokenFee",
             "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "CancelMatchParams",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "matchId",
+            "type": "u8"
+          },
+          {
+            "name": "tristeroOappBump",
+            "type": "u8"
           }
         ]
       }
@@ -628,70 +712,75 @@ export type Tristero = {
     },
     {
       "code": 6006,
-      "name": "InvalidSendLibrary"
+      "name": "NotAgain",
+      "msg": "Already canceled or traded"
     },
     {
       "code": 6007,
-      "name": "InvalidReceiveLibrary"
+      "name": "InvalidSendLibrary"
     },
     {
       "code": 6008,
-      "name": "SameValue"
+      "name": "InvalidReceiveLibrary"
     },
     {
       "code": 6009,
-      "name": "AccountNotFound"
+      "name": "SameValue"
     },
     {
       "code": 6010,
-      "name": "OnlySendLib"
+      "name": "AccountNotFound"
     },
     {
       "code": 6011,
-      "name": "OnlyReceiveLib"
+      "name": "OnlySendLib"
     },
     {
       "code": 6012,
-      "name": "InvalidExpiry"
+      "name": "OnlyReceiveLib"
     },
     {
       "code": 6013,
-      "name": "OnlyNonDefaultLib"
+      "name": "InvalidExpiry"
     },
     {
       "code": 6014,
-      "name": "InvalidAmount"
+      "name": "OnlyNonDefaultLib"
     },
     {
       "code": 6015,
-      "name": "InvalidNonce"
+      "name": "InvalidAmount"
     },
     {
       "code": 6016,
-      "name": "Unauthorized"
+      "name": "InvalidNonce"
     },
     {
       "code": 6017,
-      "name": "ComposeNotFound"
+      "name": "Unauthorized"
     },
     {
       "code": 6018,
-      "name": "InvalidPayloadHash"
+      "name": "ComposeNotFound"
     },
     {
       "code": 6019,
-      "name": "LzTokenUnavailable"
+      "name": "InvalidPayloadHash"
     },
     {
       "code": 6020,
-      "name": "ReadOnlyAccount"
+      "name": "LzTokenUnavailable"
     },
     {
       "code": 6021,
-      "name": "InvalidMessageLib"
+      "name": "ReadOnlyAccount"
     },
     {
       "code": 6022,
+      "name": "InvalidMessageLib"
+    },
+    {
+      "code": 6023,
       "name": "WritableAccountNotAllowed"
     }
   ]
@@ -942,6 +1031,70 @@ export const IDL: Tristero = {
       ]
     },
     {
+      "name": "cancelMatch",
+      "accounts": [
+        {
+          "name": "authority",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "adminPanel",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "tokenMint",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "token mint address"
+          ]
+        },
+        {
+          "name": "tokenAccount",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "user's token account address"
+          ]
+        },
+        {
+          "name": "stakingAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "user",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "tradeMatch",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "params",
+          "type": {
+            "defined": "CancelMatchParams"
+          }
+        }
+      ]
+    },
+    {
       "name": "swapToken",
       "accounts": [
         {
@@ -962,7 +1115,7 @@ export const IDL: Tristero = {
           "isMut": true,
           "isSigner": false,
           "docs": [
-            "user's token account address"
+            "dest's token account address"
           ]
         },
         {
@@ -1075,6 +1228,10 @@ export const IDL: Tristero = {
           {
             "name": "tradeMatchId",
             "type": "u8"
+          },
+          {
+            "name": "isValiable",
+            "type": "bool"
           }
         ]
       }
@@ -1178,6 +1335,22 @@ export const IDL: Tristero = {
           {
             "name": "lzTokenFee",
             "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "CancelMatchParams",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "matchId",
+            "type": "u8"
+          },
+          {
+            "name": "tristeroOappBump",
+            "type": "u8"
           }
         ]
       }
@@ -1327,70 +1500,75 @@ export const IDL: Tristero = {
     },
     {
       "code": 6006,
-      "name": "InvalidSendLibrary"
+      "name": "NotAgain",
+      "msg": "Already canceled or traded"
     },
     {
       "code": 6007,
-      "name": "InvalidReceiveLibrary"
+      "name": "InvalidSendLibrary"
     },
     {
       "code": 6008,
-      "name": "SameValue"
+      "name": "InvalidReceiveLibrary"
     },
     {
       "code": 6009,
-      "name": "AccountNotFound"
+      "name": "SameValue"
     },
     {
       "code": 6010,
-      "name": "OnlySendLib"
+      "name": "AccountNotFound"
     },
     {
       "code": 6011,
-      "name": "OnlyReceiveLib"
+      "name": "OnlySendLib"
     },
     {
       "code": 6012,
-      "name": "InvalidExpiry"
+      "name": "OnlyReceiveLib"
     },
     {
       "code": 6013,
-      "name": "OnlyNonDefaultLib"
+      "name": "InvalidExpiry"
     },
     {
       "code": 6014,
-      "name": "InvalidAmount"
+      "name": "OnlyNonDefaultLib"
     },
     {
       "code": 6015,
-      "name": "InvalidNonce"
+      "name": "InvalidAmount"
     },
     {
       "code": 6016,
-      "name": "Unauthorized"
+      "name": "InvalidNonce"
     },
     {
       "code": 6017,
-      "name": "ComposeNotFound"
+      "name": "Unauthorized"
     },
     {
       "code": 6018,
-      "name": "InvalidPayloadHash"
+      "name": "ComposeNotFound"
     },
     {
       "code": 6019,
-      "name": "LzTokenUnavailable"
+      "name": "InvalidPayloadHash"
     },
     {
       "code": 6020,
-      "name": "ReadOnlyAccount"
+      "name": "LzTokenUnavailable"
     },
     {
       "code": 6021,
-      "name": "InvalidMessageLib"
+      "name": "ReadOnlyAccount"
     },
     {
       "code": 6022,
+      "name": "InvalidMessageLib"
+    },
+    {
+      "code": 6023,
       "name": "WritableAccountNotAllowed"
     }
   ]

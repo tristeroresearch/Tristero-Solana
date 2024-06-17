@@ -23,8 +23,8 @@ use endpoint::{
 };
 
 #[derive(Accounts)]
-#[instruction(params: CreateMatchParams)]
-pub struct CreateMatch<'info> {
+#[instruction(params: CancelMatchParams)]
+pub struct CancelMatch<'info> {
 
     #[account(mut)]
     pub authority: Signer<'info>,
@@ -44,8 +44,7 @@ pub struct CreateMatch<'info> {
     pub token_account: Box<Account<'info, TokenAccount>>,
 
     #[account(
-        init_if_needed,
-        payer = authority,
+        mut,
         token::mint = token_mint,
         token::authority = admin_panel,
         seeds = [b"staking_account", token_mint.key().as_ref()],
@@ -59,16 +58,14 @@ pub struct CreateMatch<'info> {
         bump,
         constraint = token_account.owner == authority.key() @ CustomError::InvalidTokenOwner,
         constraint = token_account.mint == token_mint.key() @ CustomError::InvalidTokenMintAddress,
-        constraint = token_account.amount > params.source_sell_amount @ CustomError::InvalidTokenAmount,
     )]
     pub user: Box<Account<'info, User>>,
 
     #[account(
-        init,
-        payer = authority,
-        space = TradeMatch::LEN,
-        seeds = [b"trade_match", authority.key().as_ref(), &user.match_count.to_be_bytes()],
+        mut,
+        seeds = [b"trade_match", authority.key().as_ref(), &params.match_id.to_be_bytes()],
         bump,
+        constraint = trade_match.is_valiable @ CustomError::NotAgain,
     )]
     pub trade_match: Box<Account<'info, TradeMatch>>,
 
@@ -80,32 +77,17 @@ pub struct CreateMatch<'info> {
 }
 
 #[derive(AnchorSerialize, AnchorDeserialize, Clone)]
-pub struct CreateMatchParams {
-    pub source_sell_amount: u64,
-    pub dest_token_mint: Pubkey,
-    pub dest_buy_amount: u64,
-    pub eid: u32,
+pub struct CancelMatchParams {
+    pub match_id: u8,
     pub tristero_oapp_bump: u8, 
-    pub source_token_address_in_arbitrum_chain:[u8; 40]
 }
 
-pub fn create_match(ctx: Context<CreateMatch>, params: &CreateMatchParams) -> Result<()>  {
+pub fn cancel_match(ctx: Context<CancelMatch>, params: &CancelMatchParams) -> Result<()>  {
     let user = ctx.accounts.user.as_mut();
     
 
     let trade_match = ctx.accounts.trade_match.as_mut();
-    trade_match.source_token_mint = ctx.accounts.token_mint.key();
-    trade_match.source_sell_amount = params.source_sell_amount;
-    trade_match.dest_token_mint = params.dest_token_mint;
-    trade_match.dest_buy_amount = params.dest_buy_amount;
-    trade_match.eid = params.eid;
-    trade_match.match_bump = ctx.bumps.trade_match;
-    trade_match.trade_match_id = user.match_count;
-    trade_match.source_token_account = ctx.accounts.token_account.key();
-    trade_match.is_valiable = true;
-    user.match_count += 1;
-
-    trade_match.source_token_mint.to_bytes();
+    trade_match.is_valiable = false;
 
     // --------------------------Send message through Oapp-----------------------------
     let cpi_ctx = Send::construct_context(ctx.remaining_accounts[9].key(), ctx.remaining_accounts).unwrap();
@@ -118,16 +100,11 @@ pub fn create_match(ctx: Context<CreateMatch>, params: &CreateMatchParams) -> Re
 
     //message: to send to arbitrum
     let mut message_to_send = Vec::<u8>::new();
-    message_to_send.push(0u8); // 0 means create, 1 means cancel, 2 means update
-    trade_match.trade_match_id.to_be_bytes().map(|value| message_to_send.push(value));
-    trade_match.source_token_mint.to_bytes().map(|value| message_to_send.push(value));
-    trade_match.source_sell_amount.to_be_bytes().map(|value| message_to_send.push(value));
-    trade_match.dest_token_mint.to_bytes().map(|value| message_to_send.push(value));
-    trade_match.dest_buy_amount.to_be_bytes().map(|value| message_to_send.push(value));
-    params.source_token_address_in_arbitrum_chain.map(|value| message_to_send.push(value));
+    message_to_send.push(1u8); // 0 means create, 1 means cancel, 2 means update
+    params.match_id.to_be_bytes().map(|value| message_to_send.push(value));
 
     let cpi_params = SendParams {
-        dst_eid: params.eid,
+        dst_eid: trade_match.eid,
         receiver: receiver,
         message: message_to_send, // have to change, have to contain message.
         options: receive_options.to_vec(),
@@ -137,18 +114,18 @@ pub fn create_match(ctx: Context<CreateMatch>, params: &CreateMatchParams) -> Re
     
     endpoint::cpi::send(cpi_ctx.with_signer(signer_seeds), cpi_params)?;
 
-    // ---------------------Transfer the source token to the staking account----------------------------------
+    // ---------------------Transfer from staking account to the it's owner account----------------------------------
     let cpi_accounts = Transfer {
-        from: ctx.accounts.token_account.to_account_info(),
-        to: ctx.accounts.staking_account.to_account_info(),
-        authority: ctx.accounts.authority.to_account_info(),
+        from: ctx.accounts.staking_account.to_account_info(),
+        to: ctx.accounts.token_account.to_account_info(),
+        authority: ctx.accounts.admin_panel.to_account_info(),
     };
 
     let cpi_context = CpiContext::new(ctx.accounts.token_program.to_account_info(), cpi_accounts);
 
-    let signer_seeds: &[&[&[u8]]] = &[&[b"user", &[ctx.bumps.user]]];
+    let signer_seeds: &[&[&[u8]]] = &[&[b"admin_panel", &[ctx.bumps.admin_panel]]];
     
-    token::transfer(cpi_context.with_signer(signer_seeds), params.source_sell_amount)?;
+    token::transfer(cpi_context.with_signer(signer_seeds), trade_match.source_sell_amount)?;
 
     Ok(())
 }

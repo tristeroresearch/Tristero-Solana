@@ -20,6 +20,9 @@ pub enum CustomError {
     #[msg("PayloadHashNotFound")]
     PayloadHashNotFound,
 
+    #[msg("Already canceled or traded")]
+    NotAgain,
+
     InvalidSendLibrary,
     InvalidReceiveLibrary,
     SameValue,

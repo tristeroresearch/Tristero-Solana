@@ -448,6 +448,189 @@ describe("# test scenario - tristero ", () => {
                 console.log("createMatchTx = ", createMatchTx)
             }
 
+            console.log("------------------------Cancel Match------------------------");
+
+            {
+                const sendLibraryConfig = getSendLibraryConfigPDA(tristeroOappPubkey, arbitrumEID);
+                const defaultSendLibraryConfig = getDefaultSendLibraryConfig(arbitrumEID);
+                const sendLibraryInfo = await getSendLibraryInfoPDA(sendLibraryConfig, defaultSendLibraryConfig);
+                const ulnPdaDeriver = new UlnPDADeriver(sendLibraryProgram);
+                let sendConfig = ulnPdaDeriver.sendConfig(arbitrumEID, tristeroOappPubkey)[0];
+                let defaultSendConfig = ulnPdaDeriver.defaultSendConfig(arbitrumEID)[0]; //until here
+                const sendInstructionRemainingAccounts = [
+                    { //0
+                        pubkey: endpoint,
+                        isSigner: false,
+                        isWritable: true
+                    },
+                    { //1
+                        pubkey: tristeroOappPubkey,
+                        isSigner: false,
+                        isWritable: true
+                    },
+                    { //2
+                        pubkey: sendLibraryProgram,
+                        isSigner: false,
+                        isWritable: true
+                    },
+                    { //3
+                        pubkey: sendLibraryConfig,
+                        isSigner: false,
+                        isWritable: true
+                    },
+                    { //4
+                        pubkey: defaultSendLibraryConfig,
+                        isSigner: false,
+                        isWritable: true
+                    },
+                    { //5
+                        pubkey: sendLibraryInfo,
+                        isSigner: false,
+                        isWritable: true
+                    },
+                    { //6
+                        pubkey: getEndpointPDA(arbitrumEID),
+                        isSigner: false,
+                        isWritable: true
+                    },
+                    { //7
+                        pubkey: getNoncePDA(tristeroOappPubkey, arbitrumEID, receiverPubKey),
+                        isSigner: false,
+                        isWritable: true
+                    },
+                    { //8
+                        pubkey: endpointEventPdaDeriver.eventAuthority()[0],
+                        isSigner: false,
+                        isWritable: true
+                    },
+                    { //9
+                        pubkey: endpoint,
+                        isSigner: false,
+                        isWritable: true
+                    },
+                    { //10
+                        pubkey: getUlnPDA(),
+                        isSigner: false,
+                        isWritable: true
+                    },
+                    { //11
+                        pubkey: sendConfig,
+                        isSigner: false,
+                        isWritable: true
+                    },
+                    { //12
+                        pubkey: defaultSendConfig,
+                        isSigner: false,
+                        isWritable: true
+                    },
+                    { //13
+                        pubkey: user.publicKey,
+                        isSigner: false,
+                        isWritable: true
+                    },
+                    { //14
+                        pubkey: user.publicKey,
+                        isSigner: false,
+                        isWritable: true
+                    },
+                    { //15
+                        pubkey: SystemProgram.programId,
+                        isSigner: false,
+                        isWritable: true
+                    },
+                    { //16
+                        pubkey: uldEventPdaDeriver.eventAuthority()[0],
+                        isSigner: false,
+                        isWritable: true
+                    },
+                    { //17
+                        pubkey: sendLibraryProgram,
+                        isSigner: false,
+                        isWritable: true
+                    },
+                    { //18
+                        pubkey: executorProgramId,
+                        isSigner: false,
+                        isWritable: true
+                    },
+                    { //19
+                        pubkey: new ExecutorPDADeriver(executorProgramId).config()[0],
+                        isSigner: false,
+                        isWritable: true
+                    },
+                    { //20
+                        pubkey: priceFeeProgramId,
+                        isSigner: false,
+                        isWritable: true
+                    },
+                    { //21
+                        pubkey: new PriceFeedPDADeriver(priceFeeProgramId).priceFeed()[0],
+                        isSigner: false,
+                        isWritable: true
+                    },
+                    { //22
+                        pubkey: dvnProgramId,
+                        isSigner: false,
+                        isWritable: true
+                    },
+                    { //23
+                        pubkey: new DVNDeriver(dvnProgramId).config()[0],
+                        isSigner: false,
+                        isWritable: true
+                    },
+                    { //24
+                        pubkey: priceFeeProgramId,
+                        isSigner: false,
+                        isWritable: true
+                    },
+                    { //25
+                        pubkey: new PriceFeedPDADeriver(priceFeeProgramId).priceFeed()[0],
+                        isSigner: false,
+                        isWritable: true
+                    },
+                ]
+                const sellAmount = new BN(100000)
+                const buyAmount = new BN(10000)
+                const sourceTokenAddressInArbitrumChain = Array(40).fill(0); //have to input arbitrum wallet address of user
+                const messageToSend = selectedUser.matchCount.toString(16) //2
+                    + mint.toString() // 32
+                    + sellAmount.toString(16).padStart(32, '0') // 32
+                    + usdCoinMintAddress.toString() //32
+                    + buyAmount.toString(16).padStart(32, '0') //32
+                    + Buffer.from(sourceTokenAddressInArbitrumChain) //40
+
+                const additionalComputeBudgetInstruction =
+                    anchor.web3.ComputeBudgetProgram.requestUnits({
+                        units: 800000,
+                        additionalFee: 0,
+                    });
+
+                let tx = new Transaction();
+                tx.add(ComputeBudgetProgram.setComputeUnitLimit({ units: 2000000 }))
+
+                let instruction = await program.methods.cancelMatch({
+                    matchId: selectedUser.matchCount,
+                    tristeroOappBump: getTristeroOappBump(),
+                })
+                    .accounts({
+                        authority: user.publicKey,
+                        adminPanel: getAdminPanel(),
+                        tokenMint: mint,
+                        tokenAccount: tokenAccount.address,
+                        stakingAccount: getStakingPanel(mint),
+                        user: getUserPDA(user.publicKey),
+                        tradeMatch: getTradeMatchPDA(user.publicKey, selectedUser.matchCount),
+                        tokenProgram: TOKEN_PROGRAM_ID,
+                        systemProgram: SystemProgram.programId
+                    })
+                    .remainingAccounts(sendInstructionRemainingAccounts)
+                    .instruction();
+                tx.add(instruction)
+                const createMatchTx = await sendAndConfirmTransaction(connection, tx, [user])
+
+                console.log("cancelMatchTx = ", createMatchTx)
+            }
+
         } catch (err) {
             console.log(err)
         }
