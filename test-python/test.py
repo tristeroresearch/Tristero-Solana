@@ -1,195 +1,239 @@
-import json
-import base64
-import struct
-import solana
-from solana.rpc.api import Client
+import asyncio
 from solders.pubkey import Pubkey
 from solders.keypair import Keypair
-from solana.transaction import Transaction
+from solders.account import Account
+from solders.bankrun import ProgramTestContext
+from solders.instruction import Instruction
+from solders.message import Message
+from solders.token.associated import get_associated_token_address
+from solders.bankrun import start_anchor
+from anchorpy import Provider, Program, WorkspaceType, workspace, Idl, Context, create_workspace, close_workspace
 from solders.system_program import ID as SYS_PROGRAM_ID
+from pathlib import Path
 from solana.rpc.async_api import AsyncClient
-from solana.rpc.commitment import Confirmed
-from solana.rpc.types import TxOpts
-from spl.token.constants import TOKEN_PROGRAM_ID
-from spl.token.async_client import AsyncToken
-from spl.token.instructions import get_associated_token_address
-from solders.pubkey import Pubkey
-from solders.keypair import Keypair
+import json
+import struct
 
-# Load keypair from file
-def load_keypair(file_path):
-    with open(file_path, 'r') as f:
-        secret_key = json.load(f)
-    return Keypair.from_secret_key(bytes(secret_key))
+tristero_program_id = Pubkey.from_string("7rcYP7cn1KFSrPF6Py4FtaTBRy8fkkAkJpEnirvPdmu8")
+endpoint_program_id = Pubkey.from_string("76y77prsiCMvXMjuoZ5VRrhG5qYBrUMYTE5WgHqgjEn6")
+executor_program_id = Pubkey.from_string("6doghB248px58JSSwG4qejQ46kFMW4AMj7vzJnWZHNZn")
+send_library_program_id = Pubkey.from_string("7a4WjyR8VZ7yZz5XJAKm39BUGn5iT9CKcv2pmG9tdXVH")
+price_fee_program_id = Pubkey.from_string("8ahPGPjEbpgGaZx2NV1iG5Shj7TDwvsjkEDcGWjt94TP")
+dvn_program_id = Pubkey.from_string("HtEYV4xB4wvsj5fgTkcfuChYpvGYzgzwvNhgDZQNh7wW")
+uln_program_id = Pubkey.from_string("7a4WjyR8VZ7yZz5XJAKm39BUGn5iT9CKcv2pmG9tdXVH")
 
-# Constants and Configurations
-# DEFAULT_MESSAGE_LIB = PublicKey(0)
+rpc_url = "http://localhost:8899"
 
-client = AsyncClient("https://api.mainnet-beta.solana.com", commitment=Confirmed)
-provider = Client("https://api.mainnet-beta.solana.com")
-connection = provider
-program_id = Pubkey("58nEPFCuebJsxjcyg6p6q2fXNLY2ApMiSQ619wZHe88h")
-endpoint_id = Pubkey("76y77prsiCMvXMjuoZ5VRrhG5qYBrUMYTE5WgHqgjEn6")
-dvn_id = Pubkey("HtEYV4xB4wvsj5fgTkcfuChYpvGYzgzwvNhgDZQNh7wW")
-executor_id = Pubkey("6doghB248px58JSSwG4qejQ46kFMW4AMj7vzJnWZHNZn")
-price_fee_id = Pubkey("8ahPGPjEbpgGaZx2NV1iG5Shj7TDwvsjkEDcGWjt94TP")
-uln_id = Pubkey("7a4WjyR8VZ7yZz5XJAKm39BUGn5iT9CKcv2pmG9tdXVH")
-LAMPORTS_PER_SOL = 1000000000
+# Load JSON files
+with open(Path("./tests/user.json"), "r") as user_file:
+    user_json = json.load(user_file)
 
-user_json = load_keypair("../tests/user.json")
-other_json = load_keypair("../tests/other.json")
-admin_json = load_keypair("../tests/adminJson.json")
+with open(Path("./tests/other.json"), "r") as other_file:
+    other_json = json.load(other_file)
 
-user = Keypair.from_secret_key(bytes(user_json))
-other_user = Keypair.from_secret_key(bytes(other_json))
-admin = Keypair.from_secret_key(bytes(admin_json))
-receiver_pubkey = other_user.public_key
-arbitrum_eid = 40231
+with open(Path("./tests/adminJson.json"), "r") as admin_file:
+    admin_json = json.load(admin_file)
+
+# Create Keypair instances from secret keys
+user = Keypair.from_bytes(bytes(user_json))
+other_user = Keypair.from_bytes(bytes(other_json))
+admin = Keypair.from_bytes(bytes(admin_json))
+
+LAMPORTS_PER_SOL = 1_000_000_000
+
+def get_oapp_pda(authority):
+    (distributor, bump) = Pubkey.find_program_address(
+        [b"OApp", bytes(authority)],
+        endpoint_program_id,
+    )
+    return distributor
+
+def get_executor_pda():
+    (distributor, bump) = Pubkey.find_program_address(
+        [b"ExecutorConfig"],
+        executor_program_id,
+    )
+    return distributor
+
+def get_uln_pda():
+    (distributor, bump) = Pubkey.find_program_address(
+        [b"MessageLib"],
+        uln_program_id,
+    )
+    return distributor
+
+def get_send_config_pda():
+    (distributor, bump) = Pubkey.find_program_address(
+        [b"MessageLib"],
+        uln_program_id,
+    )
+    return distributor
+
+def get_tristero_oapp():
+    (distributor, bump) = Pubkey.find_program_address(
+        [b"TristeroOapp"],
+        tristero_program_id,
+    )
+    return distributor
+
+def get_tristero_oapp_bump():
+    (distributor, bump) = Pubkey.find_program_address(
+        [b"TristeroOapp"],
+        tristero_program_id,
+    )
+    return bump
+
+def get_message_lib_pda():
+    (distributor, bump) = Pubkey.find_program_address(
+        [b"MessageLib"],
+        endpoint_program_id,
+    )
+    return distributor
+
+def get_message_lib_info_pda(pubkey):
+    (distributor, bump) = Pubkey.find_program_address(
+        [b"MessageLib", bytes(pubkey)],
+        endpoint_program_id,
+    )
+    return distributor
+
+def get_oapp_registry_pda(pubkey):
+    (distributor, bump) = Pubkey.find_program_address(
+        [b"OApp", bytes(pubkey)],
+        endpoint_program_id,
+    )
+    return distributor
+
+def get_send_library_config_pda(pubkey, eid):
+    eid_bytes = struct.pack(">I", eid)
+    (distributor, bump) = Pubkey.find_program_address(
+        [b"SendLibraryConfig", bytes(pubkey), eid_bytes],
+        endpoint_program_id,
+    )
+    return distributor
+
+def get_receive_library_config_pda(pubkey, eid):
+    eid_bytes = struct.pack(">I", eid)
+    (distributor, bump) = Pubkey.find_program_address(
+        [b"ReceiveLibraryConfig", bytes(pubkey), eid_bytes],
+        endpoint_program_id,
+    )
+    return distributor
+
+def get_default_send_library_config(eid):
+    eid_bytes = struct.pack(">I", eid)
+    (distributor, bump) = Pubkey.find_program_address(
+        [b"SendLibraryConfig", eid_bytes],
+        endpoint_program_id,
+    )
+    return distributor
+
+def get_send_library_info_pda(send_library_config, default_send_library_config): #have to fix this part
+    eid_bytes = struct.pack(">I", eid)
+    (distributor, bump) = Pubkey.find_program_address(
+        [b"SendLibraryConfig", eid_bytes],
+        endpoint_program_id,
+    )
+    return distributor
+
+def get_endpoint_pda():
+    (distributor, bump) = Pubkey.find_program_address(
+        [b"Endpoint"],
+        endpoint_program_id,
+    )
+    return distributor
+
+def get_price_feed_pda():
+    (distributor, bump) = Pubkey.find_program_address(
+        [b"PriceFeed"],
+        price_fee_program_id,
+    )
+    return distributor
+
+def get_nonce_pda(sender_key, eid, receiver):
+    eid_bytes = struct.pack(">I", eid)
+    (distributor, bump) = Pubkey.find_program_address(
+        [b"Nonce", bytes(sender_key), eid_bytes, bytes(receiver)],
+        endpoint_program_id,
+    )
+    return distributor
+
+def get_pending_inbound_nonce_pda(sender_key, eid, receiver):
+    eid_bytes = struct.pack(">I", eid)
+    (distributor, bump) = Pubkey.find_program_address(
+        [b"PendingNonce", bytes(sender_key), eid_bytes, bytes(receiver)],
+        endpoint_program_id,
+    )
+    return distributor
+
+def get_admin_panel():
+    (distributor, bump) = Pubkey.find_program_address(
+        [b"admin_panel"],
+        tristero_program_id,
+    )
+    return distributor
+
+def get_staking_panel(mint):
+    (distributor, bump) = Pubkey.find_program_address(
+        [b"staking_account", bytes(mint)],
+        tristero_program_id,
+    )
+    return distributor
+
+def get_user_pda(authority):
+    (distributor, bump) = Pubkey.find_program_address(
+        [b"user", bytes(authority)],
+        tristero_program_id,
+    )
+    return distributor
+
+def get_trade_match_pda(authority, match_count):
+    match_count_bytes = struct.pack(">B", match_count)
+    (distributor, bump) = Pubkey.find_program_address(
+        [b"trade_match", bytes(authority), match_count_bytes],
+        tristero_program_id,
+    )
+    return distributor
+
+def get_payload_hash_pda(receiver, src_eid, sender, nonce):
+    src_eid_bytes = struct.pack(">I", src_eid)  # ">I" for big-endian, unsigned int (4 bytes)
+    nonce_bytes = struct.pack(">Q", nonce)
+    (distributor, bump) = Pubkey.find_program_address(
+        [b"PayloadHash", bytes(receiver), src_eid_bytes, bytes(nonce), nonce_bytes],
+        tristero_program_id,
+    )
+    return distributor
 
 async def main():
-    try:
-        
-        user_air_drop_tx = await connection.request_airdrop(user.public_key, 5 * LAMPORTS_PER_SOL)
-        await connection.confirm_transaction(user_air_drop_tx)
-        print("User Airdrop successful: ", user_air_drop_tx)
+    client = AsyncClient("http://127.0.0.1:8899")
+    
+    # Close the client connection
+    await client.close()
+    
+    # Read the generated IDL.
+    with Path("./target/idl/tristero.json").open() as f:
+        raw_idl = f.read()
+    idl = Idl.from_json(raw_idl)
+    # Address of the deployed program.
+    program_id = Pubkey.from_string("7rcYP7cn1KFSrPF6Py4FtaTBRy8fkkAkJpEnirvPdmu8")
+    
+    accounts = {
+        "admin_wallet": admin.pubkey(),
+        "admin_panel": get_admin_panel(),
+        "system_program": SYS_PROGRAM_ID
+    }
+    
+    params = {
+        "admin_wallet": admin.pubkey(),
+        "payment_wallet": admin.pubkey(),
+    }
+    
+    # Create an Anchor workspace
+    workspace = create_workspace()
+    
+    program = workspace["tristero"]
+    
+    
+    await program.rpc["admin_panel_create"](params, ctx=Context(accounts = accounts, signers = [admin]))
 
-        admin_air_drop_tx = await connection.request_airdrop(admin.publicKey, 5 * LAMPORTS_PER_SOL)
-        await connection.confirm_transaction(admin_air_drop_tx)
-        print("User Airdrop successful: ", admin_air_drop_tx)
-
-        print("balance(User): ", await connection.get_balance(user.public_key), "balance(Admin): ", await connection.getBalance(admin.publicKey))
-
-        print("Balance:", await connection.get_balance(user.public_key))
-        
-        print("------------------------Create admin panel------------------------")
-        
-
-        print("------------------------Register New Oapp(Sender)------------------------")
-        register_tristero_oapp_params = {"delegate": user.public_key}
-        tristero_oapp_pubkey = get_tristero_oapp()
-        endpoint_event_pda_deriver = EventPDADeriver(endpoint)
-        uld_event_pda_deriver = EventPDADeriver(send_library_program)
-
-        tx1 = Transaction()
-        tx1.add(register_tristero_oapp(register_tristero_oapp_params, user.public_key, tristero_oapp_pubkey, get_oapp_pda(tristero_oapp_pubkey), endpoint, endpoint_event_pda_deriver.event_authority()[0]))
-        await client.send_transaction(tx1, user)
-        print("tx1 complete")
-
-        print("-------------------Init Send Library-----------------------------")
-        init_send_library_instruction_accounts = {
-            "delegate": user.public_key,
-            "oapp_registry": get_oapp_registry_pda(tristero_oapp_pubkey),
-            "send_library_config": get_send_library_config_pda(tristero_oapp_pubkey, arbitrum_eid)
-        }
-        init_send_library_params = {
-            "params": {
-                "oapp": tristero_oapp_pubkey,
-                "sender": tristero_oapp_pubkey,
-                "eid": arbitrum_eid
-            }
-        }
-
-        send_library_instruction = create_init_send_library_instruction(init_send_library_instruction_accounts, init_send_library_params)
-        tx2 = Transaction().add(send_library_instruction)
-        await client.send_transaction(tx2, user)
-        print("tx2 complete")
-
-        print("----------------------------Init Receive Library-------------------------------")
-        init_receive_library_instruction_accounts = {
-            "delegate": user.public_key,
-            "oapp_registry": get_oapp_registry_pda(tristero_oapp_pubkey),
-            "receive_library_config": get_receive_library_config_pda(tristero_oapp_pubkey, arbitrum_eid)
-        }
-        init_receive_library_params = {
-            "params": {
-                "receiver": tristero_oapp_pubkey,
-                "eid": arbitrum_eid
-            }
-        }
-        receive_library_instruction = create_init_receive_library_instruction(init_receive_library_instruction_accounts, init_receive_library_params)
-        tx3 = Transaction().add(receive_library_instruction)
-        await client.send_transaction(tx3, user)
-        print("tx3 complete")
-
-        print("-------------------Init Nonce-----------------------------")
-        init_nonce_accounts = {
-            "delegate": user.public_key,
-            "oapp_registry": get_oapp_registry_pda(tristero_oapp_pubkey),
-            "nonce": get_nonce_pda(tristero_oapp_pubkey, arbitrum_eid, receiver_pubkey),
-            "pending_inbound_nonce": get_pending_inbound_nonce_pda(tristero_oapp_pubkey, arbitrum_eid, receiver_pubkey),
-            "system_program": SYS_PROGRAM_ID
-        }
-        init_nonce_params = {
-            "params": {
-                "local_oapp": tristero_oapp_pubkey,
-                "remote_eid": arbitrum_eid,
-                "remote_oapp": list(receiver_pubkey.to_bytes())
-            }
-        }
-        init_nonce_instruction = create_init_nonce_instruction(init_nonce_accounts, init_nonce_params)
-        tx4 = Transaction().add(init_nonce_instruction)
-        await client.send_transaction(tx4, user)
-        print("tx4 complete")
-
-        # Sending
-        print("Sending")
-        send_library_config = get_send_library_config_pda(tristero_oapp_pubkey, arbitrum_eid)
-        default_send_library_config = get_default_send_library_config(arbitrum_eid)
-        send_library_info = await get_send_library_info_pda(send_library_config, default_send_library_config)
-
-        uln_pda_deriver = UlnPDADeriver(send_library_program)
-        send_config = uln_pda_deriver.send_config(arbitrum_eid, tristero_oapp_pubkey)[0]
-        default_send_config = uln_pda_deriver.default_send_config(arbitrum_eid)[0]
-
-        treasury = user.public_key
-
-        send_instruction_accounts = {
-            "sender": tristero_oapp_pubkey,
-            "endpoint_program": endpoint,
-        }
-        send_instruction_remaining_accounts = [
-            {"pubkey": endpoint, "is_signer": False, "is_writable": True},
-            {"pubkey": tristero_oapp_pubkey, "is_signer": False, "is_writable": True},
-            {"pubkey": send_library_program, "is_signer": False, "is_writable": True},
-            {"pubkey": send_library_config, "is_signer": False, "is_writable": True},
-            {"pubkey": default_send_library_config, "is_signer": False, "is_writable": True},
-            {"pubkey": send_library_info, "is_signer": False, "is_writable": True},
-            {"pubkey": get_endpoint_pda(arbitrum_eid), "is_signer": False, "is_writable": True},
-            {"pubkey": get_nonce_pda(tristero_oapp_pubkey, arbitrum_eid, receiver_pubkey), "is_signer": False, "is_writable": True},
-            {"pubkey": endpoint_event_pda_deriver.event_authority()[0], "is_signer": False, "is_writable": True},
-            {"pubkey": get_uln_pda(), "is_signer": False, "is_writable": True},
-            {"pubkey": send_config, "is_signer": False, "is_writable": True},
-            {"pubkey": default_send_config, "is_signer": False, "is_writable": True},
-            {"pubkey": user.public_key, "is_signer": False, "is_writable": True},
-            {"pubkey": SYS_PROGRAM_ID, "is_signer": False, "is_writable": True},
-            {"pubkey": uld_event_pda_deriver.event_authority()[0], "is_signer": False, "is_writable": True},
-            {"pubkey": executor_program_id, "is_signer": False, "is_writable": True},
-            {"pubkey": new ExecutorPDADeriver(executor_program_id).config()[0], "is_signer": False, "is_writable": True},
-            {"pubkey": price_fee_program_id, "is_signer": False, "is_writable": True},
-            {"pubkey": new PriceFeedPDADeriver(price_fee_program_id).price_feed()[0], "is_signer": False, "is_writable": True},
-            {"pubkey": dvn_program_id, "is_signer": False, "is_writable": True},
-            {"pubkey": new DVNDeriver(dvn_program_id).config()[0], "is_signer": False, "is_writable": True}
-        ]
-
-        send_params = {
-            "dst_eid": arbitrum_eid,
-            "receiver": list(receiver_pubkey.to_bytes()),
-            "message": b"Hello World",
-            "options": Options.new_options().add_executor_lz_receive_option(100, 0).to_bytes(),
-            "native_fee": 3 * LAMPORTS_PER_SOL,
-            "lz_token_fee": 0
-        }
-
-        tx5 = Transaction()
-        tx5.add(ComputeBudgetProgram.set_compute_unit_limit(90000000))
-        tristero_send_instruction = await create_tristero_send_instruction(send_params, send_instruction_accounts, send_instruction_remaining_accounts)
-        tx5.add(tristero_send_instruction)
-        await client.send_transaction(tx5, user)
-        print("tx5 complete")
-
-    except Exception as e:
-        print(f"Error: {e}")
-
-if __name__ == "__main__":
-    import asyncio
-    asyncio.run(main())
+asyncio.run(main())
