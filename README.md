@@ -1,8 +1,8 @@
 ## Prerequisites
 
 - [rust](https://www.rust-lang.org/tools/install) (nightly)
-- [solana](https://docs.solana.com/cli/install-solana-cli-tools) (v1.14.17)
-- [anchor](https://book.anchor-lang.com/getting_started/installation.html) (v0.27.0)
+- [solana](https://docs.solana.com/cli/install-solana-cli-tools) (v1.17.31)
+- [anchor](https://book.anchor-lang.com/getting_started/installation.html) (v0.29.0)
 - [jq](https://stedolan.github.io/jq/download/)
 
 ## Install
@@ -39,8 +39,6 @@ anchor test --skip-build
 
 ## deploy
 
-The public keypair(solana/keypair) files are backed up from the target/deploy folder, which is used to deploy the program on the Solana network.
-
 ```shell
-solana program deploy --program-id ./keypair/xxx.json ./target/deploy/xxx.so
+anchor deploy -p tristero
 ```

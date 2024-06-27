@@ -40,6 +40,8 @@ other_user = Keypair.from_bytes(bytes(other_json))
 admin = Keypair.from_bytes(bytes(admin_json))
 
 LAMPORTS_PER_SOL = 1_000_000_000
+ARBITRUM_EID = 40231
+RECEIVER_PUBKEY = bytes([1] * 32)
 
 def get_oapp_pda(authority):
     (distributor, bump) = Pubkey.find_program_address(
@@ -216,24 +218,84 @@ async def main():
     idl = Idl.from_json(raw_idl)
     # Address of the deployed program.
     program_id = Pubkey.from_string("7rcYP7cn1KFSrPF6Py4FtaTBRy8fkkAkJpEnirvPdmu8")
+    # Create an Anchor workspace
+    workspace = create_workspace()
+    program = workspace["tristero"]
+    endpoint_program = workspace["endpoint"]
     
     accounts = {
         "admin_wallet": admin.pubkey(),
         "admin_panel": get_admin_panel(),
         "system_program": SYS_PROGRAM_ID
     }
-    
     params = {
         "admin_wallet": admin.pubkey(),
         "payment_wallet": admin.pubkey(),
     }
+    admin_panel_update_tx = await program.rpc["admin_panel_update"](params, ctx=Context(accounts = accounts, signers = [admin]))
+    print("admin_panel_update_tx ", admin_panel_update_tx)
     
-    # Create an Anchor workspace
-    workspace = create_workspace()
+    # create_user_params = {}
+    # create_user_accounts = {
+    #     "authority": user.pubkey(),
+    #     "user": get_user_pda(user.pubkey()),
+    #     "system_program": SYS_PROGRAM_ID
+    # }
+    # create_user_account_tx = await program.rpc["create_user"](ctx = Context(accounts = create_user_accounts, signers=[user]))
+    # print("create_user_tx: ", create_user_account_tx)
     
-    program = workspace["tristero"]
+    register_tristero_oapp_params = {
+        "delegate": user.pubkey()
+    }
+    tristero_oapp_pubkey = get_tristero_oapp()
+    register_tristero_oapp_accounts = {
+        "payer": user.pubkey(),
+        "oapp": tristero_oapp_pubkey,
+        "oapp_registry": get_oapp_pda(tristero_oapp_pubkey),
+        "endpoint_program": endpoint_program_id,
+        "system_program": SYS_PROGRAM_ID,
+        "event_authority": endpoint_program_id
+    }
+    register_tristero_oapp_tx = await program.rpc["register_tristero_oapp"](register_tristero_oapp_params, ctx = Context(accounts = register_tristero_oapp_accounts, signers = [user]))
+    print("register_tristero_oapp_tx: ", register_tristero_oapp_tx)
     
+    init_send_library_accounts = {
+        "delegate": user.pubkey(),
+        "oapp_registry": get_oapp_registry_pda(tristero_oapp_pubkey),
+        "send_library_config": get_send_library_config_pda(tristero_oapp_pubkey, ARBITRUM_EID)
+    }
+    init_send_library_params = {
+        "oapp": tristero_oapp_pubkey,
+        "sender": tristero_oapp_pubkey,
+        "eid": ARBITRUM_EID
+    }
+    send_library_tx = await endpoint_program.rpc["init_send_library"](init_send_library_params, ctx = Context(accounts = init_send_library_accounts, signers = [user]))
+    print("send_library_tx: ", send_library_tx)
     
-    await program.rpc["admin_panel_create"](params, ctx=Context(accounts = accounts, signers = [admin]))
+    init_receive_library_accounts = {
+        "delegate": user.pubkey(),
+        "oapp_registry": get_oapp_registry_pda(tristero_oapp_pubkey),
+        "receive_library_config": get_receive_library_config_pda(tristero_oapp_pubkey, ARBITRUM_EID)
+    }
+    init_receive_library_params = {
+        "receiver": tristero_oapp_pubkey,
+        "eid": ARBITRUM_EID
+    }
+    receive_library_tx = await endpoint_program.rpc["init_receive_library"](init_receive_library_params, ctx = Context(accounts = init_receive_library_accounts, signers = [user]))
+    print("receive_library_tx: ", receive_library_tx)
+    
+    init_nonce_accounts = {
+        "delegate": user.pubkey(),
+        "oapp_registry": get_oapp_registry_pda(tristero_oapp_pubkey),
+        "nonce": get_nonce_pda(tristero_oapp_pubkey, ARBITRUM_EID, RECEIVER_PUBKEY)
+    }
+    init_nonce_params = {
+        "local_oapp": tristero_oapp_pubkey,
+        "remote_eid": ARBITRUM_EID,
+        "remote_oapp": list(RECEIVER_PUBKEY)
+    }
+    init_nonce_tx = await endpoint_program.rpc["init_nonce"](init_nonce_params, ctx = Context(accounts = init_nonce_accounts, signers = [user]))
+    print("init_nonce_tx: ", init_nonce_tx)
+    
 
 asyncio.run(main())

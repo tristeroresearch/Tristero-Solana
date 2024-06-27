@@ -69,36 +69,36 @@ describe("# test scenario - tristero ", () => {
 
             console.log("------------------------Create admin panel------------------------");
 
-            const adminPanelCreateTx = await program.methods.adminPanelCreate({ adminWallet: admin.publicKey, paymentWallet: admin.publicKey })
-                .accounts({
-                    adminWallet: admin.publicKey,
-                    adminPanel: getAdminPanel(),
-                })
-                .signers([admin])
-                .rpc();
-            console.log("adminPanelCreateTx = ", adminPanelCreateTx)
+            // const adminPanelCreateTx = await program.methods.adminPanelCreate({ adminWallet: admin.publicKey, paymentWallet: admin.publicKey })
+            //     .accounts({
+            //         adminWallet: admin.publicKey,
+            //         adminPanel: getAdminPanel(),
+            //     })
+            //     .signers([admin])
+            //     .rpc();
+            // console.log("adminPanelCreateTx = ", adminPanelCreateTx)
 
             console.log("------------------------Update admin panel------------------------");
 
-            const adminPanelUpdateTx = await program.methods.adminPanelUpdate({ adminWallet: admin.publicKey, paymentWallet: admin.publicKey })
-                .accounts({
-                    adminWallet: admin.publicKey,
-                    adminPanel: getAdminPanel(),
-                })
-                .signers([admin])
-                .rpc();
-            console.log("adminPanelUpdateTx = ", adminPanelUpdateTx)
+            // const adminPanelUpdateTx = await program.methods.adminPanelUpdate({ adminWallet: admin.publicKey, paymentWallet: admin.publicKey })
+            //     .accounts({
+            //         adminWallet: admin.publicKey,
+            //         adminPanel: getAdminPanel(),
+            //     })
+            //     .signers([admin])
+            //     .rpc();
+            // console.log("adminPanelUpdateTx = ", adminPanelUpdateTx)
 
             console.log("------------------------Create User------------------------");
 
-            const createUserTx = await program.methods.createUser()
-                .accounts({
-                    authority: user.publicKey,
-                    user: getUserPDA(user.publicKey),
-                })
-                .signers([user])
-                .rpc();
-            console.log("createUserTx = ", createUserTx)
+            // const createUserTx = await program.methods.createUser()
+            //     .accounts({
+            //         authority: user.publicKey,
+            //         user: getUserPDA(user.publicKey),
+            //     })
+            //     .signers([user])
+            //     .rpc();
+            // console.log("createUserTx = ", createUserTx)
 
 
             // console.log("-------------------------Airdrop for tristero oapp-------------------------------------")
@@ -123,17 +123,17 @@ describe("# test scenario - tristero ", () => {
                 eventAuthority: endpointEventPdaDeriver.eventAuthority()[0],
             }))
 
-            const tx1 = await program.methods.registerTristeroOapp(registerTristeroOAppParams)
-                .accounts({
-                    payer: user.publicKey,
-                    oapp: tristeroOappPubkey,
-                    oappRegistry: getOappPDA(tristeroOappPubkey),
-                    endpointProgram: endpoint,
-                    // systemProgram: SystemProgram.programId,
-                    eventAuthority: endpointEventPdaDeriver.eventAuthority()[0],
-                })
-                .signers([user])
-                .rpc();
+            // const tx1 = await program.methods.registerTristeroOapp(registerTristeroOAppParams)
+            //     .accounts({
+            //         payer: user.publicKey,
+            //         oapp: tristeroOappPubkey,
+            //         oappRegistry: getOappPDA(tristeroOappPubkey),
+            //         endpointProgram: endpoint,
+            //         // systemProgram: SystemProgram.programId,
+            //         eventAuthority: endpointEventPdaDeriver.eventAuthority()[0],
+            //     })
+            //     .signers([user])
+            //     .rpc();
 
             // console.log("tx1 = " + tx1);
 
