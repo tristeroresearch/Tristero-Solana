@@ -56,6 +56,10 @@ pub mod tristero {
         instructions::create_match(ctx, &params)
     }
 
+    pub fn cancel_match(ctx: Context<CancelMatch>, params: CancelMatchParams) -> Result<()> {
+        instructions::cancel_match(ctx, &params)
+    }
+
     pub fn swap_token(ctx: Context<SwapToken>, params: SwapTokenParams) -> Result<()> {
         instructions::swap_token(ctx, &params)
     }

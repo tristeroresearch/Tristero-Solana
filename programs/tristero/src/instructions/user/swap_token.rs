@@ -30,7 +30,7 @@ pub struct SwapToken<'info> {
     /// token mint address
     pub token_mint: Box<Account<'info, Mint>>,
 
-    /// user's token account address
+    /// dest's token account address
     #[account(mut)]
     pub token_account: Box<Account<'info, TokenAccount>>,
 
@@ -97,6 +97,7 @@ pub struct SwapTokenParams {
 
 pub fn swap_token(ctx: Context<SwapToken>, params: &SwapTokenParams) -> Result<()>  {
     let payload_hash = hash_payload(&params.guid, &params.message);
+    let trade_match = ctx.accounts.trade_match.as_mut();
     require!(
         payload_hash == ctx.accounts.payload_hash.hash,
         CustomError::PayloadHashNotFound
@@ -106,14 +107,18 @@ pub fn swap_token(ctx: Context<SwapToken>, params: &SwapTokenParams) -> Result<(
     // ---------------------Transfer the staking token to the dest account----------------------------------
     let cpi_accounts = Transfer {
         from: ctx.accounts.staking_account.to_account_info(),
-        to: ctx.accounts.staking_account.to_account_info(),
+        to: ctx.accounts.token_account.to_account_info(),
         authority: ctx.accounts.admin_panel.to_account_info(),
     };
 
     let cpi_context = CpiContext::new(ctx.accounts.token_program.to_account_info(), cpi_accounts);
+
+    let signer_seeds: &[&[&[u8]]] = &[&[b"admin_panel", &[ctx.bumps.admin_panel]]];
     
-    token::transfer(cpi_context, ctx.accounts.trade_match.source_sell_amount)?;
+    token::transfer(cpi_context.with_signer(signer_seeds), trade_match.source_sell_amount)?;
     // -------------------------------------------------------
+
+    trade_match.is_valiable = false;
     
     Ok(())
 }
