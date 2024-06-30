@@ -82,7 +82,7 @@ pub struct CreateMatch<'info> {
 #[derive(AnchorSerialize, AnchorDeserialize, Clone)]
 pub struct CreateMatchParams {
     pub source_sell_amount: u64,
-    pub dest_token_mint: Pubkey,
+    pub dest_token_mint: [u8; 20],
     pub dest_buy_amount: u64,
     pub eid: u32,
     pub tristero_oapp_bump: u8, 
@@ -114,16 +114,22 @@ pub fn create_match(ctx: Context<CreateMatch>, params: &CreateMatchParams) -> Re
     let signer_seeds: &[&[&[u8]]] = &[&[b"TristeroOapp", &[params.tristero_oapp_bump]]];
 
     let receive_options= [0u8, 3u8, 1u8, 0u8, 17u8, 1u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 100u8]; // For lzReceiveOption
-    let receiver:[u8; 32] = [1u8; 32]; //have to change. This should be receiver
+    let receiver:[u8; 32] = [1u8; 32]; // have to change. This should be receiver
+    let guarantor:[u8; 20] = [1u8; 20]; // have to change. This should be guarantor wallet address in arbitrum
+    let guarantor_fee = 10u32; // have to be guarantor fee with percent. 
 
     //message: to send to arbitrum
     let mut message_to_send = Vec::<u8>::new();
+    
+
     message_to_send.push(0u8); // 0 means create, 1 means cancel, 2 means update
     trade_match.trade_match_id.to_be_bytes().map(|value| message_to_send.push(value));
     trade_match.source_token_mint.to_bytes().map(|value| message_to_send.push(value));
     trade_match.source_sell_amount.to_be_bytes().map(|value| message_to_send.push(value));
-    trade_match.dest_token_mint.to_bytes().map(|value| message_to_send.push(value));
+    trade_match.dest_token_mint.map(|value| message_to_send.push(value));
     trade_match.dest_buy_amount.to_be_bytes().map(|value| message_to_send.push(value));
+    guarantor.map(|value: u8| message_to_send.push(value));
+    guarantor_fee.to_be_bytes().map(|value: u8| message_to_send.push(value));
     params.source_token_address_in_arbitrum_chain.map(|value| message_to_send.push(value));
 
     let cpi_params = SendParams {

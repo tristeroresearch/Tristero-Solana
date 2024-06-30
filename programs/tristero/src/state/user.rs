@@ -5,7 +5,7 @@ use anchor_lang::prelude::*;
 pub struct User {
     pub authority: Pubkey,
     pub user_bump: u8,
-    pub match_count: u8,
+    pub match_count: u64,
 }
 
 impl anchor_lang::Id for User {
