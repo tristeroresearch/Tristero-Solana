@@ -78,7 +78,7 @@ pub struct CancelMatch<'info> {
 
 #[derive(AnchorSerialize, AnchorDeserialize, Clone)]
 pub struct CancelMatchParams {
-    pub match_id: u8,
+    pub match_id: u32,
     pub tristero_oapp_bump: u8, 
 }
 

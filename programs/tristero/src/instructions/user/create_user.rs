@@ -34,7 +34,7 @@ pub fn create_user(ctx: Context<CreateUser>) -> Result<()> {
     let user = ctx.accounts.user.as_mut();
     user.authority = ctx.accounts.authority.key();
     user.user_bump = ctx.bumps.user;
-    user.match_count = 0u64;
+    user.match_count = 0u32;
 
     Ok(())
 }

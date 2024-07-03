@@ -56,7 +56,7 @@ pub struct CreateMatch<'info> {
     #[account(
         mut,
         seeds = [b"user", authority.key().as_ref()],
-        bump,
+        bump = user.user_bump,
         constraint = token_account.owner == authority.key() @ CustomError::InvalidTokenOwner,
         constraint = token_account.mint == token_mint.key() @ CustomError::InvalidTokenMintAddress,
         constraint = token_account.amount > params.source_sell_amount @ CustomError::InvalidTokenAmount,
@@ -86,7 +86,7 @@ pub struct CreateMatchParams {
     pub dest_buy_amount: u64,
     pub eid: u32,
     pub tristero_oapp_bump: u8, 
-    pub source_token_address_in_arbitrum_chain:[u8; 40]
+    pub source_token_address_in_arbitrum_chain:[u8; 20]
 }
 
 pub fn create_match(ctx: Context<CreateMatch>, params: &CreateMatchParams) -> Result<()>  {
@@ -113,24 +113,43 @@ pub fn create_match(ctx: Context<CreateMatch>, params: &CreateMatchParams) -> Re
 
     let signer_seeds: &[&[&[u8]]] = &[&[b"TristeroOapp", &[params.tristero_oapp_bump]]];
 
-    let receive_options= [0u8, 3u8, 1u8, 0u8, 17u8, 1u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 100u8]; // For lzReceiveOption
-    let receiver:[u8; 32] = [1u8; 32]; // have to change. This should be receiver
-    let guarantor:[u8; 20] = [1u8; 20]; // have to change. This should be guarantor wallet address in arbitrum
-    let guarantor_fee = 10u32; // have to be guarantor fee with percent. 
+    let receive_options= [0, 3, 1, 0, 17, 1,   0,
+            0, 0, 0, 0,  0, 0,   0,
+            0, 0, 0, 0,  0, 7, 161,
+            32]; // For lzReceiveOption
+    //let receiver:[u8; 32] = [1u8; 32]; // have to change. This should be receiver
+    // let receiver:[u8; 32] = [
+    //     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+    //     21, 159, 172, 75, 179, 64, 128, 61, 
+    //     41, 24, 136, 120, 112, 163, 222, 202, 
+    //     139, 120, 199, 116
+    //   ];
+    let receiver:[u8; 32] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 178, 9, 14, 222, 128, 3, 178, 164, 104, 120, 62, 73, 200, 137, 50, 113, 191, 173, 240, 68];
+
+    let sol_eid: u32 = 30168u32;
 
     //message: to send to arbitrum
     let mut message_to_send = Vec::<u8>::new();
     
-
-    message_to_send.push(0u8); // 0 means create, 1 means cancel, 2 means update
-    trade_match.trade_match_id.to_be_bytes().map(|value| message_to_send.push(value));
-    trade_match.source_token_mint.to_bytes().map(|value| message_to_send.push(value));
-    trade_match.source_sell_amount.to_be_bytes().map(|value| message_to_send.push(value));
-    trade_match.dest_token_mint.map(|value| message_to_send.push(value));
-    trade_match.dest_buy_amount.to_be_bytes().map(|value| message_to_send.push(value));
-    guarantor.map(|value: u8| message_to_send.push(value));
-    guarantor_fee.to_be_bytes().map(|value: u8| message_to_send.push(value));
-    params.source_token_address_in_arbitrum_chain.map(|value| message_to_send.push(value));
+    for _ in 0..20 { // Here is for sender
+        message_to_send.push(0u8);
+    }
+    sol_eid.to_be_bytes().map(|value: u8| message_to_send.push(value)); // Here is for srcLzc
+    trade_match.source_token_mint.to_bytes().map(|value| message_to_send.push(value)); // srcToken
+    trade_match.dest_token_mint.map(|value| message_to_send.push(value)); // dstToken
+    trade_match.trade_match_id.to_be_bytes().map(|value| message_to_send.push(value)); // srcIndex
+    for _ in 0..4 {
+        message_to_send.push(0u8); // dstIndex
+    }
+    params.source_token_address_in_arbitrum_chain.map(|value| message_to_send.push(value)); // dstIndex
+    for _ in 0..24 {
+        message_to_send.push(0u8); 
+    }
+    trade_match.source_sell_amount.to_be_bytes().map(|value| message_to_send.push(value)); // minAmount
+    for _ in 0..31 {
+        message_to_send.push(0u8);
+    }
+    message_to_send.push(0u8);
 
     let cpi_params = SendParams {
         dst_eid: params.eid,
@@ -141,6 +160,7 @@ pub fn create_match(ctx: Context<CreateMatch>, params: &CreateMatchParams) -> Re
         lz_token_fee: 0,
     };
     
+    msg!("Here is for send message through oapp");
     endpoint::cpi::send(cpi_ctx.with_signer(signer_seeds), cpi_params)?;
 
     // ---------------------Transfer the source token to the staking account----------------------------------
@@ -152,9 +172,11 @@ pub fn create_match(ctx: Context<CreateMatch>, params: &CreateMatchParams) -> Re
 
     let cpi_context = CpiContext::new(ctx.accounts.token_program.to_account_info(), cpi_accounts);
 
-    let signer_seeds: &[&[&[u8]]] = &[&[b"user", &[ctx.bumps.user]]];
+    let signer_seeds: &[&[&[u8]]] = &[&[b"user", &[user.user_bump]]];
     
-    token::transfer(cpi_context.with_signer(signer_seeds), params.source_sell_amount)?;
+    msg!("Here is for transfer token");
+    //token::transfer(cpi_context.with_signer(signer_seeds), params.source_sell_amount)?;
+    token::transfer(cpi_context, params.source_sell_amount)?;
 
     Ok(())
 }

@@ -415,7 +415,12 @@
           },
           {
             "name": "destTokenMint",
-            "type": "publicKey"
+            "type": {
+              "array": [
+                "u8",
+                20
+              ]
+            }
           },
           {
             "name": "sourceSellAmount",
@@ -439,7 +444,7 @@
           },
           {
             "name": "tradeMatchId",
-            "type": "u8"
+            "type": "u32"
           },
           {
             "name": "isValiable",
@@ -463,7 +468,7 @@
           },
           {
             "name": "matchCount",
-            "type": "u8"
+            "type": "u32"
           }
         ]
       }
@@ -558,7 +563,7 @@
         "fields": [
           {
             "name": "matchId",
-            "type": "u8"
+            "type": "u32"
           },
           {
             "name": "tristeroOappBump",
@@ -578,7 +583,12 @@
           },
           {
             "name": "destTokenMint",
-            "type": "publicKey"
+            "type": {
+              "array": [
+                "u8",
+                20
+              ]
+            }
           },
           {
             "name": "destBuyAmount",
@@ -597,7 +607,7 @@
             "type": {
               "array": [
                 "u8",
-                40
+                20
               ]
             }
           }
@@ -785,6 +795,6 @@
     }
   ],
   "metadata": {
-    "address": "7rcYP7cn1KFSrPF6Py4FtaTBRy8fkkAkJpEnirvPdmu8"
+    "address": "FnYMMLyzBjpD6RBZxgvK7PTyxAEdsXUJDFa4uofA4mBV"
   }
 }

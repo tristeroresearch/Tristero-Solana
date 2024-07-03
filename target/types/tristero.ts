@@ -415,7 +415,12 @@ export type Tristero = {
           },
           {
             "name": "destTokenMint",
-            "type": "publicKey"
+            "type": {
+              "array": [
+                "u8",
+                20
+              ]
+            }
           },
           {
             "name": "sourceSellAmount",
@@ -439,7 +444,7 @@ export type Tristero = {
           },
           {
             "name": "tradeMatchId",
-            "type": "u8"
+            "type": "u32"
           },
           {
             "name": "isValiable",
@@ -463,7 +468,7 @@ export type Tristero = {
           },
           {
             "name": "matchCount",
-            "type": "u8"
+            "type": "u32"
           }
         ]
       }
@@ -558,7 +563,7 @@ export type Tristero = {
         "fields": [
           {
             "name": "matchId",
-            "type": "u8"
+            "type": "u32"
           },
           {
             "name": "tristeroOappBump",
@@ -578,7 +583,12 @@ export type Tristero = {
           },
           {
             "name": "destTokenMint",
-            "type": "publicKey"
+            "type": {
+              "array": [
+                "u8",
+                20
+              ]
+            }
           },
           {
             "name": "destBuyAmount",
@@ -597,7 +607,7 @@ export type Tristero = {
             "type": {
               "array": [
                 "u8",
-                40
+                20
               ]
             }
           }
@@ -1203,7 +1213,12 @@ export const IDL: Tristero = {
           },
           {
             "name": "destTokenMint",
-            "type": "publicKey"
+            "type": {
+              "array": [
+                "u8",
+                20
+              ]
+            }
           },
           {
             "name": "sourceSellAmount",
@@ -1227,7 +1242,7 @@ export const IDL: Tristero = {
           },
           {
             "name": "tradeMatchId",
-            "type": "u8"
+            "type": "u32"
           },
           {
             "name": "isValiable",
@@ -1251,7 +1266,7 @@ export const IDL: Tristero = {
           },
           {
             "name": "matchCount",
-            "type": "u8"
+            "type": "u32"
           }
         ]
       }
@@ -1346,7 +1361,7 @@ export const IDL: Tristero = {
         "fields": [
           {
             "name": "matchId",
-            "type": "u8"
+            "type": "u32"
           },
           {
             "name": "tristeroOappBump",
@@ -1366,7 +1381,12 @@ export const IDL: Tristero = {
           },
           {
             "name": "destTokenMint",
-            "type": "publicKey"
+            "type": {
+              "array": [
+                "u8",
+                20
+              ]
+            }
           },
           {
             "name": "destBuyAmount",
@@ -1385,7 +1405,7 @@ export const IDL: Tristero = {
             "type": {
               "array": [
                 "u8",
-                40
+                20
               ]
             }
           }
