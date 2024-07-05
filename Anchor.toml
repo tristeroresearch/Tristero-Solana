@@ -15,15 +15,17 @@ executor = "6doghB248px58JSSwG4qejQ46kFMW4AMj7vzJnWZHNZn"
 worker_interface = "2iENutMTfTfxdFEjEQSbFCBstZqakXFZQCLZLLk4Ti58"
 messagelib_interface = "J8tfaWEsewRGacgvAeQsXLTRTuUQz5FGyUuqDW2TpiTJ"
 pricefeed = "8ahPGPjEbpgGaZx2NV1iG5Shj7TDwvsjkEDcGWjt94TP"
-simple_messagelib = "6GsmxMTHAAiFKfemuM4zBjumTjNSX5CAiw4xSSXM2Toy"
+simple_messagelib = "EDuNZnJUZDskRPWjLqCaEL7EKvPHaYu5jJyjrycbVgvm"
 uln = "7a4WjyR8VZ7yZz5XJAKm39BUGn5iT9CKcv2pmG9tdXVH"
 oft = "HRPXLCqspQocTjfcX4rvAPaY9q6Gwb1rrD3xXWrfJWdW"
 
 [programs.testnet]
 tristero = "FnYMMLyzBjpD6RBZxgvK7PTyxAEdsXUJDFa4uofA4mBV"
+simple_messagelib = "EDuNZnJUZDskRPWjLqCaEL7EKvPHaYu5jJyjrycbVgvm"
 
 [programs.mainnet]
 tristero = "FnYMMLyzBjpD6RBZxgvK7PTyxAEdsXUJDFa4uofA4mBV"
+simple_messagelib = "EDuNZnJUZDskRPWjLqCaEL7EKvPHaYu5jJyjrycbVgvm"
 
 [[test.genesis]]
 address = "76y77prsiCMvXMjuoZ5VRrhG5qYBrUMYTE5WgHqgjEn6"
@@ -91,6 +93,7 @@ wallet = "~/.config/solana/id.json"
 
 [scripts]
 test = "yarn run ts-mocha -b -p ./tsconfig.json -t 10000000 tests/**/*.ts"
+#test = "python3 test-python/test.py"
 
 [test]
 startup_wait = 40000

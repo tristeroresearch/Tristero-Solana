@@ -1,17 +1,17 @@
 import * as anchor from "@coral-xyz/anchor";
 import { BN, Program } from "@coral-xyz/anchor";
-import { getExecutorProgramId, ExecutorPDADeriver, getBlockedMessageLibProgramId, OAPP_SEED, getProgramKeypair, oappIDPDA, OftPDADeriver, OftTools, OPTIONS_SEED, SEND_LIBRARY_CONFIG_SEED, NONCE_SEED, ENDPOINT_SEED, EndpointProgram, MESSAGE_LIB_SEED, SupportedPrograms, getEndpointProgramId, EventPDADeriver, BaseOApp, getSimpleMessageLibProgramId, RECEIVE_LIBRARY_CONFIG_SEED, PENDING_NONCE_SEED, UlnProgram, getULNProgramId, UlnPDADeriver, getDVNProgramId, ULN_SEED, SEND_CONFIG_SEED, ULN_CONFIG_SEED, getPricefeedProgramId, PriceFeedPDADeriver, PRICE_FEED_SEED, EXECUTOR_CONFIG_SEED, DVNDeriver, PAYLOAD_HASH_SEED } from "@layerzerolabs/lz-solana-sdk-v2";
+import { getExecutorProgramId, ExecutorPDADeriver, getBlockedMessageLibProgramId, OAPP_SEED, getProgramKeypair, oappIDPDA, OftPDADeriver, OftTools, OPTIONS_SEED, SEND_LIBRARY_CONFIG_SEED, NONCE_SEED, ENDPOINT_SEED, EndpointProgram, MESSAGE_LIB_SEED, SupportedPrograms, getEndpointProgramId, EventPDADeriver, BaseOApp, getSimpleMessageLibProgramId, RECEIVE_LIBRARY_CONFIG_SEED, PENDING_NONCE_SEED, UlnProgram, getULNProgramId, UlnPDADeriver, getDVNProgramId, ULN_SEED, SEND_CONFIG_SEED, ULN_CONFIG_SEED, getPricefeedProgramId, PriceFeedPDADeriver, PRICE_FEED_SEED, EXECUTOR_CONFIG_SEED, DVNDeriver, PAYLOAD_HASH_SEED, messageLibs, SimpleMessageLibProgram } from "@layerzerolabs/lz-solana-sdk-v2";
 import { Options } from "@layerzerolabs/lz-v2-utilities";
 import { ChainKey, EndpointVersion, networkToEndpointId } from '@layerzerolabs/lz-definitions';
 
 import { PublicKey, SystemProgram, Keypair, LAMPORTS_PER_SOL, sendAndConfirmTransaction, Transaction, ComputeBudgetProgram } from "@solana/web3.js"
 import { TOKEN_PROGRAM_ID, createMint, getOrCreateAssociatedTokenAccount, mintTo } from '@solana/spl-token'
 import { Tristero } from "../target/types/tristero";
-// import { Endpoint } from '../target/types/endpoint';
+import { SimpleMessagelib } from "../target/types/simple_messagelib";
+import { Endpoint } from '../target/types/endpoint';
 import fs from 'fs';
 import { describe } from "node:test";
 import { bs58 } from "@coral-xyz/anchor/dist/cjs/utils/bytes";
-import { Endpoint } from "../target/types/endpoint";
 import { userInfo } from "os";
 
 import userJson from "./user.json"
@@ -26,9 +26,12 @@ anchor.setProvider(anchor.AnchorProvider.env());
 
 // const program = anchor.workspace.Tristero as Program<Tristero>;
 const program = anchor.workspace.Tristero as Program<Tristero>;
-const endpointProgram = anchor.workspace.Endpoint as Program<Endpoint>;
+const simpleMessageLibProgram = anchor.workspace.SimpleMessagelib as Program<SimpleMessagelib>
+// const endpointProgram = anchor.workspace.Endpoint as Program<Endpoint>
+
 const endpoint = getEndpointProgramId('solana-mainnet');
 // const uln = getULNProgramId('solana-sandbox-local');
+
 const sendLibraryProgram = new PublicKey("7a4WjyR8VZ7yZz5XJAKm39BUGn5iT9CKcv2pmG9tdXVH")
 const executorProgramId = getExecutorProgramId("solana-mainnet")
 const priceFeeProgramId = getPricefeedProgramId("solana-mainnet")
@@ -45,7 +48,7 @@ const user = anchor.web3.Keypair.fromSecretKey(Uint8Array.from(userJson))
 const otherUser = anchor.web3.Keypair.fromSecretKey(Uint8Array.from(otherJson))
 const admin = anchor.web3.Keypair.fromSecretKey(Uint8Array.from(adminJson))
 const receiverPubKey = Buffer.alloc(32, 0);
-const paddedBuffer = Buffer.from('b2090EDE8003b2A468783E49c8893271bFaDF044', 'hex') // have to change to arbitrum side
+const paddedBuffer = Buffer.from('20edA7B413e525CCff9ffBa610f5C4b8e189eB53', 'hex') // have to change to arbitrum side
 paddedBuffer.copy(receiverPubKey, 12);
 console.log("receiverPubKey => ", receiverPubKey)
 const arbitrumEID = 40231; // Here is for Arbitrum Sepolia Testnet
@@ -112,7 +115,7 @@ describe("# test scenario - tristero ", () => {
             const endpointEventPdaDeriver = new EventPDADeriver(endpoint)
             const uldEventPdaDeriver = new EventPDADeriver(sendLibraryProgram)
 
-            console.log("------------------------Register New Oapp(Sender)------------------------");
+            console.log("------------------------Register New Oapp------------------------");
 
             // console.log("user.publickey ===> ", user.publicKey.toString())
 
@@ -129,7 +132,7 @@ describe("# test scenario - tristero ", () => {
             //     eventAuthority: endpointEventPdaDeriver.eventAuthority()[0],
             // }))
 
-            // const tx1 = await program.methods.registerTristeroOapp(registerTristeroOAppParams)
+            // const txRegisterOapp = await program.methods.registerTristeroOapp(registerTristeroOAppParams)
             //     .accounts({
             //         payer: user.publicKey,
             //         oapp: tristeroOappPubkey,
@@ -141,7 +144,7 @@ describe("# test scenario - tristero ", () => {
             //     .signers([user])
             //     .rpc();
 
-            // console.log("tx1 = " + tx1);
+            // console.log("txRegisterOapp = " + txRegisterOapp);
 
             console.log("------------------------------------------------------")
 
@@ -167,8 +170,8 @@ describe("# test scenario - tristero ", () => {
             //     console.log("InitSendLibrary well done")
             //     console.log("sendLibraryInstruction = " + sendLibraryInstruction)
             //     const transaction = new Transaction().add(sendLibraryInstruction);
-            //     const tx3 = await sendAndConfirmTransaction(connection, transaction, [user])
-            //     console.log("tx3 = ", tx3)
+            //     const txInitSendLibrary = await sendAndConfirmTransaction(connection, transaction, [user])
+            //     console.log("txInitSendLibrary = ", txInitSendLibrary)
             //     console.log("-------------------------------------------------------------------------------")
             // }
 
@@ -201,32 +204,89 @@ describe("# test scenario - tristero ", () => {
             // }
 
             console.log("-------------------Init Nonce-----------------------------")
-            {
-                const initNonceAccounts = {
-                    delegate: user.publicKey,
-                    oappRegistry: getOappRegistryPDA(tristeroOappPubkey),
-                    nonce: getNoncePDA(tristeroOappPubkey, arbitrumEID, receiverPubKey),
-                    pendingInboundNonce: getPendingInboundNoncePDA(tristeroOappPubkey, arbitrumEID, receiverPubKey),
-                    SystemProgram: SystemProgram.programId
-                }
+            // {
+            //     const initNonceAccounts = {
+            //         delegate: user.publicKey,
+            //         oappRegistry: getOappRegistryPDA(tristeroOappPubkey),
+            //         nonce: getNoncePDA(tristeroOappPubkey, arbitrumEID, receiverPubKey),
+            //         pendingInboundNonce: getPendingInboundNoncePDA(tristeroOappPubkey, arbitrumEID, receiverPubKey),
+            //         SystemProgram: SystemProgram.programId
+            //     }
 
-                const initNonceParams = {
-                    params: {
-                        localOapp: tristeroOappPubkey,
-                        remoteEid: arbitrumEID,
-                        remoteOapp: Array.from(receiverPubKey)
-                    }
-                }
+            //     const initNonceParams = {
+            //         params: {
+            //             localOapp: tristeroOappPubkey,
+            //             remoteEid: arbitrumEID,
+            //             remoteOapp: Array.from(receiverPubKey)
+            //         }
+            //     }
 
-                const initNonceInstruction = EndpointProgram.instructions.createInitNonceInstruction(initNonceAccounts, initNonceParams)
+            //     const initNonceInstruction = EndpointProgram.instructions.createInitNonceInstruction(initNonceAccounts, initNonceParams)
 
-                console.log("InitNonce well done")
-                console.log("initNonceInstruction = " + initNonceInstruction)
-                const _transaction = new Transaction().add(initNonceInstruction);
-                const _tx3 = await sendAndConfirmTransaction(connection, _transaction, [user])
-                console.log("_tx3 = ", _tx3)
-                console.log("-------------------------------------------------------------------------------")
-            }
+            //     console.log("InitNonce well done")
+            //     console.log("initNonceInstruction = " + initNonceInstruction)
+            //     const _transaction = new Transaction().add(initNonceInstruction);
+            //     const txInitNonce = await sendAndConfirmTransaction(connection, _transaction, [user])
+            //     console.log("txInitNonce = ", txInitNonce)
+            //     console.log("-------------------------------------------------------------------------------")
+            // }
+
+            const messageLib = getMessageLibPDA();
+            console.log("-------------------Init Message Lib-----------------------------")
+            // {
+            //     const initMessageLibAccounts = {
+            //         payer: user.publicKey,
+            //         messageLib: messageLib,
+            //         systemProgram: SystemProgram.programId
+            //     }
+                
+            //     const initMessageLibParams = {
+            //             eid: arbitrumEID,
+            //             endpoint: getEndpointPDA(arbitrumEID),
+            //             endpointProgram: EndpointProgram.PROGRAM_ID,
+            //             admin: user.publicKey,
+            //             fee: new BN(25000),
+            //             lzTokenFee: new BN(0)
+            //     }
+
+            //     console.log("simpleMessageLibProgramId: ", simpleMessageLibProgram.programId.toString())
+
+            //     const initMessagelibTx = await simpleMessageLibProgram.methods.initMessageLib(initMessageLibParams)
+            //                                                             .accounts(initMessageLibAccounts)
+            //                                                             .signers([user])
+            //                                                             .rpc();
+
+            //     console.log("initMessagelibTx = ", initMessagelibTx)
+            //     console.log("-----------------------------------------------------------------------------")
+
+            // }
+
+            console.log("-------------------Init Config-----------------------------")
+            // {
+                
+            //     const initConfigAccounts = {
+            //         delegate: user.publicKey,
+            //         oappRegistry: getOappPDA(tristeroOappPubkey),
+            //         messageLibInfo: getMessageLibInfoPDA(messageLib),
+            //         messageLib: messageLib,
+            //         messageLibProgram: ulnProgramId
+            //     }
+
+            //     const initConfigParams = {
+            //         params: {
+            //             oapp: tristeroOappPubkey,
+            //             eid: arbitrumEID
+            //         }
+            //     }
+
+            //     const initConfigInstruction = EndpointProgram.instructions.createInitConfigInstruction(initConfigAccounts, initConfigParams)
+
+            //     console.log("initConfig well done")
+            //     const transInitConfig = new Transaction().add(initConfigInstruction);
+            //     const initConfigTx = await sendAndConfirmTransaction(connection, transInitConfig, [user])
+            //     console.log("initConfigTx = ", initConfigTx)
+            //     console.log("-------------------------------------------------------------------------------")
+            // }
 
             console.log("------------------------------mint new spl token(only need in localnet)-------------------------------------------------");
             // const mint = await createMint(
@@ -417,7 +477,7 @@ describe("# test scenario - tristero ", () => {
                     },
                 ]
 
-                console.log("==> ", JSON.stringify(sendInstructionRemainingAccounts, null, '\t'));
+                
                 const sellAmount = new BN(100000)
                 const buyAmount = new BN(10000)
                 const sourceTokenAddressInArbitrumChain = Array(20).fill(0); //have to input arbitrum wallet address of user
@@ -437,7 +497,26 @@ describe("# test scenario - tristero ", () => {
                 let tx = new Transaction();
                 tx.add(ComputeBudgetProgram.setComputeUnitLimit({ units: 2000000 }))
 
-                console.log("getTristeroOappBump() => ", getTristeroOappBump());
+                // console.log("Remaining Accounts ==> ", JSON.stringify(sendInstructionRemainingAccounts, null, '\t'));
+                // console.log("Params => ", JSON.stringify({
+                //     sourceSellAmount: sellAmount,
+                //     destTokenMint: numberArray,
+                //     destBuyAmount: buyAmount,
+                //     eid: arbitrumEID,
+                //     tristeroOappBump: getTristeroOappBump(),
+                //     sourceTokenAddressInArbitrumChain: sourceTokenAddressInArbitrumChain
+                // }, null, '\t'))
+                // console.log("Accounts => ", JSON.stringify({
+                //     authority: user.publicKey,
+                //     adminPanel: getAdminPanel(),
+                //     tokenMint: mint,
+                //     tokenAccount: tokenAccount,
+                //     stakingAccount: getStakingPanel(mint),
+                //     user: getUserPDA(user.publicKey),
+                //     tradeMatch: getTradeMatchPDA(user.publicKey, selectedUser.matchCount),
+                //     tokenProgram: TOKEN_PROGRAM_ID,
+                //     systemProgram: SystemProgram.programId
+                // }, null, '\t'))
 
                 let instruction = await program.methods.createMatch({
                     sourceSellAmount: sellAmount,
@@ -664,42 +743,47 @@ describe("# test scenario - tristero ", () => {
     })
 });
 
-const subscriptionId = endpointProgram.addEventListener("LzReceiveAlertEvent", async (event) => {
-    const swapParams = {
-        receiver: event.receiver,
-        executor: event.executor,
-        srcEid: event.srcEid,
-        sender: event.sender,
-        nonce: event.nonce,
-        guid: event.guid,
-        computeUnits: event.computeUnits,
-        value: event.value,
-        message: event.message,
-        extraData: event.extraData,
-        reason: event.reason,
-    }
-    // message: matchId(2), 
-    const messageStr = event.message.toString();
-    const tradeMatchId = parseInt(messageStr.slice(0, 2), 16)
-    const destTokenAccount = messageStr.slice(2)
-    const tradeMatch = await program.account.tradeMatch.fetch(getTradeMatchPDA(event.receiver, tradeMatchId))
-    const swapTokenTx = await program.methods.swapToken(swapParams)
-        .accounts({
-            adminPanel: getAdminPanel(),
-            tokenMint: tradeMatch.sourceTokenMint,
-            tokenAccount: new PublicKey(destTokenAccount),
-            endpoint: getEndpointPDA(event.srcEid),
-            stakingAccount: getStakingPanel(tradeMatch.sourceTokenMint),
-            tokenProgram: TOKEN_PROGRAM_ID,
-            systemProgram: SystemProgram.programId,
-            tradeMatch: getTradeMatchPDA(event.receiver, tradeMatchId),
-            user: getUserPDA(event.receiver),
-            payloadHash: getPayloadHashPDA(event.receiver, event.srcEid, event.sender, event.nonce)
-        })
-        .rpc();
+console.log("EndpointProgram ----> ", EndpointProgram.PROGRAM_ID)
+console.log("UlnProgram ----> ", UlnProgram.PROGRAM_ID)
 
-    console.log("swapTokenTx = ", swapTokenTx);
-});
+
+// const subscriptionId =  endpointProgram.addEventListener("LzReceiveAlertEvent", async (event) => {
+//     console.log("LzReceiveAlertEvent is called....")
+//     const swapParams = {
+//         receiver: event.receiver,
+//         executor: event.executor,
+//         srcEid: event.srcEid,
+//         sender: event.sender,
+//         nonce: event.nonce,
+//         guid: event.guid,
+//         computeUnits: event.computeUnits,
+//         value: event.value,
+//         message: event.message,
+//         extraData: event.extraData,
+//         reason: event.reason,
+//     }
+//     // message: matchId(2), 
+//     const messageStr = event.message.toString();
+//     const tradeMatchId = parseInt(messageStr.slice(0, 2), 16)
+//     const destTokenAccount = messageStr.slice(2)
+//     const tradeMatch = await program.account.tradeMatch.fetch(getTradeMatchPDA(event.receiver, tradeMatchId))
+//     const swapTokenTx = await program.methods.swapToken(swapParams)
+//         .accounts({
+//             adminPanel: getAdminPanel(),
+//             tokenMint: tradeMatch.sourceTokenMint,
+//             tokenAccount: new PublicKey(destTokenAccount),
+//             endpoint: getEndpointPDA(event.srcEid),
+//             stakingAccount: getStakingPanel(tradeMatch.sourceTokenMint),
+//             tokenProgram: TOKEN_PROGRAM_ID,
+//             systemProgram: SystemProgram.programId,
+//             tradeMatch: getTradeMatchPDA(event.receiver, tradeMatchId),
+//             user: getUserPDA(event.receiver),
+//             payloadHash: getPayloadHashPDA(event.receiver, event.srcEid, event.sender, event.nonce)
+//         })
+//         .rpc();
+
+//     console.log("swapTokenTx = ", swapTokenTx);
+// });
 
 const getOappPDA = (authority: PublicKey) => {
     return PublicKey.findProgramAddressSync(
@@ -746,7 +830,7 @@ const getTristeroOappBump = () => {
 const getMessageLibPDA = () => {
     return PublicKey.findProgramAddressSync(
         [Buffer.from(MESSAGE_LIB_SEED)],
-        endpoint,
+        simpleMessageLibProgram.programId,
     )[0]
 }
 

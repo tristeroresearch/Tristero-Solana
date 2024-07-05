@@ -6,7 +6,7 @@ use anchor_lang::{
     }, system_program,
 };
 use solana_program::native_token::LAMPORTS_PER_SOL;
-use crate::program::Tristero;
+use crate::*;
 
 use {crate::error::*, crate::state::*};
 // use crate::instructions::tristero_send;
@@ -124,24 +124,42 @@ pub fn create_match(ctx: Context<CreateMatch>, params: &CreateMatchParams) -> Re
     //     41, 24, 136, 120, 112, 163, 222, 202, 
     //     139, 120, 199, 116
     //   ];
-    let receiver:[u8; 32] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 178, 9, 14, 222, 128, 3, 178, 164, 104, 120, 62, 73, 200, 137, 50, 113, 191, 173, 240, 68];
+    let receiver:[u8; 32] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 32, 237, 167, 180, 19, 229, 37, 204, 255, 159, 251, 166, 16, 245, 196, 184, 225, 137, 235, 83];
 
     let sol_eid: u32 = 30168u32;
 
     //message: to send to arbitrum
     let mut message_to_send = Vec::<u8>::new();
     
-    for _ in 0..20 { // Here is for sender
+    // Here is for payload
+
+    for _ in 0..32 { // Here is for sender
+        message_to_send.push(0u8);
+    }
+    for _ in 0..28 {
         message_to_send.push(0u8);
     }
     sol_eid.to_be_bytes().map(|value: u8| message_to_send.push(value)); // Here is for srcLzc
-    trade_match.source_token_mint.to_bytes().map(|value| message_to_send.push(value)); // srcToken
+    // trade_match.source_token_mint.to_bytes().map(|value| message_to_send.push(value)); // srcToken
+    for _ in 0..12 {
+        message_to_send.push(0u8);
+    }
+    trade_match.dest_token_mint.map(|value| message_to_send.push(value)); // have to be srcToken but now use dstToken for instance
+    for _ in 0..12 {
+        message_to_send.push(0u8);
+    }
     trade_match.dest_token_mint.map(|value| message_to_send.push(value)); // dstToken
+    for _ in 0..28 {
+        message_to_send.push(0u8);
+    }
     trade_match.trade_match_id.to_be_bytes().map(|value| message_to_send.push(value)); // srcIndex
-    for _ in 0..4 {
+    for _ in 0..32 {
         message_to_send.push(0u8); // dstIndex
     }
-    params.source_token_address_in_arbitrum_chain.map(|value| message_to_send.push(value)); // dstIndex
+    for _ in 0..12 {
+        message_to_send.push(0u8);
+    }
+    params.source_token_address_in_arbitrum_chain.map(|value| message_to_send.push(value)); // taker
     for _ in 0..24 {
         message_to_send.push(0u8); 
     }
@@ -149,12 +167,22 @@ pub fn create_match(ctx: Context<CreateMatch>, params: &CreateMatchParams) -> Re
     for _ in 0..31 {
         message_to_send.push(0u8);
     }
-    message_to_send.push(0u8);
+    message_to_send.push(0u8); //status
+
+    // Here is for message_types
+    for _ in 0..31 {
+        message_to_send.push(0u8);
+    }
+    message_to_send.push(2u8); // Here is for _msgType
+
+    // for _ in 0..32 { // Here is for _extraOptionsLength
+    //     message_to_send.push(0u8);
+    // }
 
     let cpi_params = SendParams {
         dst_eid: params.eid,
         receiver: receiver,
-        message: message_to_send, // have to change, have to contain message.
+        message: message_to_send, 
         options: receive_options.to_vec(),
         native_fee: LAMPORTS_PER_SOL * 3,
         lz_token_fee: 0,

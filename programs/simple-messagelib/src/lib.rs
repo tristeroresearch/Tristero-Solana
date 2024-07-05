@@ -14,10 +14,11 @@ use revert_call_test::*;
 use solana_helper::program_id_from_env;
 use state::*;
 
-declare_id!(Pubkey::new_from_array(program_id_from_env!(
-    "SIMPLE_MESSAGELIB_ID",
-    "6GsmxMTHAAiFKfemuM4zBjumTjNSX5CAiw4xSSXM2Toy"
-)));
+// declare_id!(Pubkey::new_from_array(program_id_from_env!(
+//     "SIMPLE_MESSAGELIB_ID",
+//     "6GsmxMTHAAiFKfemuM4zBjumTjNSX5CAiw4xSSXM2Toy"
+// )));
+declare_id!("EDuNZnJUZDskRPWjLqCaEL7EKvPHaYu5jJyjrycbVgvm");
 
 pub const MESSAGE_LIB_SEED: &[u8] = messagelib_helper::MESSAGE_LIB_SEED;
 pub const SEND_CONFIG_SEED: &[u8] = b"SendConfig";
