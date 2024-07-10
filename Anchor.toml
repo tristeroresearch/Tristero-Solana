@@ -52,10 +52,6 @@ address = "9wgwtfS2NbYariF6kFCV4ifj4fVYQ5bNtQ7pj4jWrE2T"
 filename = "./tests/default_send_library_config.json"
 
 [[test.validator.account]]
-address = "2XgGZG4oP29U3w5h4nTk1V2LFHL23zKDPJjs3psGzLKQ"
-filename = "./tests/default_send_library_messagelib.json"
-
-[[test.validator.account]]
 address = "526PeNZfw8kSnDU4nmzJFVJzJWNhwmZykEyJr5XWz5Fv"
 filename = "./tests/default_send_library_info.json"
 

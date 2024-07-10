@@ -1,14 +1,13 @@
 import * as anchor from "@coral-xyz/anchor";
 import { BN, Program } from "@coral-xyz/anchor";
-import { getExecutorProgramId, ExecutorPDADeriver, getBlockedMessageLibProgramId, OAPP_SEED, getProgramKeypair, oappIDPDA, OftPDADeriver, OftTools, OPTIONS_SEED, SEND_LIBRARY_CONFIG_SEED, NONCE_SEED, ENDPOINT_SEED, EndpointProgram, MESSAGE_LIB_SEED, SupportedPrograms, getEndpointProgramId, EventPDADeriver, BaseOApp, getSimpleMessageLibProgramId, RECEIVE_LIBRARY_CONFIG_SEED, PENDING_NONCE_SEED, UlnProgram, getULNProgramId, UlnPDADeriver, getDVNProgramId, ULN_SEED, SEND_CONFIG_SEED, ULN_CONFIG_SEED, getPricefeedProgramId, PriceFeedPDADeriver, PRICE_FEED_SEED, EXECUTOR_CONFIG_SEED, DVNDeriver, PAYLOAD_HASH_SEED, messageLibs, SimpleMessageLibProgram } from "@layerzerolabs/lz-solana-sdk-v2";
+import { getExecutorProgramId, ExecutorPDADeriver, getBlockedMessageLibProgramId, OAPP_SEED, getProgramKeypair, oappIDPDA, OftPDADeriver, OftTools, OPTIONS_SEED, SEND_LIBRARY_CONFIG_SEED, NONCE_SEED, ENDPOINT_SEED, EndpointProgram, MESSAGE_LIB_SEED, SupportedPrograms, getEndpointProgramId, EventPDADeriver, BaseOApp, getSimpleMessageLibProgramId, RECEIVE_LIBRARY_CONFIG_SEED, PENDING_NONCE_SEED, UlnProgram, getULNProgramId, UlnPDADeriver, getDVNProgramId, ULN_SEED, SEND_CONFIG_SEED, ULN_CONFIG_SEED, getPricefeedProgramId, PriceFeedPDADeriver, PRICE_FEED_SEED, EXECUTOR_CONFIG_SEED, DVNDeriver, PAYLOAD_HASH_SEED, messageLibs, SimpleMessageLibProgram, RECEIVE_CONFIG_SEED } from "@layerzerolabs/lz-solana-sdk-v2";
 import { Options } from "@layerzerolabs/lz-v2-utilities";
 import { ChainKey, EndpointVersion, networkToEndpointId } from '@layerzerolabs/lz-definitions';
 
 import { PublicKey, SystemProgram, Keypair, LAMPORTS_PER_SOL, sendAndConfirmTransaction, Transaction, ComputeBudgetProgram } from "@solana/web3.js"
 import { TOKEN_PROGRAM_ID, createMint, getOrCreateAssociatedTokenAccount, mintTo } from '@solana/spl-token'
 import { Tristero } from "../target/types/tristero";
-import { SimpleMessagelib } from "../target/types/simple_messagelib";
-import { Endpoint } from '../target/types/endpoint';
+import { Endpoint, IDL } from '../target/types/endpoint';
 import fs from 'fs';
 import { describe } from "node:test";
 import { bs58 } from "@coral-xyz/anchor/dist/cjs/utils/bytes";
@@ -18,6 +17,7 @@ import userJson from "./user.json"
 import otherJson from "./other.json"
 import adminJson from "./adminJson.json"
 // arbitrum: 0x5C105836fAa55A42957D2cC1b86e880fdE998E81
+anchor.AnchorProvider
 
 const DEFAULT_MESSAGE_LIB: PublicKey = PublicKey.default;
 
@@ -26,7 +26,8 @@ anchor.setProvider(anchor.AnchorProvider.env());
 
 // const program = anchor.workspace.Tristero as Program<Tristero>;
 const program = anchor.workspace.Tristero as Program<Tristero>;
-const simpleMessageLibProgram = anchor.workspace.SimpleMessagelib as Program<SimpleMessagelib>
+
+// const simpleMessageLibProgram = anchor.workspace.SimpleMessagelib as Program<SimpleMessagelib>
 // const endpointProgram = anchor.workspace.Endpoint as Program<Endpoint>
 
 const endpoint = getEndpointProgramId('solana-mainnet');
@@ -48,7 +49,8 @@ const user = anchor.web3.Keypair.fromSecretKey(Uint8Array.from(userJson))
 const otherUser = anchor.web3.Keypair.fromSecretKey(Uint8Array.from(otherJson))
 const admin = anchor.web3.Keypair.fromSecretKey(Uint8Array.from(adminJson))
 const receiverPubKey = Buffer.alloc(32, 0);
-const paddedBuffer = Buffer.from('20edA7B413e525CCff9ffBa610f5C4b8e189eB53', 'hex') // have to change to arbitrum side
+// const paddedBuffer = Buffer.from('20eda7b413e525ccff9ffba610f5c4b8e189eb53', 'hex') // have to change to arbitrum side
+const paddedBuffer = Buffer.from('114d9f24ab6606759FE239aa9B2d3DF75F860056', 'hex')
 paddedBuffer.copy(receiverPubKey, 12);
 console.log("receiverPubKey => ", receiverPubKey)
 const arbitrumEID = 40231; // Here is for Arbitrum Sepolia Testnet
@@ -65,7 +67,7 @@ describe("# test scenario - tristero ", () => {
     it("testing", async () => {
         console.log(">>> programId : ", programId);
         console.log("begin");
-        
+
         try {
             anchor.setProvider(anchor.AnchorProvider.env());
             // const userAirDroptx = await connection.requestAirdrop(user.publicKey, 5 * LAMPORTS_PER_SOL)
@@ -113,7 +115,7 @@ describe("# test scenario - tristero ", () => {
 
             const tristeroOappPubkey = getTristeroOapp();
             const endpointEventPdaDeriver = new EventPDADeriver(endpoint)
-            const uldEventPdaDeriver = new EventPDADeriver(sendLibraryProgram)
+            const ulnEventPdaDeriver = new EventPDADeriver(sendLibraryProgram)
 
             console.log("------------------------Register New Oapp------------------------");
 
@@ -239,7 +241,7 @@ describe("# test scenario - tristero ", () => {
             //         messageLib: messageLib,
             //         systemProgram: SystemProgram.programId
             //     }
-                
+
             //     const initMessageLibParams = {
             //             eid: arbitrumEID,
             //             endpoint: getEndpointPDA(arbitrumEID),
@@ -263,14 +265,74 @@ describe("# test scenario - tristero ", () => {
 
             console.log("-------------------Init Config-----------------------------")
             // {
-                
+            //     const anchorRemainingAccounts = [
+            //         { //1
+            //             pubkey: user.publicKey,
+            //             isSigner: true,
+            //             isWritable: true
+            //         },
+            //         { //2
+            //             pubkey: messageLib,
+            //             isSigner: false,
+            //             isWritable: false
+            //         },
+            //         { //3
+            //             pubkey: sendConfigPDA(arbitrumEID, tristeroOappPubkey),
+            //             isSigner: false,
+            //             isWritable: true
+            //         },
+            //         { //4
+            //             pubkey: receiveConfigPDA(arbitrumEID, tristeroOappPubkey),
+            //             isSigner: false,
+            //             isWritable: true
+            //         },
+            //         { //5
+            //             pubkey: SystemProgram.programId,
+            //             isSigner: false,
+            //             isWritable: false
+            //         },
+            //     ]
             //     const initConfigAccounts = {
             //         delegate: user.publicKey,
             //         oappRegistry: getOappPDA(tristeroOappPubkey),
             //         messageLibInfo: getMessageLibInfoPDA(messageLib),
             //         messageLib: messageLib,
-            //         messageLibProgram: ulnProgramId
+            //         messageLibProgram: ulnProgramId,
+            //         anchorRemainingAccounts: anchorRemainingAccounts
             //     }
+
+            //     const initConfigRemainAccounts = [
+            //         { //1
+            //             pubkey: user.publicKey,
+            //             isSigner: true,
+            //             isWritable: true
+            //         },
+            //         { //2
+            //             pubkey: getOappPDA(tristeroOappPubkey),
+            //             isSigner: false,
+            //             isWritable: false
+            //         },
+            //         { //3
+            //             pubkey: getMessageLibInfoPDA(messageLib),
+            //             isSigner: false,
+            //             isWritable: false
+            //         },
+            //         { //4
+            //             pubkey: messageLib,
+            //             isSigner: false,
+            //             isWritable: false
+            //         },
+            //         { //5
+            //             pubkey: ulnProgramId,
+            //             isSigner: false,
+            //             isWritable: false,
+            //         },
+            //         { //6
+            //             pubkey: getMessageLibInfoPDA(messageLib),
+            //             isSigner: false,
+            //             isWritable: false
+            //         },
+            //     ]
 
             //     const initConfigParams = {
             //         params: {
@@ -285,6 +347,155 @@ describe("# test scenario - tristero ", () => {
             //     const transInitConfig = new Transaction().add(initConfigInstruction);
             //     const initConfigTx = await sendAndConfirmTransaction(connection, transInitConfig, [user])
             //     console.log("initConfigTx = ", initConfigTx)
+            //     console.log("-------------------------------------------------------------------------------")
+            // }
+
+            console.log("-------------------Set Receive Library-----------------------------")
+            // {
+            //     const setReceiveLibraryAccounts = {
+            //         signer: user.publicKey,
+            //         oappRegistry: getOappRegistryPDA(tristeroOappPubkey),
+            //         receiveLibraryConfig: getReceiveLibraryConfigPDA(tristeroOappPubkey, arbitrumEID),
+            //         messageLibInfo: getMessageLibInfoPDA(messageLib),
+            //         eventAuthority: endpointEventPdaDeriver.eventAuthority()[0],
+            //         program: EndpointProgram.PROGRAM_ID
+            //     }
+
+            //     const setReceiveLibraryParams = {
+            //         params: {
+            //             receiver: tristeroOappPubkey,
+            //             eid: arbitrumEID,
+            //             newLib: messageLib,
+            //             gracePeriod: 0,
+            //         }
+            //     }
+
+            //     const setReceiveLibraryInstruction = EndpointProgram.instructions.createSetReceiveLibraryInstruction(setReceiveLibraryAccounts, setReceiveLibraryParams)
+            //     const setReceiveTrans = new Transaction().add(setReceiveLibraryInstruction);
+            //     const setReceiveTx = await sendAndConfirmTransaction(connection, setReceiveTrans, [user])
+            //     console.log("SetReceiveLibraryTx = ", setReceiveTx)
+            // }
+
+            console.log("-------------------Set Send Library-----------------------------")
+            // {
+            //     const setSendLibraryAccounts = {
+            //         signer: user.publicKey,
+            //         oappRegistry: getOappRegistryPDA(tristeroOappPubkey),
+            //         sendLibraryConfig: getSendLibraryConfigPDA(tristeroOappPubkey, arbitrumEID),
+            //         messageLibInfo: getMessageLibInfoPDA(messageLib),
+            //         eventAuthority: endpointEventPdaDeriver.eventAuthority()[0],
+            //         program: EndpointProgram.PROGRAM_ID
+            //     }
+
+            //     const setSendLibraryParams = {
+            //         params: {
+            //             sender: tristeroOappPubkey,
+            //             eid: arbitrumEID,
+            //             newLib: messageLib,
+            //             gracePeriod: 0,
+            //         }
+            //     }
+
+            //     const setSendLibraryInstruction = EndpointProgram.instructions.createSetSendLibraryInstruction(setSendLibraryAccounts, setSendLibraryParams)
+            //     const setSendTrans = new Transaction().add(setSendLibraryInstruction);
+            //     const setSendTx = await sendAndConfirmTransaction(connection, setSendTrans, [user])
+            //     console.log("SetSendLibraryTx = ", setSendTx)
+            // }
+
+            console.log("-------------------------Set Config-----------------------------")
+            // {
+            //     const setConfigRemainingAccounts = [
+            //         { //2
+            //             pubkey: getUlnPDA(),
+            //             isSigner: false,
+            //             isWritable: false
+            //         },
+            //         { //3
+            //             pubkey: sendConfigPDA(arbitrumEID, tristeroOappPubkey),
+            //             isSigner: false,
+            //             isWritable: true
+            //         },
+            //         { //4
+            //             pubkey: receiveConfigPDA(arbitrumEID, tristeroOappPubkey),
+            //             isSigner: false,
+            //             isWritable: true
+            //         },
+            //         { //5
+            //             pubkey: getDefaultSendConfig(arbitrumEID),
+            //             isSigner: false,
+            //             isWritable: false
+            //         },
+            //         { //6
+            //             pubkey: getDefaultReceiveConfig(arbitrumEID),
+            //             isSigner: false,
+            //             isWritable: false
+            //         },
+            //         { //7
+            //             pubkey: ulnEventPdaDeriver.eventAuthority()[0],
+            //             isSigner: false,
+            //             isWritable: false,
+            //         },
+            //         { //8
+            //             pubkey: ulnProgramId,
+            //             isSigner: false,
+            //             isWritable: false,
+            //         }
+            //     ]
+            //     console.log("setConfigRemainingAccounts: ", JSON.stringify(setConfigRemainingAccounts))
+            //     const setConfigAccounts = {
+            //         signer: user.publicKey,
+            //         oappRegistry: getOappPDA(tristeroOappPubkey),
+            //         messageLibInfo: getMessageLibInfoPDA(messageLib),
+            //         messageLib: messageLib,
+            //         messageLibProgram: ulnProgramId,
+            //         anchorRemainingAccounts: setConfigRemainingAccounts
+            //     }
+
+            //     const executorConfig = UlnProgram.executorConfigBeet.serialize({
+            //         executor: PublicKey.findProgramAddressSync(
+            //             [Buffer.from(EXECUTOR_CONFIG_SEED, 'utf8')],
+            //             executorProgramId,
+            //         )[0],
+            //         maxMessageSize: 10000,
+            //     })[0];
+
+            //     const setConfigExecutorParams = {
+            //         params: {
+            //             oapp: tristeroOappPubkey,
+            //             eid: arbitrumEID,
+            //             configType: OftTools.ConfigType.Executor,
+            //             config: executorConfig,
+            //         }
+            //     }
+
+            //     const ulnReceiveConfig = UlnProgram.types.ulnConfigBeet.serialize({
+            //         confirmations: 10,
+            //         requiredDvnCount: 1,
+            //         optionalDvnCount: 0,
+            //         optionalDvnThreshold: 0,
+            //         requiredDvns: [new PublicKey("4VDjp6XQaxoZf5RGwiPU9NR1EXSZn2TP4ATMmiSzLfhb")].sort(),
+            //         optionalDvns: [].sort(),
+            //       })[0];
+
+            //     const setConfigReceiveParams = {
+            //         params: {
+            //             oapp: tristeroOappPubkey,
+            //             eid: arbitrumEID,
+            //             configType: OftTools.ConfigType.SendUln,
+            //             config: ulnReceiveConfig,
+            //         }
+            //     }
+
+            //     const setConfigExecutorInstruction = EndpointProgram.instructions.createSetConfigInstruction(setConfigAccounts, setConfigExecutorParams)
+            //     const setConfigReceiveInstruction = EndpointProgram.instructions.createSetConfigInstruction(setConfigAccounts, setConfigReceiveParams)
+
+            //     console.log("setConfig well done")
+            //     const transSetConfigExecutor = new Transaction().add(setConfigExecutorInstruction);
+            //     const transSetConfigReceive = new Transaction().add(setConfigReceiveInstruction);
+            //     const setConfigExecutorTx = await sendAndConfirmTransaction(connection, transSetConfigExecutor, [user])
+            //     console.log("setConfigExecutorTx = ", setConfigExecutorTx)
+            //     const setConfigReceiveTx = await sendAndConfirmTransaction(connection, transSetConfigReceive, [user])
+            //     console.log("setConfigReceiveTx = ", setConfigReceiveTx)
             //     console.log("-------------------------------------------------------------------------------")
             // }
 
@@ -324,7 +535,7 @@ describe("# test scenario - tristero ", () => {
 
             const usdCoinMintAddress = "4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU" // dest Token Mint Address
             const numberArray: number[] = [];
-            for(let i = 0; i < usdCoinMintAddress.length; i++) {
+            for (let i = 0; i < usdCoinMintAddress.length; i++) {
                 const hexChar = usdCoinMintAddress[i];
                 const num = parseInt(hexChar, 16);
                 numberArray.push(num);
@@ -426,7 +637,7 @@ describe("# test scenario - tristero ", () => {
                         isWritable: true
                     },
                     { //16
-                        pubkey: uldEventPdaDeriver.eventAuthority()[0],
+                        pubkey: ulnEventPdaDeriver.eventAuthority()[0],
                         isSigner: false,
                         isWritable: true
                     },
@@ -477,7 +688,7 @@ describe("# test scenario - tristero ", () => {
                     },
                 ]
 
-                
+
                 const sellAmount = new BN(100000)
                 const buyAmount = new BN(10000)
                 const sourceTokenAddressInArbitrumChain = Array(20).fill(0); //have to input arbitrum wallet address of user
@@ -746,44 +957,59 @@ describe("# test scenario - tristero ", () => {
 console.log("EndpointProgram ----> ", EndpointProgram.PROGRAM_ID)
 console.log("UlnProgram ----> ", UlnProgram.PROGRAM_ID)
 
+const endpointProgram = new Program<Endpoint>(IDL, endpoint, anchor.getProvider())
 
-// const subscriptionId =  endpointProgram.addEventListener("LzReceiveAlertEvent", async (event) => {
-//     console.log("LzReceiveAlertEvent is called....")
-//     const swapParams = {
-//         receiver: event.receiver,
-//         executor: event.executor,
-//         srcEid: event.srcEid,
-//         sender: event.sender,
-//         nonce: event.nonce,
-//         guid: event.guid,
-//         computeUnits: event.computeUnits,
-//         value: event.value,
-//         message: event.message,
-//         extraData: event.extraData,
-//         reason: event.reason,
-//     }
-//     // message: matchId(2), 
-//     const messageStr = event.message.toString();
-//     const tradeMatchId = parseInt(messageStr.slice(0, 2), 16)
-//     const destTokenAccount = messageStr.slice(2)
-//     const tradeMatch = await program.account.tradeMatch.fetch(getTradeMatchPDA(event.receiver, tradeMatchId))
-//     const swapTokenTx = await program.methods.swapToken(swapParams)
-//         .accounts({
-//             adminPanel: getAdminPanel(),
-//             tokenMint: tradeMatch.sourceTokenMint,
-//             tokenAccount: new PublicKey(destTokenAccount),
-//             endpoint: getEndpointPDA(event.srcEid),
-//             stakingAccount: getStakingPanel(tradeMatch.sourceTokenMint),
-//             tokenProgram: TOKEN_PROGRAM_ID,
-//             systemProgram: SystemProgram.programId,
-//             tradeMatch: getTradeMatchPDA(event.receiver, tradeMatchId),
-//             user: getUserPDA(event.receiver),
-//             payloadHash: getPayloadHashPDA(event.receiver, event.srcEid, event.sender, event.nonce)
-//         })
-//         .rpc();
+const subscriptionId =  endpointProgram.addEventListener("LzReceiveAlertEvent", async (event) => {
+    console.log("LzReceiveAlertEvent is called....")                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 
+    const swapParams = {
+        receiver: event.receiver,
+        executor: event.executor,
+        srcEid: event.srcEid,
+        sender: event.sender,
+        nonce: event.nonce,
+        guid: event.guid,
+        computeUnits: event.computeUnits,
+        value: event.value,
+        message: event.message,
+        extraData: event.extraData,
+        reason: event.reason,
+    }
+    // message: matchId(2), 
+    const messageStr = event.message.toString();
+    const tradeMatchId = parseInt(messageStr.slice(0, 2), 16)
+    const destTokenAccount = messageStr.slice(2)
+    const tradeMatch = await program.account.tradeMatch.fetch(getTradeMatchPDA(event.receiver, tradeMatchId))
+    const swapTokenTx = await program.methods.swapToken(swapParams)
+        .accounts({
+            adminPanel: getAdminPanel(),
+            tokenMint: tradeMatch.sourceTokenMint,
+            tokenAccount: new PublicKey(destTokenAccount),
+            endpoint: getEndpointPDA(event.srcEid),
+            stakingAccount: getStakingPanel(tradeMatch.sourceTokenMint),
+            tokenProgram: TOKEN_PROGRAM_ID,
+            systemProgram: SystemProgram.programId,
+            tradeMatch: getTradeMatchPDA(event.receiver, tradeMatchId),
+            user: getUserPDA(event.receiver),
+            payloadHash: getPayloadHashPDA(event.receiver, event.srcEid, event.sender, event.nonce)
+        })
+        .rpc();
 
-//     console.log("swapTokenTx = ", swapTokenTx);
-// });
+    console.log("swapTokenTx = ", swapTokenTx);
+});
+
+const sendConfigPDA = (eid: number, pubkey: PublicKey) => {
+    return PublicKey.findProgramAddressSync(
+        [Buffer.from(SEND_CONFIG_SEED), new BN(eid).toBuffer("be", 4), pubkey.toBuffer()],
+        ulnProgramId,
+    )[0]
+}
+
+const receiveConfigPDA = (eid: number, pubkey: PublicKey) => {
+    return PublicKey.findProgramAddressSync(
+        [Buffer.from(RECEIVE_CONFIG_SEED), new BN(eid).toBuffer("be", 4), pubkey.toBuffer()],
+        ulnProgramId,
+    )[0]
+}
 
 const getOappPDA = (authority: PublicKey) => {
     return PublicKey.findProgramAddressSync(
@@ -830,7 +1056,7 @@ const getTristeroOappBump = () => {
 const getMessageLibPDA = () => {
     return PublicKey.findProgramAddressSync(
         [Buffer.from(MESSAGE_LIB_SEED)],
-        simpleMessageLibProgram.programId,
+        ulnProgramId,
     )[0]
 }
 
@@ -866,6 +1092,20 @@ const getDefaultSendLibraryConfig = (eid: number) => {
     return PublicKey.findProgramAddressSync(
         [Buffer.from(SEND_LIBRARY_CONFIG_SEED), new BN(eid).toBuffer("be", 4)],
         endpoint,
+    )[0]
+}
+
+const getDefaultSendConfig = (eid: number) => {
+    return PublicKey.findProgramAddressSync(
+        [Buffer.from(SEND_CONFIG_SEED), new BN(eid).toBuffer("be", 4)],
+        ulnProgramId,
+    )[0]
+}
+
+const getDefaultReceiveConfig = (eid: number) => {
+    return PublicKey.findProgramAddressSync(
+        [Buffer.from(RECEIVE_CONFIG_SEED), new BN(eid).toBuffer("be", 4)],
+        ulnProgramId,
     )[0]
 }
 
