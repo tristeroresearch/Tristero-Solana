@@ -50,7 +50,7 @@ const otherUser = anchor.web3.Keypair.fromSecretKey(Uint8Array.from(otherJson))
 const admin = anchor.web3.Keypair.fromSecretKey(Uint8Array.from(adminJson))
 const receiverPubKey = Buffer.alloc(32, 0);
 // const paddedBuffer = Buffer.from('20eda7b413e525ccff9ffba610f5c4b8e189eb53', 'hex') // have to change to arbitrum side
-const paddedBuffer = Buffer.from('f23D46475767E4c77237303debAF14E2e8E611a7', 'hex')
+const paddedBuffer = Buffer.from('c07d42d6f46f4C4228f9901788456a05EBDfd9DB', 'hex')
 paddedBuffer.copy(receiverPubKey, 12);
 console.log("receiverPubKey => ", receiverPubKey)
 const arbitrumEID = 40231; // Here is for Arbitrum Sepolia Testnet
@@ -206,32 +206,32 @@ describe("# test scenario - tristero ", () => {
             // }
 
             console.log("-------------------Init Nonce-----------------------------")
-            {
-                const initNonceAccounts = {
-                    delegate: user.publicKey,
-                    oappRegistry: getOappRegistryPDA(tristeroOappPubkey),
-                    nonce: getNoncePDA(tristeroOappPubkey, arbitrumEID, receiverPubKey),
-                    pendingInboundNonce: getPendingInboundNoncePDA(tristeroOappPubkey, arbitrumEID, receiverPubKey),
-                    SystemProgram: SystemProgram.programId
-                }
+            // {
+            //     const initNonceAccounts = {
+            //         delegate: user.publicKey,
+            //         oappRegistry: getOappRegistryPDA(tristeroOappPubkey),
+            //         nonce: getNoncePDA(tristeroOappPubkey, arbitrumEID, receiverPubKey),
+            //         pendingInboundNonce: getPendingInboundNoncePDA(tristeroOappPubkey, arbitrumEID, receiverPubKey),
+            //         SystemProgram: SystemProgram.programId
+            //     }
 
-                const initNonceParams = {
-                    params: {
-                        localOapp: tristeroOappPubkey,
-                        remoteEid: arbitrumEID,
-                        remoteOapp: Array.from(receiverPubKey)
-                    }
-                }
+            //     const initNonceParams = {
+            //         params: {
+            //             localOapp: tristeroOappPubkey,
+            //             remoteEid: arbitrumEID,
+            //             remoteOapp: Array.from(receiverPubKey)
+            //         }
+            //     }
 
-                const initNonceInstruction = EndpointProgram.instructions.createInitNonceInstruction(initNonceAccounts, initNonceParams)
+            //     const initNonceInstruction = EndpointProgram.instructions.createInitNonceInstruction(initNonceAccounts, initNonceParams)
 
-                console.log("InitNonce well done")
-                console.log("initNonceInstruction = " + initNonceInstruction)
-                const _transaction = new Transaction().add(initNonceInstruction);
-                const txInitNonce = await sendAndConfirmTransaction(connection, _transaction, [user])
-                console.log("txInitNonce = ", txInitNonce)
-                console.log("-------------------------------------------------------------------------------")
-            }
+            //     console.log("InitNonce well done")
+            //     console.log("initNonceInstruction = " + initNonceInstruction)
+            //     const _transaction = new Transaction().add(initNonceInstruction);
+            //     const txInitNonce = await sendAndConfirmTransaction(connection, _transaction, [user])
+            //     console.log("txInitNonce = ", txInitNonce)
+            //     console.log("-------------------------------------------------------------------------------")
+            // }
 
             const messageLib = getMessageLibPDA();
             console.log("-------------------Init Message Lib-----------------------------")
@@ -403,53 +403,53 @@ describe("# test scenario - tristero ", () => {
             // }
 
             console.log("-------------------------Set Config-----------------------------")
-            // {
-            //     const setConfigRemainingAccounts = [
-            //         { //2
-            //             pubkey: getUlnPDA(),
-            //             isSigner: false,
-            //             isWritable: false
-            //         },
-            //         { //3
-            //             pubkey: sendConfigPDA(arbitrumEID, tristeroOappPubkey),
-            //             isSigner: false,
-            //             isWritable: true
-            //         },
-            //         { //4
-            //             pubkey: receiveConfigPDA(arbitrumEID, tristeroOappPubkey),
-            //             isSigner: false,
-            //             isWritable: true
-            //         },
-            //         { //5
-            //             pubkey: getDefaultSendConfig(arbitrumEID),
-            //             isSigner: false,
-            //             isWritable: false
-            //         },
-            //         { //6
-            //             pubkey: getDefaultReceiveConfig(arbitrumEID),
-            //             isSigner: false,
-            //             isWritable: false
-            //         },
-            //         { //7
-            //             pubkey: ulnEventPdaDeriver.eventAuthority()[0],
-            //             isSigner: false,
-            //             isWritable: false,
-            //         },
-            //         { //8
-            //             pubkey: ulnProgramId,
-            //             isSigner: false,
-            //             isWritable: false,
-            //         }
-            //     ]
-            //     console.log("setConfigRemainingAccounts: ", JSON.stringify(setConfigRemainingAccounts))
-            //     const setConfigAccounts = {
-            //         signer: user.publicKey,
-            //         oappRegistry: getOappPDA(tristeroOappPubkey),
-            //         messageLibInfo: getMessageLibInfoPDA(messageLib),
-            //         messageLib: messageLib,
-            //         messageLibProgram: ulnProgramId,
-            //         anchorRemainingAccounts: setConfigRemainingAccounts
-            //     }
+            {
+                const setConfigRemainingAccounts = [
+                    { //2
+                        pubkey: getUlnPDA(),
+                        isSigner: false,
+                        isWritable: false
+                    },
+                    { //3
+                        pubkey: sendConfigPDA(arbitrumEID, tristeroOappPubkey),
+                        isSigner: false,
+                        isWritable: true
+                    },
+                    { //4
+                        pubkey: receiveConfigPDA(arbitrumEID, tristeroOappPubkey),
+                        isSigner: false,
+                        isWritable: true
+                    },
+                    { //5
+                        pubkey: getDefaultSendConfig(arbitrumEID),
+                        isSigner: false,
+                        isWritable: false
+                    },
+                    { //6
+                        pubkey: getDefaultReceiveConfig(arbitrumEID),
+                        isSigner: false,
+                        isWritable: false
+                    },
+                    { //7
+                        pubkey: ulnEventPdaDeriver.eventAuthority()[0],
+                        isSigner: false,
+                        isWritable: false,
+                    },
+                    { //8
+                        pubkey: ulnProgramId,
+                        isSigner: false,
+                        isWritable: false,
+                    }
+                ]
+                console.log("setConfigRemainingAccounts: ", JSON.stringify(setConfigRemainingAccounts))
+                const setConfigAccounts = {
+                    signer: user.publicKey,
+                    oappRegistry: getOappPDA(tristeroOappPubkey),
+                    messageLibInfo: getMessageLibInfoPDA(messageLib),
+                    messageLib: messageLib,
+                    messageLibProgram: ulnProgramId,
+                    anchorRemainingAccounts: setConfigRemainingAccounts
+                }
 
             //     const executorConfig = UlnProgram.executorConfigBeet.serialize({
             //         executor: PublicKey.findProgramAddressSync(
@@ -468,36 +468,36 @@ describe("# test scenario - tristero ", () => {
             //         }
             //     }
 
-            //     const ulnReceiveConfig = UlnProgram.types.ulnConfigBeet.serialize({
-            //         confirmations: 10,
-            //         requiredDvnCount: 1,
-            //         optionalDvnCount: 0,
-            //         optionalDvnThreshold: 0,
-            //         requiredDvns: [new PublicKey("4VDjp6XQaxoZf5RGwiPU9NR1EXSZn2TP4ATMmiSzLfhb")].sort(),
-            //         optionalDvns: [].sort(),
-            //       })[0];
+                const ulnReceiveConfig = UlnProgram.types.ulnConfigBeet.serialize({
+                    confirmations: 10,
+                    requiredDvnCount: 1,
+                    optionalDvnCount: 0,
+                    optionalDvnThreshold: 0,
+                    requiredDvns: [new PublicKey("4VDjp6XQaxoZf5RGwiPU9NR1EXSZn2TP4ATMmiSzLfhb")].sort(),
+                    optionalDvns: [].sort(),
+                  })[0];
 
-            //     const setConfigReceiveParams = {
-            //         params: {
-            //             oapp: tristeroOappPubkey,
-            //             eid: arbitrumEID,
-            //             configType: OftTools.ConfigType.SendUln,
-            //             config: ulnReceiveConfig,
-            //         }
-            //     }
+                const setConfigReceiveParams = {
+                    params: {
+                        oapp: tristeroOappPubkey,
+                        eid: arbitrumEID,
+                        configType: OftTools.ConfigType.ReceiveUln,
+                        config: ulnReceiveConfig,
+                    }
+                }
 
             //     const setConfigExecutorInstruction = EndpointProgram.instructions.createSetConfigInstruction(setConfigAccounts, setConfigExecutorParams)
-            //     const setConfigReceiveInstruction = EndpointProgram.instructions.createSetConfigInstruction(setConfigAccounts, setConfigReceiveParams)
+                const setConfigReceiveInstruction = EndpointProgram.instructions.createSetConfigInstruction(setConfigAccounts, setConfigReceiveParams)
 
             //     console.log("setConfig well done")
             //     const transSetConfigExecutor = new Transaction().add(setConfigExecutorInstruction);
-            //     const transSetConfigReceive = new Transaction().add(setConfigReceiveInstruction);
+                const transSetConfigReceive = new Transaction().add(setConfigReceiveInstruction);
             //     const setConfigExecutorTx = await sendAndConfirmTransaction(connection, transSetConfigExecutor, [user])
             //     console.log("setConfigExecutorTx = ", setConfigExecutorTx)
-            //     const setConfigReceiveTx = await sendAndConfirmTransaction(connection, transSetConfigReceive, [user])
-            //     console.log("setConfigReceiveTx = ", setConfigReceiveTx)
-            //     console.log("-------------------------------------------------------------------------------")
-            // }
+                const setConfigReceiveTx = await sendAndConfirmTransaction(connection, transSetConfigReceive, [user])
+                console.log("setConfigReceiveTx = ", setConfigReceiveTx)
+                console.log("-------------------------------------------------------------------------------")
+            }
 
             console.log("------------------------------mint new spl token(only need in localnet)-------------------------------------------------");
             // const mint = await createMint(
