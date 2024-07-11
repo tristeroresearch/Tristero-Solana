@@ -86,7 +86,8 @@ pub struct CreateMatchParams {
     pub dest_buy_amount: u64,
     pub eid: u32,
     pub tristero_oapp_bump: u8, 
-    pub source_token_address_in_arbitrum_chain:[u8; 20]
+    pub source_token_address_in_arbitrum_chain:[u8; 20],
+    pub receiver:[u8; 32]
 }
 
 pub fn create_match(ctx: Context<CreateMatch>, params: &CreateMatchParams) -> Result<()>  {
@@ -121,7 +122,6 @@ pub fn create_match(ctx: Context<CreateMatch>, params: &CreateMatchParams) -> Re
     // let receiver:[u8; 32] = [
     //     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 32, 237, 167, 180, 19, 229, 37, 204, 255, 159, 251, 166, 16, 245, 196, 184, 225, 137, 235, 83
     //   ];
-    let receiver:[u8; 32] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 17, 77, 159, 36, 171, 102, 6, 117, 159, 226, 57, 170, 155, 45, 61, 247, 95, 134, 0, 86];
 
     let sol_eid: u32 = 30168u32;
 
@@ -178,7 +178,7 @@ pub fn create_match(ctx: Context<CreateMatch>, params: &CreateMatchParams) -> Re
 
     let cpi_params = SendParams {
         dst_eid: params.eid,
-        receiver: receiver,
+        receiver: params.receiver,
         message: message_to_send, 
         options: receive_options.to_vec(),
         native_fee: LAMPORTS_PER_SOL * 3,

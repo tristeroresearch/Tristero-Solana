@@ -50,7 +50,7 @@ const otherUser = anchor.web3.Keypair.fromSecretKey(Uint8Array.from(otherJson))
 const admin = anchor.web3.Keypair.fromSecretKey(Uint8Array.from(adminJson))
 const receiverPubKey = Buffer.alloc(32, 0);
 // const paddedBuffer = Buffer.from('20eda7b413e525ccff9ffba610f5c4b8e189eb53', 'hex') // have to change to arbitrum side
-const paddedBuffer = Buffer.from('114d9f24ab6606759FE239aa9B2d3DF75F860056', 'hex')
+const paddedBuffer = Buffer.from('f23D46475767E4c77237303debAF14E2e8E611a7', 'hex')
 paddedBuffer.copy(receiverPubKey, 12);
 console.log("receiverPubKey => ", receiverPubKey)
 const arbitrumEID = 40231; // Here is for Arbitrum Sepolia Testnet
@@ -206,32 +206,32 @@ describe("# test scenario - tristero ", () => {
             // }
 
             console.log("-------------------Init Nonce-----------------------------")
-            // {
-            //     const initNonceAccounts = {
-            //         delegate: user.publicKey,
-            //         oappRegistry: getOappRegistryPDA(tristeroOappPubkey),
-            //         nonce: getNoncePDA(tristeroOappPubkey, arbitrumEID, receiverPubKey),
-            //         pendingInboundNonce: getPendingInboundNoncePDA(tristeroOappPubkey, arbitrumEID, receiverPubKey),
-            //         SystemProgram: SystemProgram.programId
-            //     }
+            {
+                const initNonceAccounts = {
+                    delegate: user.publicKey,
+                    oappRegistry: getOappRegistryPDA(tristeroOappPubkey),
+                    nonce: getNoncePDA(tristeroOappPubkey, arbitrumEID, receiverPubKey),
+                    pendingInboundNonce: getPendingInboundNoncePDA(tristeroOappPubkey, arbitrumEID, receiverPubKey),
+                    SystemProgram: SystemProgram.programId
+                }
 
-            //     const initNonceParams = {
-            //         params: {
-            //             localOapp: tristeroOappPubkey,
-            //             remoteEid: arbitrumEID,
-            //             remoteOapp: Array.from(receiverPubKey)
-            //         }
-            //     }
+                const initNonceParams = {
+                    params: {
+                        localOapp: tristeroOappPubkey,
+                        remoteEid: arbitrumEID,
+                        remoteOapp: Array.from(receiverPubKey)
+                    }
+                }
 
-            //     const initNonceInstruction = EndpointProgram.instructions.createInitNonceInstruction(initNonceAccounts, initNonceParams)
+                const initNonceInstruction = EndpointProgram.instructions.createInitNonceInstruction(initNonceAccounts, initNonceParams)
 
-            //     console.log("InitNonce well done")
-            //     console.log("initNonceInstruction = " + initNonceInstruction)
-            //     const _transaction = new Transaction().add(initNonceInstruction);
-            //     const txInitNonce = await sendAndConfirmTransaction(connection, _transaction, [user])
-            //     console.log("txInitNonce = ", txInitNonce)
-            //     console.log("-------------------------------------------------------------------------------")
-            // }
+                console.log("InitNonce well done")
+                console.log("initNonceInstruction = " + initNonceInstruction)
+                const _transaction = new Transaction().add(initNonceInstruction);
+                const txInitNonce = await sendAndConfirmTransaction(connection, _transaction, [user])
+                console.log("txInitNonce = ", txInitNonce)
+                console.log("-------------------------------------------------------------------------------")
+            }
 
             const messageLib = getMessageLibPDA();
             console.log("-------------------Init Message Lib-----------------------------")
@@ -715,7 +715,8 @@ describe("# test scenario - tristero ", () => {
                 //     destBuyAmount: buyAmount,
                 //     eid: arbitrumEID,
                 //     tristeroOappBump: getTristeroOappBump(),
-                //     sourceTokenAddressInArbitrumChain: sourceTokenAddressInArbitrumChain
+                //     sourceTokenAddressInArbitrumChain: sourceTokenAddressInArbitrumChain,
+                //     receiver: Array.from(receiverPubKey),
                 // }, null, '\t'))
                 // console.log("Accounts => ", JSON.stringify({
                 //     authority: user.publicKey,
@@ -735,7 +736,8 @@ describe("# test scenario - tristero ", () => {
                     destBuyAmount: buyAmount,
                     eid: arbitrumEID,
                     tristeroOappBump: getTristeroOappBump(),
-                    sourceTokenAddressInArbitrumChain: sourceTokenAddressInArbitrumChain
+                    sourceTokenAddressInArbitrumChain: sourceTokenAddressInArbitrumChain,
+                    receiver: Array.from(receiverPubKey),
                 })
                     .accounts({
                         authority: user.publicKey,

@@ -610,6 +610,15 @@ export type Tristero = {
                 20
               ]
             }
+          },
+          {
+            "name": "receiver",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
           }
         ]
       }
@@ -1406,6 +1415,15 @@ export const IDL: Tristero = {
               "array": [
                 "u8",
                 20
+              ]
+            }
+          },
+          {
+            "name": "receiver",
+            "type": {
+              "array": [
+                "u8",
+                32
               ]
             }
           }
