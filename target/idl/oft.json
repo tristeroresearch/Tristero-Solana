@@ -699,71 +699,6 @@
       }
     },
     {
-      "name": "LzReceiveParams",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "srcEid",
-            "type": "u32"
-          },
-          {
-            "name": "sender",
-            "type": {
-              "array": [
-                "u8",
-                32
-              ]
-            }
-          },
-          {
-            "name": "nonce",
-            "type": "u64"
-          },
-          {
-            "name": "guid",
-            "type": {
-              "array": [
-                "u8",
-                32
-              ]
-            }
-          },
-          {
-            "name": "message",
-            "type": "bytes"
-          },
-          {
-            "name": "extraData",
-            "type": "bytes"
-          }
-        ]
-      }
-    },
-    {
-      "name": "LzAccount",
-      "docs": [
-        "same to anchor_lang::prelude::AccountMeta"
-      ],
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "pubkey",
-            "type": "publicKey"
-          },
-          {
-            "name": "isSigner",
-            "type": "bool"
-          },
-          {
-            "name": "isWritable",
-            "type": "bool"
-          }
-        ]
-      }
-    },
-    {
       "name": "Version",
       "type": {
         "kind": "struct",
@@ -1202,6 +1137,71 @@
           }
         ]
       }
+    },
+    {
+      "name": "LzReceiveParams",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "srcEid",
+            "type": "u32"
+          },
+          {
+            "name": "sender",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "nonce",
+            "type": "u64"
+          },
+          {
+            "name": "guid",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "message",
+            "type": "bytes"
+          },
+          {
+            "name": "extraData",
+            "type": "bytes"
+          }
+        ]
+      }
+    },
+    {
+      "name": "LzAccount",
+      "docs": [
+        "same to anchor_lang::prelude::AccountMeta"
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "pubkey",
+            "type": "publicKey"
+          },
+          {
+            "name": "isSigner",
+            "type": "bool"
+          },
+          {
+            "name": "isWritable",
+            "type": "bool"
+          }
+        ]
+      }
     }
   ],
   "events": [
@@ -1312,8 +1312,5 @@
       "code": 6009,
       "name": "RateLimitExceeded"
     }
-  ],
-  "metadata": {
-    "address": "Bf6w6UXf939YiHKFBwGc2x5HQ1xgXwWa86RVsaCXscMb"
-  }
+  ]
 }

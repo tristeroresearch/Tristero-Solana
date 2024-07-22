@@ -3,6 +3,7 @@ use anchor_lang::{
     prelude::*,
     solana_program::{keccak::hash, system_program::ID as SYSTEM_ID},
 };
+use anchor_spl::token::TokenAccount;
 use cpi_helper::CpiContext;
 use endpoint::{
     self, cpi::accounts::{Clear, ClearCompose, Quote, RegisterOApp, Send, SendCompose, SetDelegate}, instructions::{
@@ -17,7 +18,9 @@ pub struct RegisterTristeroOApp<'info> {
     pub payer: Signer<'info>,
     /// CHECK: The PDA of the OApp
     #[account(
-        mut,
+        init,
+        space = 8 + 165,
+        payer = payer,
         seeds = [b"TristeroOapp"],
         bump
     )]

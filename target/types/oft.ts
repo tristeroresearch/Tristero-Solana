@@ -699,71 +699,6 @@ export type Oft = {
       }
     },
     {
-      "name": "LzReceiveParams",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "srcEid",
-            "type": "u32"
-          },
-          {
-            "name": "sender",
-            "type": {
-              "array": [
-                "u8",
-                32
-              ]
-            }
-          },
-          {
-            "name": "nonce",
-            "type": "u64"
-          },
-          {
-            "name": "guid",
-            "type": {
-              "array": [
-                "u8",
-                32
-              ]
-            }
-          },
-          {
-            "name": "message",
-            "type": "bytes"
-          },
-          {
-            "name": "extraData",
-            "type": "bytes"
-          }
-        ]
-      }
-    },
-    {
-      "name": "LzAccount",
-      "docs": [
-        "same to anchor_lang::prelude::AccountMeta"
-      ],
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "pubkey",
-            "type": "publicKey"
-          },
-          {
-            "name": "isSigner",
-            "type": "bool"
-          },
-          {
-            "name": "isWritable",
-            "type": "bool"
-          }
-        ]
-      }
-    },
-    {
       "name": "Version",
       "type": {
         "kind": "struct",
@@ -1199,6 +1134,71 @@ export type Oft = {
           {
             "name": "lastRefillTime",
             "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "LzReceiveParams",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "srcEid",
+            "type": "u32"
+          },
+          {
+            "name": "sender",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "nonce",
+            "type": "u64"
+          },
+          {
+            "name": "guid",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "message",
+            "type": "bytes"
+          },
+          {
+            "name": "extraData",
+            "type": "bytes"
+          }
+        ]
+      }
+    },
+    {
+      "name": "LzAccount",
+      "docs": [
+        "same to anchor_lang::prelude::AccountMeta"
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "pubkey",
+            "type": "publicKey"
+          },
+          {
+            "name": "isSigner",
+            "type": "bool"
+          },
+          {
+            "name": "isWritable",
+            "type": "bool"
           }
         ]
       }
@@ -2016,71 +2016,6 @@ export const IDL: Oft = {
       }
     },
     {
-      "name": "LzReceiveParams",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "srcEid",
-            "type": "u32"
-          },
-          {
-            "name": "sender",
-            "type": {
-              "array": [
-                "u8",
-                32
-              ]
-            }
-          },
-          {
-            "name": "nonce",
-            "type": "u64"
-          },
-          {
-            "name": "guid",
-            "type": {
-              "array": [
-                "u8",
-                32
-              ]
-            }
-          },
-          {
-            "name": "message",
-            "type": "bytes"
-          },
-          {
-            "name": "extraData",
-            "type": "bytes"
-          }
-        ]
-      }
-    },
-    {
-      "name": "LzAccount",
-      "docs": [
-        "same to anchor_lang::prelude::AccountMeta"
-      ],
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "pubkey",
-            "type": "publicKey"
-          },
-          {
-            "name": "isSigner",
-            "type": "bool"
-          },
-          {
-            "name": "isWritable",
-            "type": "bool"
-          }
-        ]
-      }
-    },
-    {
       "name": "Version",
       "type": {
         "kind": "struct",
@@ -2516,6 +2451,71 @@ export const IDL: Oft = {
           {
             "name": "lastRefillTime",
             "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "LzReceiveParams",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "srcEid",
+            "type": "u32"
+          },
+          {
+            "name": "sender",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "nonce",
+            "type": "u64"
+          },
+          {
+            "name": "guid",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "message",
+            "type": "bytes"
+          },
+          {
+            "name": "extraData",
+            "type": "bytes"
+          }
+        ]
+      }
+    },
+    {
+      "name": "LzAccount",
+      "docs": [
+        "same to anchor_lang::prelude::AccountMeta"
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "pubkey",
+            "type": "publicKey"
+          },
+          {
+            "name": "isSigner",
+            "type": "bool"
+          },
+          {
+            "name": "isWritable",
+            "type": "bool"
           }
         ]
       }

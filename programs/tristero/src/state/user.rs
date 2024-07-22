@@ -17,3 +17,13 @@ impl anchor_lang::Id for User {
 impl User {
     pub const LEN: usize = 8 + std::mem::size_of::<User>();
 }
+
+
+/// LzReceiveTypesAccounts includes accounts that are used in the LzReceiveTypes
+/// instruction.
+#[account]
+#[derive(InitSpace)]
+pub struct LzReceiveTypesAccounts {
+    pub oft_config: Pubkey,
+    pub token_mint: Pubkey,
+}

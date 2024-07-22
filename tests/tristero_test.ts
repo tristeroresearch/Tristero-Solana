@@ -50,7 +50,7 @@ const otherUser = anchor.web3.Keypair.fromSecretKey(Uint8Array.from(otherJson))
 const admin = anchor.web3.Keypair.fromSecretKey(Uint8Array.from(adminJson))
 const receiverPubKey = Buffer.alloc(32, 0);
 // const paddedBuffer = Buffer.from('20eda7b413e525ccff9ffba610f5c4b8e189eb53', 'hex') // have to change to arbitrum side
-const paddedBuffer = Buffer.from('c07d42d6f46f4C4228f9901788456a05EBDfd9DB', 'hex')
+const paddedBuffer = Buffer.from('96E81c4Ff6c260CF93B92E1c187D6cb11A4ecA11', 'hex')
 paddedBuffer.copy(receiverPubKey, 12);
 console.log("receiverPubKey => ", receiverPubKey)
 const arbitrumEID = 40231; // Here is for Arbitrum Sepolia Testnet
@@ -120,6 +120,7 @@ describe("# test scenario - tristero ", () => {
             console.log("------------------------Register New Oapp------------------------");
 
             // console.log("user.publickey ===> ", user.publicKey.toString())
+            // console.log("tristeroOAppPubkey => ", tristeroOappPubkey.toString())
 
             // const registerTristeroOAppParams = {
             //     delegate: user.publicKey
@@ -403,101 +404,101 @@ describe("# test scenario - tristero ", () => {
             // }
 
             console.log("-------------------------Set Config-----------------------------")
-            {
-                const setConfigRemainingAccounts = [
-                    { //2
-                        pubkey: getUlnPDA(),
-                        isSigner: false,
-                        isWritable: false
-                    },
-                    { //3
-                        pubkey: sendConfigPDA(arbitrumEID, tristeroOappPubkey),
-                        isSigner: false,
-                        isWritable: true
-                    },
-                    { //4
-                        pubkey: receiveConfigPDA(arbitrumEID, tristeroOappPubkey),
-                        isSigner: false,
-                        isWritable: true
-                    },
-                    { //5
-                        pubkey: getDefaultSendConfig(arbitrumEID),
-                        isSigner: false,
-                        isWritable: false
-                    },
-                    { //6
-                        pubkey: getDefaultReceiveConfig(arbitrumEID),
-                        isSigner: false,
-                        isWritable: false
-                    },
-                    { //7
-                        pubkey: ulnEventPdaDeriver.eventAuthority()[0],
-                        isSigner: false,
-                        isWritable: false,
-                    },
-                    { //8
-                        pubkey: ulnProgramId,
-                        isSigner: false,
-                        isWritable: false,
-                    }
-                ]
-                console.log("setConfigRemainingAccounts: ", JSON.stringify(setConfigRemainingAccounts))
-                const setConfigAccounts = {
-                    signer: user.publicKey,
-                    oappRegistry: getOappPDA(tristeroOappPubkey),
-                    messageLibInfo: getMessageLibInfoPDA(messageLib),
-                    messageLib: messageLib,
-                    messageLibProgram: ulnProgramId,
-                    anchorRemainingAccounts: setConfigRemainingAccounts
-                }
+            // {
+            //     const setConfigRemainingAccounts = [
+            //         { //2
+            //             pubkey: getUlnPDA(),
+            //             isSigner: false,
+            //             isWritable: false
+            //         },
+            //         { //3
+            //             pubkey: sendConfigPDA(arbitrumEID, tristeroOappPubkey),
+            //             isSigner: false,
+            //             isWritable: true
+            //         },
+            //         { //4
+            //             pubkey: receiveConfigPDA(arbitrumEID, tristeroOappPubkey),
+            //             isSigner: false,
+            //             isWritable: true
+            //         },
+            //         { //5
+            //             pubkey: getDefaultSendConfig(arbitrumEID),
+            //             isSigner: false,
+            //             isWritable: false
+            //         },
+            //         { //6
+            //             pubkey: getDefaultReceiveConfig(arbitrumEID),
+            //             isSigner: false,
+            //             isWritable: false
+            //         },
+            //         { //7
+            //             pubkey: ulnEventPdaDeriver.eventAuthority()[0],
+            //             isSigner: false,
+            //             isWritable: false,
+            //         },
+            //         { //8
+            //             pubkey: ulnProgramId,
+            //             isSigner: false,
+            //             isWritable: false,
+            //         }
+            //     ]
+            //     console.log("setConfigRemainingAccounts: ", JSON.stringify(setConfigRemainingAccounts))
+            //     const setConfigAccounts = {
+            //         signer: user.publicKey,
+            //         oappRegistry: getOappPDA(tristeroOappPubkey),
+            //         messageLibInfo: getMessageLibInfoPDA(messageLib),
+            //         messageLib: messageLib,
+            //         messageLibProgram: ulnProgramId,
+            //         anchorRemainingAccounts: setConfigRemainingAccounts
+            //     }
 
-            //     const executorConfig = UlnProgram.executorConfigBeet.serialize({
-            //         executor: PublicKey.findProgramAddressSync(
-            //             [Buffer.from(EXECUTOR_CONFIG_SEED, 'utf8')],
-            //             executorProgramId,
-            //         )[0],
-            //         maxMessageSize: 10000,
-            //     })[0];
+            // //     const executorConfig = UlnProgram.executorConfigBeet.serialize({
+            // //         executor: PublicKey.findProgramAddressSync(
+            // //             [Buffer.from(EXECUTOR_CONFIG_SEED, 'utf8')],
+            // //             executorProgramId,
+            // //         )[0],
+            // //         maxMessageSize: 10000,
+            // //     })[0];
 
-            //     const setConfigExecutorParams = {
+            // //     const setConfigExecutorParams = {
+            // //         params: {
+            // //             oapp: tristeroOappPubkey,
+            // //             eid: arbitrumEID,
+            // //             configType: OftTools.ConfigType.Executor,
+            // //             config: executorConfig,
+            // //         }
+            // //     }
+
+            //     const ulnReceiveConfig = UlnProgram.types.ulnConfigBeet.serialize({
+            //         confirmations: 10,
+            //         requiredDvnCount: 1,
+            //         optionalDvnCount: 0,
+            //         optionalDvnThreshold: 0,
+            //         requiredDvns: [new PublicKey("4VDjp6XQaxoZf5RGwiPU9NR1EXSZn2TP4ATMmiSzLfhb")].sort(),
+            //         optionalDvns: [].sort(),
+            //       })[0];
+
+            //     const setConfigReceiveParams = {
             //         params: {
             //             oapp: tristeroOappPubkey,
             //             eid: arbitrumEID,
-            //             configType: OftTools.ConfigType.Executor,
-            //             config: executorConfig,
+            //             configType: OftTools.ConfigType.ReceiveUln,
+            //             config: ulnReceiveConfig,
             //         }
             //     }
 
-                const ulnReceiveConfig = UlnProgram.types.ulnConfigBeet.serialize({
-                    confirmations: 10,
-                    requiredDvnCount: 1,
-                    optionalDvnCount: 0,
-                    optionalDvnThreshold: 0,
-                    requiredDvns: [new PublicKey("4VDjp6XQaxoZf5RGwiPU9NR1EXSZn2TP4ATMmiSzLfhb")].sort(),
-                    optionalDvns: [].sort(),
-                  })[0];
+            // //     const setConfigExecutorInstruction = EndpointProgram.instructions.createSetConfigInstruction(setConfigAccounts, setConfigExecutorParams)
+            //     const setConfigReceiveInstruction = EndpointProgram.instructions.createSetConfigInstruction(setConfigAccounts, setConfigReceiveParams)
 
-                const setConfigReceiveParams = {
-                    params: {
-                        oapp: tristeroOappPubkey,
-                        eid: arbitrumEID,
-                        configType: OftTools.ConfigType.ReceiveUln,
-                        config: ulnReceiveConfig,
-                    }
-                }
-
-            //     const setConfigExecutorInstruction = EndpointProgram.instructions.createSetConfigInstruction(setConfigAccounts, setConfigExecutorParams)
-                const setConfigReceiveInstruction = EndpointProgram.instructions.createSetConfigInstruction(setConfigAccounts, setConfigReceiveParams)
-
-            //     console.log("setConfig well done")
-            //     const transSetConfigExecutor = new Transaction().add(setConfigExecutorInstruction);
-                const transSetConfigReceive = new Transaction().add(setConfigReceiveInstruction);
-            //     const setConfigExecutorTx = await sendAndConfirmTransaction(connection, transSetConfigExecutor, [user])
-            //     console.log("setConfigExecutorTx = ", setConfigExecutorTx)
-                const setConfigReceiveTx = await sendAndConfirmTransaction(connection, transSetConfigReceive, [user])
-                console.log("setConfigReceiveTx = ", setConfigReceiveTx)
-                console.log("-------------------------------------------------------------------------------")
-            }
+            // //     console.log("setConfig well done")
+            // //     const transSetConfigExecutor = new Transaction().add(setConfigExecutorInstruction);
+            //     const transSetConfigReceive = new Transaction().add(setConfigReceiveInstruction);
+            // //     const setConfigExecutorTx = await sendAndConfirmTransaction(connection, transSetConfigExecutor, [user])
+            // //     console.log("setConfigExecutorTx = ", setConfigExecutorTx)
+            //     const setConfigReceiveTx = await sendAndConfirmTransaction(connection, transSetConfigReceive, [user])
+            //     console.log("setConfigReceiveTx = ", setConfigReceiveTx)
+            //     console.log("-------------------------------------------------------------------------------")
+            // }
 
             console.log("------------------------------mint new spl token(only need in localnet)-------------------------------------------------");
             // const mint = await createMint(
@@ -507,19 +508,19 @@ describe("# test scenario - tristero ", () => {
             //     null,
             //     5 // Decimals
             // )
-            const mint = new PublicKey("iwyvga9wLQAU9cNk9kycrLptQR8dgpMBvjDWZjc3npN")
+            const mint = new PublicKey("96dYLgk5D6rHm2V8Bi3djA3QXrAJrhENWuHC9m4kCmDq")
 
-            // console.log("Mint Address: ", mint.toBase58());
+            console.log("Mint Address: ", mint.toBase58());
 
             // Create a token account for the mint
-            // const tokenAccount = await getOrCreateAssociatedTokenAccount(
+            // const tokenAccount = (await getOrCreateAssociatedTokenAccount(
             //     connection,
             //     user,
             //     mint,
             //     user.publicKey
-            // )
+            // )).address;
 
-            const tokenAccount = new PublicKey("FFKNLCf6tK6B7yoJivjgcW9uoaQXx38DdaAheMH857Jh")
+            const tokenAccount = new PublicKey("CqVTHuqiBKuygw5UXiGmyinAaJzgyrcV5wxubK8C8fDQ")
 
             console.log("Token Account Address: ", tokenAccount.toBase58())
 
@@ -544,6 +545,20 @@ describe("# test scenario - tristero ", () => {
             console.log("getUserPDA(user.publicKey) => ", getUserPDA(user.publicKey));
             const selectedUser = await program.account.user.fetch(getUserPDA(user.publicKey));
             console.log("selectedUser => ", selectedUser)
+
+
+            console.log("-----------------------Init Oft-Config------------------------------");
+            // {
+            //     const initOftTx = await program.methods.registerConfig().accounts({
+            //         payer: user.publicKey,
+            //         oappConfig: tristeroOappPubkey,
+            //         lzReceiveTypesAccounts: getLzReceiveTypesPDA(tristeroOappPubkey),
+            //         systemProgram: SystemProgram.programId
+            //     })
+            //     .signers([user])
+            //     .rpc();
+            //     console.log("initOftTx: ", initOftTx);
+            // }
 
             console.log("------------------------Create Match------------------------");
 
@@ -688,6 +703,139 @@ describe("# test scenario - tristero ", () => {
                     },
                 ]
 
+                console.log("RemainingAccounts => ", JSON.stringify([
+                    { //0
+                        pubkey: endpoint,
+                        isSigner: false,
+                        isWritable: true
+                    },
+                    { //1
+                        pubkey: tristeroOappPubkey,
+                        isSigner: false,
+                        isWritable: true
+                    },
+                    { //2
+                        pubkey: sendLibraryProgram,
+                        isSigner: false,
+                        isWritable: true
+                    },
+                    { //3
+                        pubkey: sendLibraryConfig,
+                        isSigner: false,
+                        isWritable: true
+                    },
+                    { //4
+                        pubkey: defaultSendLibraryConfig,
+                        isSigner: false,
+                        isWritable: true
+                    },
+                    { //5
+                        pubkey: sendLibraryInfo,
+                        isSigner: false,
+                        isWritable: true
+                    },
+                    { //6
+                        pubkey: getEndpointPDA(arbitrumEID),
+                        isSigner: false,
+                        isWritable: true
+                    },
+                    { //7
+                        pubkey: getNoncePDA(tristeroOappPubkey, arbitrumEID, receiverPubKey),
+                        isSigner: false,
+                        isWritable: true
+                    },
+                    { //8
+                        pubkey: endpointEventPdaDeriver.eventAuthority()[0],
+                        isSigner: false,
+                        isWritable: true
+                    },
+                    { //9
+                        pubkey: endpoint,
+                        isSigner: false,
+                        isWritable: true
+                    },
+                    { //10
+                        pubkey: getUlnPDA(),
+                        isSigner: false,
+                        isWritable: true
+                    },
+                    { //11
+                        pubkey: sendConfig,
+                        isSigner: false,
+                        isWritable: true
+                    },
+                    { //12
+                        pubkey: defaultSendConfig,
+                        isSigner: false,
+                        isWritable: true
+                    },
+                    { //13
+                        pubkey: user.publicKey,
+                        isSigner: false,
+                        isWritable: true
+                    },
+                    { //14
+                        pubkey: user.publicKey,
+                        isSigner: false,
+                        isWritable: true
+                    },
+                    { //15
+                        pubkey: SystemProgram.programId,
+                        isSigner: false,
+                        isWritable: true
+                    },
+                    { //16
+                        pubkey: ulnEventPdaDeriver.eventAuthority()[0],
+                        isSigner: false,
+                        isWritable: true
+                    },
+                    { //17
+                        pubkey: sendLibraryProgram,
+                        isSigner: false,
+                        isWritable: true
+                    },
+                    { //18
+                        pubkey: executorProgramId,
+                        isSigner: false,
+                        isWritable: true
+                    },
+                    { //19
+                        pubkey: new ExecutorPDADeriver(executorProgramId).config()[0],
+                        isSigner: false,
+                        isWritable: true
+                    },
+                    { //20
+                        pubkey: priceFeeProgramId,
+                        isSigner: false,
+                        isWritable: true
+                    },
+                    { //21
+                        pubkey: new PriceFeedPDADeriver(priceFeeProgramId).priceFeed()[0],
+                        isSigner: false,
+                        isWritable: true
+                    },
+                    { //22
+                        pubkey: dvnProgramId,
+                        isSigner: false,
+                        isWritable: true
+                    },
+                    { //23
+                        pubkey: new DVNDeriver(dvnProgramId).config()[0],
+                        isSigner: false,
+                        isWritable: true
+                    },
+                    { //24
+                        pubkey: priceFeeProgramId,
+                        isSigner: false,
+                        isWritable: true
+                    },
+                    { //25
+                        pubkey: new PriceFeedPDADeriver(priceFeeProgramId).priceFeed()[0],
+                        isSigner: false,
+                        isWritable: true
+                    },
+                ], "\t", 2))
+
 
                 const sellAmount = new BN(100000)
                 const buyAmount = new BN(10000)
@@ -718,19 +866,19 @@ describe("# test scenario - tristero ", () => {
                 //     sourceTokenAddressInArbitrumChain: sourceTokenAddressInArbitrumChain,
                 //     receiver: Array.from(receiverPubKey),
                 // }, null, '\t'))
-                // console.log("Accounts => ", JSON.stringify({
-                //     authority: user.publicKey,
-                //     adminPanel: getAdminPanel(),
-                //     tokenMint: mint,
-                //     tokenAccount: tokenAccount,
-                //     stakingAccount: getStakingPanel(mint),
-                //     user: getUserPDA(user.publicKey),
-                //     tradeMatch: getTradeMatchPDA(user.publicKey, selectedUser.matchCount),
-                //     tokenProgram: TOKEN_PROGRAM_ID,
-                //     systemProgram: SystemProgram.programId
-                // }, null, '\t'))
+                console.log("Accounts => ", JSON.stringify({
+                    authority: user.publicKey,
+                    adminPanel: getAdminPanel(),
+                    tokenMint: mint,
+                    tokenAccount: tokenAccount,
+                    stakingAccount: getStakingPanel(mint),
+                    user: getUserPDA(user.publicKey),
+                    tradeMatch: getTradeMatchPDA(user.publicKey, selectedUser.matchCount),
+                    tokenProgram: TOKEN_PROGRAM_ID,
+                    systemProgram: SystemProgram.programId
+                }, null, '\t'))
 
-                let instruction = await program.methods.createMatch({
+                console.log("=======> ", JSON.stringify({
                     sourceSellAmount: sellAmount,
                     destTokenMint: numberArray,
                     destBuyAmount: buyAmount,
@@ -738,21 +886,33 @@ describe("# test scenario - tristero ", () => {
                     tristeroOappBump: getTristeroOappBump(),
                     sourceTokenAddressInArbitrumChain: sourceTokenAddressInArbitrumChain,
                     receiver: Array.from(receiverPubKey),
-                })
-                    .accounts({
-                        authority: user.publicKey,
-                        adminPanel: getAdminPanel(),
-                        tokenMint: mint,
-                        tokenAccount: tokenAccount,
-                        stakingAccount: getStakingPanel(mint),
-                        user: getUserPDA(user.publicKey),
-                        tradeMatch: getTradeMatchPDA(user.publicKey, selectedUser.matchCount),
-                        tokenProgram: TOKEN_PROGRAM_ID,
-                        systemProgram: SystemProgram.programId
-                    })
-                    .remainingAccounts(sendInstructionRemainingAccounts)
-                    .signers([user])
-                    .instruction();
+                }))
+
+                // let instruction = await program.methods.createMatch({
+                //     sourceSellAmount: sellAmount,
+                //     destTokenMint: numberArray,
+                //     destBuyAmount: buyAmount,
+                //     eid: arbitrumEID,
+                //     tristeroOappBump: getTristeroOappBump(),
+                //     sourceTokenAddressInArbitrumChain: sourceTokenAddressInArbitrumChain,
+                //     receiver: Array.from(receiverPubKey),
+                // })
+                //     .accounts({
+                //         authority: user.publicKey,
+                //         adminPanel: getAdminPanel(),
+                //         tokenMint: mint,
+                //         tokenAccount: tokenAccount,
+                //         stakingAccount: getStakingPanel(mint),
+                //         user: getUserPDA(user.publicKey),
+                //         tradeMatch: getTradeMatchPDA(user.publicKey, selectedUser.matchCount),
+                //         tokenProgram: TOKEN_PROGRAM_ID,
+                //         systemProgram: SystemProgram.programId
+                //     })
+                //     .remainingAccounts(sendInstructionRemainingAccounts)
+                //     .signers([user])
+                //     .instruction();
+
+
                 // console.log(" params => ", JSON.stringify({
                 //     sourceSellAmount: sellAmount,
                 //     destTokenMint: usdCoinMintAddress,
@@ -761,11 +921,14 @@ describe("# test scenario - tristero ", () => {
                 //     tristeroOappBump: getTristeroOappBump(),
                 //     sourceTokenAddressInArbitrumChain: sourceTokenAddressInArbitrumChain
                 // }, null, '\t'))
-                tx.add(instruction)
-                const createMatchTx = await sendAndConfirmTransaction(connection, tx, [user])
+                // tx.add(instruction)
+                // const createMatchTx = await sendAndConfirmTransaction(connection, tx, [user])
 
-                console.log("createMatchTx = ", createMatchTx)
+                // console.log("createMatchTx = ", createMatchTx)
             }
+
+            console.log("tristeroOappPubkey =====> ", tristeroOappPubkey);
+            console.log("getOappRegistryPDA =====> ", getOappRegistryPDA(tristeroOappPubkey));
 
             console.log("------------------------Cancel Match------------------------");
 
@@ -959,50 +1122,17 @@ describe("# test scenario - tristero ", () => {
 console.log("EndpointProgram ----> ", EndpointProgram.PROGRAM_ID)
 console.log("UlnProgram ----> ", UlnProgram.PROGRAM_ID)
 
-const endpointProgram = new Program<Endpoint>(IDL, endpoint, anchor.getProvider())
-
-const subscriptionId =  endpointProgram.addEventListener("LzReceiveAlertEvent", async (event) => {
-    console.log("LzReceiveAlertEvent is called....")                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 
-    const swapParams = {
-        receiver: event.receiver,
-        executor: event.executor,
-        srcEid: event.srcEid,
-        sender: event.sender,
-        nonce: event.nonce,
-        guid: event.guid,
-        computeUnits: event.computeUnits,
-        value: event.value,
-        message: event.message,
-        extraData: event.extraData,
-        reason: event.reason,
-    }
-    // message: matchId(2), 
-    const messageStr = event.message.toString();
-    const tradeMatchId = parseInt(messageStr.slice(0, 2), 16)
-    const destTokenAccount = messageStr.slice(2)
-    const tradeMatch = await program.account.tradeMatch.fetch(getTradeMatchPDA(event.receiver, tradeMatchId))
-    const swapTokenTx = await program.methods.swapToken(swapParams)
-        .accounts({
-            adminPanel: getAdminPanel(),
-            tokenMint: tradeMatch.sourceTokenMint,
-            tokenAccount: new PublicKey(destTokenAccount),
-            endpoint: getEndpointPDA(event.srcEid),
-            stakingAccount: getStakingPanel(tradeMatch.sourceTokenMint),
-            tokenProgram: TOKEN_PROGRAM_ID,
-            systemProgram: SystemProgram.programId,
-            tradeMatch: getTradeMatchPDA(event.receiver, tradeMatchId),
-            user: getUserPDA(event.receiver),
-            payloadHash: getPayloadHashPDA(event.receiver, event.srcEid, event.sender, event.nonce)
-        })
-        .rpc();
-
-    console.log("swapTokenTx = ", swapTokenTx);
-});
-
 const sendConfigPDA = (eid: number, pubkey: PublicKey) => {
     return PublicKey.findProgramAddressSync(
         [Buffer.from(SEND_CONFIG_SEED), new BN(eid).toBuffer("be", 4), pubkey.toBuffer()],
         ulnProgramId,
+    )[0]
+}
+
+const getLzReceiveTypesPDA = (oappConfig: PublicKey) => {
+    return PublicKey.findProgramAddressSync(
+        [Buffer.from("LzReceiveTypes"), oappConfig.toBuffer()],
+        program.programId
     )[0]
 }
 

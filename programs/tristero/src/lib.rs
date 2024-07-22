@@ -8,9 +8,9 @@ pub use messagelib_interface::{
     self, InitConfigParams, MessageLibType, MessagingFee, MessagingReceipt, Packet, SetConfigParams,
 };
 use instructions::*;
-use error::*;
+use state::*;
 
-declare_id!("FnYMMLyzBjpD6RBZxgvK7PTyxAEdsXUJDFa4uofA4mBV");
+declare_id!("5wrxGvTGkUCAusBSpkgGjW7N4G1xvWA2Aw1Pk1fAmuMf");
 
 pub const ENDPOINT_SEED: &[u8] = b"Endpoint";
 pub const MESSAGE_LIB_SEED: &[u8] = b"MessageLib";
@@ -21,6 +21,7 @@ pub const PENDING_NONCE_SEED: &[u8] = b"PendingNonce";
 pub const PAYLOAD_HASH_SEED: &[u8] = b"PayloadHash";
 pub const COMPOSED_MESSAGE_HASH_SEED: &[u8] = b"ComposedMessageHash";
 pub const OAPP_SEED: &[u8] = b"OApp";
+pub const LZ_RECEIVE_TYPES_SEED: &[u8] = b"LzReceiveTypes";
 
 pub const DEFAULT_MESSAGE_LIB: Pubkey = Pubkey::new_from_array([0u8; 32]);
 #[program]
@@ -63,6 +64,21 @@ pub mod tristero {
 
     pub fn swap_token(ctx: Context<SwapToken>, params: SwapTokenParams) -> Result<()> {
         instructions::swap_token(ctx, &params)
+    }
+
+    pub fn lz_receive(mut ctx: Context<LzReceive>, params: LzReceiveParams) -> Result<()> {
+        LzReceive::apply(&mut ctx, &params)
+    }
+
+    pub fn lz_receive_types(
+        ctx: Context<LzReceiveTypes>,
+        params: LzReceiveTypeParams,
+    ) -> Result<Vec<LzAccount>> {
+        LzReceiveTypes::apply(&ctx, &params)
+    }
+
+    pub fn register_config(mut ctx: Context<InitOft>) -> Result<()> {
+        InitOft::apply(&mut ctx)
     }
 } 
 

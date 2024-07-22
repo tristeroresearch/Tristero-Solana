@@ -17,4 +17,12 @@ from .admin_panel_update import (
 from .create_user import create_user, CreateUserAccounts
 from .update_user import update_user, UpdateUserArgs, UpdateUserAccounts
 from .create_match import create_match, CreateMatchArgs, CreateMatchAccounts
+from .cancel_match import cancel_match, CancelMatchArgs, CancelMatchAccounts
 from .swap_token import swap_token, SwapTokenArgs, SwapTokenAccounts
+from .lz_receive import lz_receive, LzReceiveArgs, LzReceiveAccounts
+from .lz_receive_types import (
+    lz_receive_types,
+    LzReceiveTypesArgs,
+    LzReceiveTypesAccounts,
+)
+from .register_config import register_config, RegisterConfigAccounts

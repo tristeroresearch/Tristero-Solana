@@ -21,7 +21,7 @@ class UserJSON(typing.TypedDict):
 class User:
     discriminator: typing.ClassVar = b"\x9fu_\xe3\xef\x97:\xec"
     layout: typing.ClassVar = borsh.CStruct(
-        "authority" / BorshPubkey, "user_bump" / borsh.U8, "match_count" / borsh.U8
+        "authority" / BorshPubkey, "user_bump" / borsh.U8, "match_count" / borsh.U32
     )
     authority: Pubkey
     user_bump: int

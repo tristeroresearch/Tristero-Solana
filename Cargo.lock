@@ -2604,6 +2604,7 @@ dependencies = [
  "endpoint",
  "messagelib-interface",
  "mpl-token-metadata",
+ "oapp",
  "solana-helper",
  "solana-program",
  "spl-token",

@@ -1,0 +1,174 @@
+import * as anchor from "@coral-xyz/anchor";
+import { BN, Program } from "@coral-xyz/anchor";
+import { getExecutorProgramId, ExecutorPDADeriver, getBlockedMessageLibProgramId, OAPP_SEED, getProgramKeypair, oappIDPDA, OftPDADeriver, OftTools, OPTIONS_SEED, SEND_LIBRARY_CONFIG_SEED, NONCE_SEED, ENDPOINT_SEED, EndpointProgram, MESSAGE_LIB_SEED, SupportedPrograms, getEndpointProgramId, EventPDADeriver, BaseOApp, getSimpleMessageLibProgramId, RECEIVE_LIBRARY_CONFIG_SEED, PENDING_NONCE_SEED, UlnProgram, getULNProgramId, UlnPDADeriver, getDVNProgramId, ULN_SEED, SEND_CONFIG_SEED, ULN_CONFIG_SEED, getPricefeedProgramId, PriceFeedPDADeriver, PRICE_FEED_SEED, EXECUTOR_CONFIG_SEED, DVNDeriver, PAYLOAD_HASH_SEED, messageLibs, SimpleMessageLibProgram, RECEIVE_CONFIG_SEED, OFT_SEED, LZ_RECEIVE_TYPES_SEED, PEER_SEED, ENFORCED_OPTIONS_SEED } from "@layerzerolabs/lz-solana-sdk-v2";
+import { Options } from "@layerzerolabs/lz-v2-utilities";
+import { ChainKey, EndpointVersion, networkToEndpointId } from '@layerzerolabs/lz-definitions';
+import { PublicKey, SystemProgram, Keypair, LAMPORTS_PER_SOL, sendAndConfirmTransaction, Transaction, ComputeBudgetProgram, Connection } from "@solana/web3.js"
+import { Myoft } from "../target/types/myoft";
+import userJson from "./user.json";
+import mintJson from "./mint_kp.json";
+import { TOKEN_PROGRAM_ID, createInitializeMintInstruction, getMintLen, getOrCreateAssociatedTokenAccount, setAuthority } from "@solana/spl-token";
+
+const user = anchor.web3.Keypair.fromSecretKey(Uint8Array.from(userJson))
+const mintKp = anchor.web3.Keypair.fromSecretKey(Uint8Array.from(mintJson))
+
+anchor.setProvider(anchor.AnchorProvider.env());
+const program = anchor.workspace.myoft as Program<Myoft>
+const connection = program.provider.connection;
+
+const receiverPubKey = Buffer.alloc(32, 0);
+const paddedBuffer = Buffer.from('c07d42d6f46f4C4228f9901788456a05EBDfd9DB', 'hex')
+paddedBuffer.copy(receiverPubKey, 12);
+console.log("receiverPubKey => ", receiverPubKey)
+const arbitrumEID = 40231; // Here is for Arbitrum Sepolia Testnet
+const OFT_DECIMALS = 6;
+
+describe("# test scenario - myoft ", () => {
+    it("testing", async () => {
+        console.log(">>> programId : ", program.programId);
+        console.log("begin");
+        try {
+            anchor.setProvider(anchor.AnchorProvider.env());
+
+            // Initialize a new SPL Token Mint transaction
+            const minimumBalanceForMint = await connection.getMinimumBalanceForRentExemption(getMintLen([]));
+            let transaction = new Transaction().add(
+                SystemProgram.createAccount({
+                    fromPubkey: user.publicKey,
+                    newAccountPubkey: mintKp.publicKey,
+                    space: getMintLen([]),
+                    lamports: minimumBalanceForMint,
+                    programId: TOKEN_PROGRAM_ID,
+                }),
+                await createInitializeMintInstruction(
+                    mintKp.publicKey, // mint public key
+                    OFT_DECIMALS, // decimals
+                    user.publicKey, // mint authority
+                    null, // freeze authority (not used here)
+                    TOKEN_PROGRAM_ID, // token program id
+                ),
+            );
+
+            // Send the transaction to create the mint
+            await sendAndConfirmTransaction(connection, transaction, [user, mintKp]);
+
+            const initOftParams = {
+                admin: user.publicKey,
+                sharedDecimals: 5,
+                endpointProgram: EndpointProgram.PROGRAM_ID,
+                mintAuthority: mintKp.publicKey
+            }
+            const oftConfigPDA = getOftConfigPDA(mintKp.publicKey);
+            const initOftTx = await program.methods.initOft(initOftParams)
+                .accounts({
+                    payer: user.publicKey,
+                    oftConfig: oftConfigPDA,
+                    lzReceiveTypesAccounts: getLzReceiveTypesAccountsPDA(oftConfigPDA),
+                    tokenMint: mintKp.publicKey,
+                    tokenProgram: TOKEN_PROGRAM_ID,
+                    systemProgram: SystemProgram.programId
+                })
+                .signers([user])
+                .rpc();
+            console.log("initOftTx: ", initOftTx)
+
+            const setPeerParams = {
+                dstEid: arbitrumEID,
+                peer: Array.from(receiverPubKey)
+            }
+            const setPeerTx = await program.methods.setPeer(setPeerParams)
+                .accounts({
+                    admin: user.publicKey,
+                    peer: getPeerPDA(oftConfigPDA, arbitrumEID),
+                    oftConfig: oftConfigPDA,
+                    systemProgram: SystemProgram.programId
+                })
+                .rpc();
+            console.log("setPeerIx: ", setPeerTx)
+
+            const setEnforcedOptionsParams = {
+                dstEid: arbitrumEID,
+                send: Buffer.from(Options.newOptions().addExecutorLzReceiveOption(65000, 0).toBytes()),
+                sendAndCall: Buffer.from(Options.newOptions()
+                    .addExecutorLzReceiveOption(65000, 0)
+                    .addExecutorComposeOption(0, 50000, 0)
+                    .toBytes()),
+            }
+            const setEnforcedOptionsTx = await program.methods.setEnforcedOptions(setEnforcedOptionsParams)
+                .accounts({
+                    admin: user.publicKey,
+                    enforcedOptions: getEnforcedOptionsPDA(oftConfigPDA, arbitrumEID),
+                    oftConfig: oftConfigPDA,
+                    systemProgram: SystemProgram.programId
+                })
+                .signers([user])
+                .rpc();
+            console.log("setEnforcedOptions: ", setEnforcedOptionsTx)
+
+            const associatedTokenAccount = (
+                await getOrCreateAssociatedTokenAccount(
+                  connection,
+                  user,
+                  mintKp.publicKey,
+                  user.publicKey,
+                  false,
+                  'confirmed',
+                )
+              ).address;
+
+            const sendParams = {
+                dstEid: arbitrumEID,
+                to: Array.from(receiverPubKey),
+                amountLd: new BN(500000),
+                minAmountLd: new BN(300000),
+                options: Buffer.from(Options.newOptions().addExecutorLzReceiveOption(100000, 0).toBytes()),
+                composeMsg: Buffer.from("Hello world"),
+                nativeFee: new BN(100000),
+                lzTokenFee: new BN(0)
+            }
+            const sendTx = await program.methods.send(sendParams)
+                .accounts({
+                    signer: user.publicKey,
+                    peer: getPeerPDA(oftConfigPDA, arbitrumEID),
+                    enforcedOptions: getEnforcedOptionsPDA(oftConfigPDA, arbitrumEID),
+                    oftConfig: oftConfigPDA,
+                    tokenSource: associatedTokenAccount,
+                    tokenMint: mintKp.publicKey,
+                    tokenProgram: TOKEN_PROGRAM_ID
+                })
+                .signers([user])
+                .rpc();
+            console.log("sendTx: ", sendTx);
+        } catch (err) {
+            console.log(err)
+        }
+    })
+})
+
+const getOftConfigPDA = (tokenMintAddr: PublicKey) => {
+    return PublicKey.findProgramAddressSync(
+        [Buffer.from(OFT_SEED), tokenMintAddr.toBytes()],
+        program.programId,
+    )[0]
+}
+
+const getLzReceiveTypesAccountsPDA = (tokenMintAddr: PublicKey) => {
+    return PublicKey.findProgramAddressSync(
+        [Buffer.from(LZ_RECEIVE_TYPES_SEED), tokenMintAddr.toBytes()],
+        program.programId,
+    )[0]
+}
+
+const getPeerPDA = (oftConfig: PublicKey, dstEid: number) => {
+    return PublicKey.findProgramAddressSync(
+        [Buffer.from(PEER_SEED), oftConfig.toBytes(), new BN(dstEid).toBuffer("be", 4)],
+        program.programId,
+    )[0]
+}
+
+const getEnforcedOptionsPDA = (oftConfig: PublicKey, dstEid: number) => {
+    return PublicKey.findProgramAddressSync(
+        [Buffer.from(ENFORCED_OPTIONS_SEED), oftConfig.toBytes(), new BN(dstEid).toBuffer("be", 4)],
+        program.programId,
+    )[0]
+}
