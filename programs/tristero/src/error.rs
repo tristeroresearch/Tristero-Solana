@@ -23,6 +23,18 @@ pub enum CustomError {
     #[msg("Already canceled or traded")]
     NotAgain,
 
+    #[msg("Wrong msg type")]
+    WrongMsgTypeError,
+
+    #[msg("Can not find with dst index")]
+    WrongMsgDstIndex,
+
+    #[msg("Can not find with src token address")]
+    WrongMsgSrcToken,
+
+    #[msg("Can not find with dst token address")]
+    WrongMsgDstToken,
+
     InvalidSendLibrary,
     InvalidReceiveLibrary,
     SameValue,

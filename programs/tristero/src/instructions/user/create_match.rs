@@ -40,7 +40,12 @@ pub struct CreateMatch<'info> {
     pub token_mint: Box<Account<'info, Mint>>,
 
     /// user's token account address
-    #[account(mut)]
+    #[account(
+        mut,
+        constraint = token_account.owner == authority.key() @ CustomError::InvalidTokenOwner,
+        constraint = token_account.mint == token_mint.key() @ CustomError::InvalidTokenMintAddress,
+        constraint = token_account.amount > params.source_sell_amount @ CustomError::InvalidTokenAmount,
+    )]
     pub token_account: Box<Account<'info, TokenAccount>>,
 
     #[account(
@@ -54,20 +59,10 @@ pub struct CreateMatch<'info> {
     pub staking_account: Box<Account<'info, TokenAccount>>,
 
     #[account(
-        mut,
-        seeds = [b"user", authority.key().as_ref()],
-        bump = user.user_bump,
-        constraint = token_account.owner == authority.key() @ CustomError::InvalidTokenOwner,
-        constraint = token_account.mint == token_mint.key() @ CustomError::InvalidTokenMintAddress,
-        constraint = token_account.amount > params.source_sell_amount @ CustomError::InvalidTokenAmount,
-    )]
-    pub user: Box<Account<'info, User>>,
-
-    #[account(
         init,
         payer = authority,
         space = TradeMatch::LEN,
-        seeds = [b"trade_match", authority.key().as_ref(), &user.match_count.to_be_bytes()],
+        seeds = [b"trade_match", &admin_panel.match_count.to_be_bytes()],
         bump,
     )]
     pub trade_match: Box<Account<'info, TradeMatch>>,
@@ -146,7 +141,7 @@ pub fn create_match(ctx: Context<CreateMatch>, params: &CreateMatchParams) -> Re
         message_to_send.push(0u8);
     }
     trade_match.dest_token_mint.map(|value| message_to_send.push(value)); // dstToken
-    for _ in 0..28 {
+    for _ in 0..16 {
         message_to_send.push(0u8);
     }
     trade_match.trade_match_id.to_be_bytes().map(|value| message_to_send.push(value)); // srcIndex

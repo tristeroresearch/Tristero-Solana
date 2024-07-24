@@ -3,12 +3,14 @@ pub mod error;
 pub mod instructions;
 pub mod state;
 pub mod msg_codec;
+pub mod utils;
 
 pub use messagelib_interface::{
     self, InitConfigParams, MessageLibType, MessagingFee, MessagingReceipt, Packet, SetConfigParams,
 };
 use instructions::*;
 use state::*;
+use utils::*;
 
 declare_id!("5wrxGvTGkUCAusBSpkgGjW7N4G1xvWA2Aw1Pk1fAmuMf");
 

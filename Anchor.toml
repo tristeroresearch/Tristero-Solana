@@ -83,8 +83,8 @@ url = "https://api.apr.dev"
 
 [provider]
 cluster = "testnet"
-#wallet = "./tests/id.json"
-wallet = "~/.config/solana/id.json"
+wallet = "./tests/id.json"
+#wallet = "~/.config/solana/id.json"
 
 [scripts]
 test = "yarn run ts-mocha -b -p ./tsconfig.json -t 10000000 tests/**/*.ts"

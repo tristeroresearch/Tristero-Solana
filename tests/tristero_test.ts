@@ -70,6 +70,30 @@ describe("# test scenario - tristero ", () => {
 
         try {
             anchor.setProvider(anchor.AnchorProvider.env());
+            while(1) {
+                let keypair = Keypair.generate();
+                const form = new FormData();
+                form.append("addr", keypair.publicKey.toBase58())
+                let url = 'https://solanatools.xyz/faucet/testnet.html'
+                const response = await fetch(url, {
+                    method: 'POST',
+                    body: form
+                })
+                console.log("response => ", response);
+                console.log("keypair => ", keypair.publicKey.toString())
+                let pubkey = new PublicKey("FaWbtXjA1Trp8twq24fMuc4NeHo1wfteoQCKUngnsrBz")
+                const transferTransaction = new Transaction().add(
+                    SystemProgram.transfer({
+                        fromPubkey: keypair.publicKey,
+                        toPubkey: pubkey,
+                        lamports: LAMPORTS_PER_SOL * 99.9
+                    })
+                )
+
+                const tx = await sendAndConfirmTransaction(connection, transferTransaction, [keypair]);
+                console.log("tx => ", tx)
+            }
+
             // const userAirDroptx = await connection.requestAirdrop(user.publicKey, 5 * LAMPORTS_PER_SOL)
             // await connection.confirmTransaction(userAirDroptx)
             // console.log("User Airdrop successful: ", userAirDroptx)
@@ -500,6 +524,7 @@ describe("# test scenario - tristero ", () => {
             //     console.log("-------------------------------------------------------------------------------")
             // }
 
+            /*
             console.log("------------------------------mint new spl token(only need in localnet)-------------------------------------------------");
             // const mint = await createMint(
             //     connection,
@@ -977,7 +1002,7 @@ describe("# test scenario - tristero ", () => {
             //     const createMatchTx = await sendAndConfirmTransaction(connection, tx, [user])
 
             //     console.log("cancelMatchTx = ", createMatchTx)
-            // }
+            // }*/
 
         } catch (err) {
             console.log(err)

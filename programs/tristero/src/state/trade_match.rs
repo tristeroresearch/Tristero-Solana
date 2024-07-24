@@ -10,7 +10,7 @@ pub struct TradeMatch {
     pub source_token_account: Pubkey,
     pub eid: u32, //which eco system
     pub match_bump: u8,
-    pub trade_match_id: u32,
+    pub trade_match_id: u128,
     pub is_valiable: bool,
 }
 
