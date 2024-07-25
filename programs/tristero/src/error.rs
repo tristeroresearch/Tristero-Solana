@@ -35,6 +35,9 @@ pub enum CustomError {
     #[msg("Can not find with dst token address")]
     WrongMsgDstToken,
 
+    #[msg("Can not cancel with this authority")]
+    WrongAuthorityToCancel,
+
     InvalidSendLibrary,
     InvalidReceiveLibrary,
     SameValue,

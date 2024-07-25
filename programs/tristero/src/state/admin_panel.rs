@@ -19,3 +19,12 @@ impl anchor_lang::Id for AdminPanel {
 impl AdminPanel {
     pub const LEN: usize = 8 + std::mem::size_of::<AdminPanel>();
 }
+
+/// LzReceiveTypesAccounts includes accounts that are used in the LzReceiveTypes
+/// instruction.
+#[account]
+#[derive(InitSpace)]
+pub struct LzReceiveTypesAccounts {
+    pub oft_config: Pubkey,
+    pub token_mint: Pubkey,
+}

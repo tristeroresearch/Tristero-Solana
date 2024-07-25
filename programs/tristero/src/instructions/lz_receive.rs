@@ -57,8 +57,6 @@ impl LzReceive<'_> {
         let admin_panel = ctx.accounts.admin_panel.as_mut();
         let trade_match = ctx.accounts.trade_match.as_mut();
 
-        
-
         // ---------------------Analyzing payload from Arb(Have to check status later)---------------------------------
         let msg_vec:Vec<[u8; 32]> = split_into_chunks(message);
         require!(msg_vec.len() == 9, CustomError::WrongMsgTypeError);
@@ -79,7 +77,7 @@ impl LzReceive<'_> {
 
         // ---------------------Transfer the source token from the staking account----------------------------------
         let cpi_accounts = Transfer {
-            from: ctx.accounts.staking_account.to_account_info() ,
+            from: ctx.accounts.staking_account.to_account_info(),
             to: ctx.accounts.token_account.to_account_info(),
             authority: ctx.accounts.admin_panel.to_account_info(),
         };
