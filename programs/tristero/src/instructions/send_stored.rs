@@ -23,7 +23,7 @@ use endpoint::{
 };
 
 #[derive(Accounts)]
-#[instruction(params: CreateMatchParams)]
+#[instruction(params: SendStoredParams)]
 pub struct SendStored<'info> {
 
     #[account(mut)]
@@ -36,12 +36,19 @@ pub struct SendStored<'info> {
     )]
     pub admin_panel: Box<Account<'info, AdminPanel>>,
 
-    /// token mint address
+    /// arb user's token mint address
     pub token_mint: Box<Account<'info, Mint>>,
 
-    /// user's token account address
+    /// arb user's token account address
     #[account(mut)]
     pub token_account: Box<Account<'info, TokenAccount>>,
+
+    /// sol user's token account address
+    #[account(
+        mut,
+        constraint = trade_match.user_pubkey == user_token_addr.owner @ CustomError::InvalidTokenStandard
+    )]
+    pub user_token_addr : Box<Account<'info, TokenAccount>>,
 
     #[account(
         mut,
@@ -61,10 +68,11 @@ pub struct SendStored<'info> {
 
 #[derive(AnchorSerialize, AnchorDeserialize, Clone)]
 pub struct SendStoredParams {
-    pub src_index: u128,
+    pub src_index: u64,
     pub eid: u32,
     pub tristero_oapp_bump: u8, 
-    pub receiver_addr:[u8; 32]
+    pub source_token_address_in_arbitrum_chain: [u8; 32],
+    pub receiver:[u8; 32]
 }
 
 pub fn send_stored(ctx: Context<SendStored>, params: &SendStoredParams) -> Result<()>  {
@@ -73,7 +81,7 @@ pub fn send_stored(ctx: Context<SendStored>, params: &SendStoredParams) -> Resul
     // ---------------------Transfer from Arb user's token to Sol user's token account----------------------------------
     let cpi_accounts = Transfer {
         from: ctx.accounts.token_account.to_account_info(),
-        to: trade_match.user_token_addr.to_account_info(),
+        to: ctx.accounts.user_token_addr.to_account_info(),
         authority: ctx.accounts.authority.to_account_info(),
     };
 
@@ -81,18 +89,6 @@ pub fn send_stored(ctx: Context<SendStored>, params: &SendStoredParams) -> Resul
     
     msg!("Here is for transfer token");
     token::transfer(cpi_context, trade_match.source_sell_amount)?;
-
-    
-    let cpi_accounts = Transfer {
-        from: ctx.accounts.token_account.to_account_info(),
-        to: ctx.accounts.staking_account.to_account_info(),
-        authority: ctx.accounts.authority.to_account_info(),
-    };
-
-    let cpi_context = CpiContext::new(ctx.accounts.token_program.to_account_info(), cpi_accounts);
-    
-    msg!("Here is for transfer token");
-    token::transfer(cpi_context, params.source_sell_amount)?;
 
     // --------------------------Send message through Oapp-----------------------------
     let cpi_ctx = Send::construct_context(ctx.remaining_accounts[9].key(), ctx.remaining_accounts).unwrap();
@@ -173,21 +169,6 @@ pub fn send_stored(ctx: Context<SendStored>, params: &SendStoredParams) -> Resul
     
     msg!("Here is for send message through oapp");
     endpoint::cpi::send(cpi_ctx.with_signer(signer_seeds), cpi_params)?;
-
-    // ---------------------Transfer the source token to the staking account----------------------------------
-    let cpi_accounts = Transfer {
-        from: ctx.accounts.token_account.to_account_info(),
-        to: ctx.accounts.staking_account.to_account_info(),
-        authority: ctx.accounts.authority.to_account_info(),
-    };
-
-    let cpi_context = CpiContext::new(ctx.accounts.token_program.to_account_info(), cpi_accounts);
-
-    let signer_seeds: &[&[&[u8]]] = &[&[b"user", &[user.user_bump]]];
-    
-    msg!("Here is for transfer token");
-    //token::transfer(cpi_context.with_signer(signer_seeds), params.source_sell_amount)?;
-    token::transfer(cpi_context, params.source_sell_amount)?;
 
     Ok(())
 }

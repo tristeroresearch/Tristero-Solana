@@ -9,18 +9,12 @@ use solana_program::native_token::LAMPORTS_PER_SOL;
 use crate::*;
 
 use {crate::error::*, crate::state::*};
-// use crate::instructions::tristero_send;
 use anchor_spl::{
     associated_token::AssociatedToken,
     token::{self, Transfer, Mint, Token, TokenAccount},
 };
 use mpl_token_metadata::instructions::*;
 use spl_token::ID as TOKEN_PROGRAM_ID;
-use endpoint::{
-    self, cpi::accounts::{Clear, ClearCompose, Quote, RegisterOApp, Send, SendCompose, SetDelegate}, instructions::{
-        oapp::send::*, ClearComposeParams, ClearParams, QuoteParams, RegisterOAppParams, SendComposeParams, SendParams, SetDelegateParams
-    }, state::{endpoint::*, message_lib::*, messaging_channel::*}, ConstructCPIContext, MessagingFee, MessagingReceipt, COMPOSED_MESSAGE_HASH_SEED, ENDPOINT_SEED, NONCE_SEED, OAPP_SEED, PAYLOAD_HASH_SEED
-};
 
 #[derive(Accounts)]
 #[instruction(params: CancelMatchParams)]
@@ -48,7 +42,7 @@ pub struct CancelMatch<'info> {
     pub token_account: Box<Account<'info, TokenAccount>>,
 
     #[account(
-        mut
+        mut,
         seeds = [b"staking_account", token_mint.key().as_ref()],
         bump,
     )]
@@ -57,7 +51,7 @@ pub struct CancelMatch<'info> {
     #[account(
         mut,
         seeds = [b"trade_match", &params.src_index.to_be_bytes()],
-        constraint = trade_match.user_pubkey == authority.key() @ CustomError::WrongAuthorityToCancel
+        constraint = trade_match.user_pubkey == authority.key() @ CustomError::WrongAuthorityToCancel,
         bump,
     )]
     pub trade_match: Box<Account<'info, TradeMatch>>,
@@ -71,10 +65,11 @@ pub struct CancelMatch<'info> {
 
 #[derive(AnchorSerialize, AnchorDeserialize, Clone)]
 pub struct CancelMatchParams {
-    pub src_index: u128
+    pub src_index: u64
 }
 
-pub fn create_match(ctx: Context<CreateMatch>, params: &CreateMatchParams) -> Result<()>  {
+pub fn cancel_match(ctx: Context<CancelMatch>, params: &CancelMatchParams) -> Result<()>  {
+    let trade_match = ctx.accounts.trade_match.as_mut();
     
     // ---------------------Transfer from staking account to source token account----------------------------------
     let cpi_accounts = Transfer {
@@ -88,7 +83,7 @@ pub fn create_match(ctx: Context<CreateMatch>, params: &CreateMatchParams) -> Re
     msg!("Here is for transfer token");
 
     let signer_seeds: &[&[&[u8]]] = &[&[b"admin_panel", &[ctx.bumps.admin_panel]]];
-    token::transfer(cpi_context.with_signer(signer_seeds), params.source_sell_amount)?;
+    token::transfer(cpi_context.with_signer(signer_seeds), trade_match.source_sell_amount)?;
 
     trade_match.is_valiable = false;
 

@@ -23,7 +23,7 @@ use endpoint::{
 };
 
 #[derive(Accounts)]
-#[instruction(params: CreateMatchParams)]
+#[instruction(params: ChallengeParams)]
 pub struct Challenge<'info> {
 
     #[account(mut)]
@@ -52,14 +52,13 @@ pub struct Challenge<'info> {
 
 #[derive(AnchorSerialize, AnchorDeserialize, Clone)]
 pub struct ChallengeParams {
-    pub src_index: u128
+    pub src_index: u64,
     pub tristero_oapp_bump: u8, 
     pub source_token_address_in_arbitrum_chain:[u8; 20],
     pub receiver:[u8; 32]
 }
 
 pub fn challenge(ctx: Context<Challenge>, params: &ChallengeParams) -> Result<()>  {
-    let user = ctx.accounts.user.as_mut();
 
     let trade_match = ctx.accounts.trade_match.as_mut();
 
@@ -132,7 +131,7 @@ pub fn challenge(ctx: Context<Challenge>, params: &ChallengeParams) -> Result<()
     // }
 
     let cpi_params = SendParams {
-        dst_eid: params.eid,
+        dst_eid: trade_match.eid,
         receiver: params.receiver,
         message: message_to_send, 
         options: receive_options.to_vec(),

@@ -3,14 +3,14 @@ pub mod error;
 pub mod instructions;
 pub mod state;
 pub mod msg_codec;
-pub mod utils;
+pub mod myutils;
 
 pub use messagelib_interface::{
     self, InitConfigParams, MessageLibType, MessagingFee, MessagingReceipt, Packet, SetConfigParams,
 };
 use instructions::*;
 use state::*;
-use utils::*;
+use myutils::*;
 
 declare_id!("5wrxGvTGkUCAusBSpkgGjW7N4G1xvWA2Aw1Pk1fAmuMf");
 
@@ -48,14 +48,6 @@ pub mod tristero {
         instructions::update(ctx, &params)
     }
 
-    pub fn create_user(ctx: Context<CreateUser>) -> Result<()> {
-        instructions::create_user(ctx)
-    }
-
-    pub fn update_user(ctx: Context<UpdateUser>, params: UpdateUserParams) -> Result<()> {
-        instructions::update_user(ctx, &params)
-    }
-
     pub fn create_match(ctx: Context<CreateMatch>, params: CreateMatchParams) -> Result<()> {
         instructions::create_match(ctx, &params)
     }
@@ -64,8 +56,8 @@ pub mod tristero {
         instructions::cancel_match(ctx, &params)
     }
 
-    pub fn swap_token(ctx: Context<SwapToken>, params: SwapTokenParams) -> Result<()> {
-        instructions::swap_token(ctx, &params)
+    pub fn challenge(ctx: Context<Challenge>, params: ChallengeParams) -> Result<()> {
+        instructions::challenge(ctx, &params)
     }
 
     pub fn lz_receive(mut ctx: Context<LzReceive>, params: LzReceiveParams) -> Result<()> {

@@ -7,7 +7,7 @@ pub struct AdminPanel {
     pub payment_wallet: Pubkey,
     pub admin_panel_bump: u8,
     pub freeze_fee: u64,
-    pub match_count: u128,
+    pub match_count: u64,
 }
 
 impl anchor_lang::Id for AdminPanel {

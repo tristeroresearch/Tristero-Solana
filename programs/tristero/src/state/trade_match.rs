@@ -11,7 +11,7 @@ pub struct TradeMatch {
     pub dest_buy_amount: u64,
     pub eid: u32, //which eco system
     pub match_bump: u8,
-    pub trade_match_id: u128,
+    pub trade_match_id: u64,
     pub is_valiable: bool,
 }
 

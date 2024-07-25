@@ -16,4 +16,4 @@ pub use lz_receive::*;
 pub use challenge::*;
 pub use create_match::*;
 pub use cancel_match::*;
-pub mod send_stored::*;
+pub use send_stored::*;
