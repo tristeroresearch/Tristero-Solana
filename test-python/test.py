@@ -198,10 +198,10 @@ def get_user_pda(authority):
     )
     return distributor
 
-def get_trade_match_pda(authority, match_count):
+def get_trade_match_pda(match_count):
     match_count_bytes = struct.pack(">B", match_count)
     (distributor, bump) = Pubkey.find_program_address(
-        [b"trade_match", bytes(authority), match_count_bytes],
+        [b"trade_match", match_count_bytes],
         tristero_program_id,
     )
     return distributor
