@@ -383,7 +383,7 @@ async def main():
         "token_mint": mint_addr,
         "token_account": Pubkey.from_string("CqVTHuqiBKuygw5UXiGmyinAaJzgyrcV5wxubK8C8fDQ"),
         "staking_account": get_staking_panel(mint_addr),
-        "trade_match": get_trade_match_pda(mint_addr, admin_panel.match_count),
+        "trade_match": get_trade_match_pda(admin_panel.match_count),
         "token_program": Pubkey.from_string("TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"),
         "system_program": SYS_PROGRAM_ID
     }
@@ -414,5 +414,43 @@ async def main():
     
     create_match_tx = solana_client.send_transaction(txn, *signers).value
     print(f"create_match_tx: {create_match_tx}")
+    
+    # challenge instruction
+    src_index = 0
+    
+    challenge_accounts : ChallengeAccounts = {
+        "authority": user.pubkey(),
+        "admin_panel": admin_panel_pda,
+        "trade_match": get_trade_match_pda(src_index),
+        "token_program": Pubkey.from_string("TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"),
+        "system_program": SYS_PROGRAM_ID
+    }
+    
+    challenge_params_json : ChallengeParamsJSON = {
+        "src_index": src_index,
+        "tristero_oapp_bump": 255,
+        "source_token_address_in_arbitrum_chain": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        "receiver":[0,0,0,0,0,0,0,0,0,0,0,0,150,232,28,79,246,194,96,207,147,185,46,28,24,125,108,177,26,78,202,17]
+    }
+    
+    challenge_params = ChallengeParams.from_json(challenge_params_json)
+    
+    challenge_ix = challenge(
+        {
+            "params": challenge_params
+        },
+        challenge_accounts,
+        program_id
+    )
+    latest_blockhash = solana_client.get_latest_blockhash()
+    blockhash = latest_blockhash.value.blockhash
+    signers = [user]
+    
+    txn = Transaction(recent_blockhash=blockhash, fee_payer=user.pubkey())
+    txn.add(set_compute_unit_limit(2000000))
+    txn.add(challenge_ix)
+    
+    challenge_tx = solana_client.send_transaction(txn, *signers).value
+    print(f"challenge_tx: {challenge_tx}")
 
 asyncio.run(main())
