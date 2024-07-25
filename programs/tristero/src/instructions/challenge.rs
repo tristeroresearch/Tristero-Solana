@@ -60,7 +60,6 @@ pub struct ChallengeParams {
 
 pub fn challenge(ctx: Context<Challenge>, params: &ChallengeParams) -> Result<()>  {
     let user = ctx.accounts.user.as_mut();
-    
 
     let trade_match = ctx.accounts.trade_match.as_mut();
 
