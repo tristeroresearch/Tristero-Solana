@@ -19,6 +19,7 @@ from solders.compute_budget import set_compute_unit_limit
 from tristero.instructions.create_match import create_match, CreateMatchAccounts
 from tristero.types.create_match_params import CreateMatchParams
 from tristero.types.create_match_params import CreateMatchParamsJSON
+from tristero.accounts.admin_panel import AdminPanel
 import json
 import struct
 
@@ -365,54 +366,53 @@ async def main():
             is_writable =  True
         )
     ]
-    create_match_accounts:CreateMatchAccounts = {
-        "authority": Pubkey.from_string("8oUck8bkDE1BnmfELXreAe8HS8cFR2FTqoFXA8daRNQ6"),
-        "admin_panel": Pubkey.from_string("AoJ8c8GxfPFWVnKA94fM477ezC3S6Mt3x6nMiyjYK6uE"),
-        "token_mint": Pubkey.from_string("96dYLgk5D6rHm2V8Bi3djA3QXrAJrhENWuHC9m4kCmDq"),
+    
+    
+    
+    mint_addr = Pubkey.from_string("96dYLgk5D6rHm2V8Bi3djA3QXrAJrhENWuHC9m4kCmDq")
+    
+    admin_panel_pda = get_admin_panel()
+    
+    admin_panel = AdminPanel.fetch(solana_client, admin_panel_pda, program_id = program_id)
+    
+    # calling create_match instruction
+    
+    create_match_accounts : CreateMatchAccounts = {
+        "authority": user.pubkey(),
+        "admin_panel": admin_panel_pda,
+        "token_mint": mint_addr,
         "token_account": Pubkey.from_string("CqVTHuqiBKuygw5UXiGmyinAaJzgyrcV5wxubK8C8fDQ"),
-        "staking_account": Pubkey.from_string("KhYAtVqBSEaUQbeX5V3kSRjgm1t4N9a2sPPnhcUSw9G"),
-        "user": Pubkey.from_string("Ex1ZUjtojuqqqgJp2SJSM2NLg2vNrcofbF3YRbiAerPb"),
-        "trade_match": Pubkey.from_string("414TanavQ3tsomdtP3RhxEo5Tayv5XDkX5rkeq2ir2Pa"),
+        "staking_account": get_staking_panel(mint_addr),
+        "trade_match": get_trade_match_pda(mint_addr, admin_panel.match_count),
         "token_program": Pubkey.from_string("TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"),
         "system_program": SYS_PROGRAM_ID
     }
     
-    param1:CreateMatchParamsJSON = {
+    create_match_params_json : CreateMatchParamsJSON = {
         "source_sell_amount": 100000,
         "dest_token_mint": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
         "dest_buy_amount": 10000,
         "eid": 40231,
-        "tristero_oapp_bump": 255,
-        "source_token_address_in_arbitrum_chain": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        "receiver":[0,0,0,0,0,0,0,0,0,0,0,0,150,232,28,79,246,194,96,207,147,185,46,28,24,125,108,177,26,78,202,17]
     }
     
-    create_match_params = CreateMatchParams.from_json(param1)
-    
-    # print(f"create_match_params: {CreateMatchParams.from_json(create_match_params)}")
+    create_match_params = CreateMatchParams.from_json(create_match_params_json)
     
     create_match_ix = create_match(
         {
             "params": create_match_params
         },
         create_match_accounts,
-        program_id,
-        send_instruction_remaining_accounts
+        program_id
     )
     latest_blockhash = solana_client.get_latest_blockhash()
     blockhash = latest_blockhash.value.blockhash
-    print(f"blockhash: {blockhash}")
     signers = [user]
     
     txn = Transaction(recent_blockhash=blockhash, fee_payer=user.pubkey())
     txn.add(set_compute_unit_limit(2000000))
     txn.add(create_match_ix)
-    # txn = Transaction(create_match_ix)
-    #txn.sign(*signers)
     
-    print(f"user.pubkey() => ", user.pubkey())
-    #print(f"create_match_ix => ", create_match_ix)
-    response = solana_client.send_transaction(txn, *signers).value
-    print(f"response: {response}")
+    create_match_tx = solana_client.send_transaction(txn, *signers).value
+    print(f"create_match_tx: {create_match_tx}")
 
 asyncio.run(main())
