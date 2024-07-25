@@ -87,6 +87,7 @@ pub fn create_match(ctx: Context<CreateMatch>, params: &CreateMatchParams) -> Re
 
     let trade_match = ctx.accounts.trade_match.as_mut();
     trade_match.user_pubkey = ctx.accounts.authority.key();
+    trade_match.user_token_addr = ctx.accounts.token_account.key();
     trade_match.source_token_mint = ctx.accounts.token_mint.key();
     trade_match.source_sell_amount = params.source_sell_amount;
     trade_match.dest_token_mint = params.dest_token_mint;

@@ -44,31 +44,11 @@ pub struct SendStored<'info> {
     pub token_account: Box<Account<'info, TokenAccount>>,
 
     #[account(
-        init_if_needed,
-        payer = authority,
-        token::mint = token_mint,
-        token::authority = admin_panel,
-        seeds = [b"staking_account", token_mint.key().as_ref()],
-        bump,
-    )]
-    pub staking_account: Box<Account<'info, TokenAccount>>,
-
-    #[account(
         mut,
-        seeds = [b"user", authority.key().as_ref()],
-        bump = user.user_bump,
-        constraint = token_account.owner == authority.key() @ CustomError::InvalidTokenOwner,
-        constraint = token_account.mint == token_mint.key() @ CustomError::InvalidTokenMintAddress,
-        constraint = token_account.amount > params.source_sell_amount @ CustomError::InvalidTokenAmount,
-    )]
-    pub user: Box<Account<'info, User>>,
-
-    #[account(
-        init,
-        payer = authority,
-        space = TradeMatch::LEN,
-        seeds = [b"trade_match", authority.key().as_ref(), &user.match_count.to_be_bytes()],
+        seeds = [b"trade_match", &params.src_index.to_be_bytes()],
         bump,
+        constraint = trade_match.source_token_mint == token_mint.key() @ CustomError::InvalidTokenMintAddress,
+        constraint = token_account.amount > trade_match.source_sell_amount @ CustomError::InvalidAmount, 
     )]
     pub trade_match: Box<Account<'info, TradeMatch>>,
 
@@ -81,17 +61,38 @@ pub struct SendStored<'info> {
 
 #[derive(AnchorSerialize, AnchorDeserialize, Clone)]
 pub struct SendStoredParams {
-    pub source_sell_amount: u64,
-    pub dest_token_mint: [u8; 20],
-    pub dest_buy_amount: u64,
+    pub src_index: u128,
     pub eid: u32,
     pub tristero_oapp_bump: u8, 
-    pub source_token_address_in_arbitrum_chain:[u8; 20],
-    pub receiver:[u8; 32]
+    pub receiver_addr:[u8; 32]
 }
 
 pub fn send_stored(ctx: Context<SendStored>, params: &SendStoredParams) -> Result<()>  {
-    let user = ctx.accounts.user.as_mut();
+    let trade_match = ctx.accounts.trade_match.as_mut();
+
+    // ---------------------Transfer from Arb user's token to Sol user's token account----------------------------------
+    let cpi_accounts = Transfer {
+        from: ctx.accounts.token_account.to_account_info(),
+        to: trade_match.user_token_addr.to_account_info(),
+        authority: ctx.accounts.authority.to_account_info(),
+    };
+
+    let cpi_context = CpiContext::new(ctx.accounts.token_program.to_account_info(), cpi_accounts);
+    
+    msg!("Here is for transfer token");
+    token::transfer(cpi_context, trade_match.source_sell_amount)?;
+
+    
+    let cpi_accounts = Transfer {
+        from: ctx.accounts.token_account.to_account_info(),
+        to: ctx.accounts.staking_account.to_account_info(),
+        authority: ctx.accounts.authority.to_account_info(),
+    };
+
+    let cpi_context = CpiContext::new(ctx.accounts.token_program.to_account_info(), cpi_accounts);
+    
+    msg!("Here is for transfer token");
+    token::transfer(cpi_context, params.source_sell_amount)?;
 
     // --------------------------Send message through Oapp-----------------------------
     let cpi_ctx = Send::construct_context(ctx.remaining_accounts[9].key(), ctx.remaining_accounts).unwrap();
@@ -149,7 +150,7 @@ pub fn send_stored(ctx: Context<SendStored>, params: &SendStoredParams) -> Resul
     for _ in 0..31 {
         message_to_send.push(0u8);
     }
-    message_to_send.push(0u8); //status
+    message_to_send.push(1u8); //status
 
     // Here is for message_types
     for _ in 0..31 {
