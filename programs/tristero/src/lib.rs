@@ -12,7 +12,7 @@ use instructions::*;
 use state::*;
 use myutils::*;
 
-declare_id!("5wrxGvTGkUCAusBSpkgGjW7N4G1xvWA2Aw1Pk1fAmuMf");
+declare_id!("APob25xoaC1Zz2FKePPCRfRBgJ5nhrjg7dUfV68ZNobP");
 
 pub const ENDPOINT_SEED: &[u8] = b"Endpoint";
 pub const MESSAGE_LIB_SEED: &[u8] = b"MessageLib";
@@ -52,9 +52,9 @@ pub mod tristero {
         instructions::create_match(ctx, &params)
     }
 
-    pub fn cancel_match(ctx: Context<CancelMatch>, params: CancelMatchParams) -> Result<()> {
-        instructions::cancel_match(ctx, &params)
-    }
+    // pub fn cancel_match(ctx: Context<CancelMatch>, params: CancelMatchParams) -> Result<()> {
+    //     instructions::cancel_match(ctx, &params)
+    // }
 
     pub fn challenge(ctx: Context<Challenge>, params: ChallengeParams) -> Result<()> {
         instructions::challenge(ctx, &params)
@@ -73,6 +73,10 @@ pub mod tristero {
 
     pub fn register_config(mut ctx: Context<InitOft>) -> Result<()> {
         InitOft::apply(&mut ctx)
+    }
+
+    pub fn place_order(mut ctx: Context<PlaceOrder>, params: PlaceOrderParams) -> Result<()> {
+        instructions::place_order(ctx, &params)
     }
 } 
 

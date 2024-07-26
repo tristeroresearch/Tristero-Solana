@@ -36,33 +36,19 @@ pub struct CreateMatch<'info> {
     )]
     pub admin_panel: Box<Account<'info, AdminPanel>>,
 
-    /// token mint address
-    pub token_mint: Box<Account<'info, Mint>>,
-
     /// token account address
     #[account(
         mut,
-        constraint = token_account.owner == authority.key() @ CustomError::InvalidTokenOwner,
-        constraint = token_account.mint == token_mint.key() @ CustomError::InvalidTokenMintAddress,
-        constraint = token_account.amount > params.source_sell_amount @ CustomError::InvalidTokenAmount,
-    )]
-    pub token_account: Box<Account<'info, TokenAccount>>,
-
-    #[account(
-        init_if_needed,
-        payer = authority,
-        token::mint = token_mint,
-        token::authority = admin_panel,
-        seeds = [b"staking_account", token_mint.key().as_ref()],
+        seeds = [b"order", &params.src_index.to_be_bytes()],
         bump,
     )]
-    pub staking_account: Box<Account<'info, TokenAccount>>,
+    pub order: Box<Account<'info, Order>>,
 
     #[account(
         init,
         payer = authority,
         space = TradeMatch::LEN,
-        seeds = [b"trade_match", &admin_panel.match_count.to_be_bytes()],
+        seeds = [b"trade_match".as_ref(), &params.trade_match_id.to_be_bytes()],
         bump,
     )]
     pub trade_match: Box<Account<'info, TradeMatch>>,
@@ -74,41 +60,40 @@ pub struct CreateMatch<'info> {
     pub token_program: AccountInfo<'info>,
 }
 
-#[derive(AnchorSerialize, AnchorDeserialize, Clone)]
+#[derive(AnchorSerialize, AnchorDeserialize, Clone, Copy)]
 pub struct CreateMatchParams {
-    pub source_sell_amount: u64,
-    pub dest_token_mint: [u8; 20],
-    pub dest_buy_amount: u64,
-    pub eid: u32,
+    pub src_index: u64,
+    pub dst_index: u64,
+    pub src_quantity: u64,
+    pub dst_quantity: u64,
+    pub trade_match_id: u64,
+    pub arb_source_token_addr: [u8; 20],
 }
 
 pub fn create_match(ctx: Context<CreateMatch>, params: &CreateMatchParams) -> Result<()>  {
     let admin_panel = ctx.accounts.admin_panel.as_mut();
-
+    let order = ctx.accounts.order.as_mut();
     let trade_match = ctx.accounts.trade_match.as_mut();
-    trade_match.user_pubkey = ctx.accounts.authority.key();
-    trade_match.user_token_addr = ctx.accounts.token_account.key();
-    trade_match.source_token_mint = ctx.accounts.token_mint.key();
-    trade_match.source_sell_amount = params.source_sell_amount;
-    trade_match.dest_token_mint = params.dest_token_mint;
-    trade_match.dest_buy_amount = params.dest_buy_amount;
-    trade_match.eid = params.eid;
-    trade_match.match_bump = ctx.bumps.trade_match;
-    trade_match.trade_match_id = admin_panel.match_count;
-    trade_match.is_valiable = true;
-    admin_panel.match_count += 1;
 
-    // ---------------------Transfer the source token to the staking account----------------------------------
-    let cpi_accounts = Transfer {
-        from: ctx.accounts.token_account.to_account_info(),
-        to: ctx.accounts.staking_account.to_account_info(),
-        authority: ctx.accounts.authority.to_account_info(),
-    };
+    require!(params.src_quantity >= order.min_sell_amount, CustomError::MinSellAmountConflict);
+    require!(order.source_sell_amount - order.settled >= params.src_quantity, CustomError::InSufficientFundsOfOrder);
 
-    let cpi_context = CpiContext::new(ctx.accounts.token_program.to_account_info(), cpi_accounts);
+    trade_match.user_pubkey = order.user_pubkey;
+    trade_match.user_token_addr = order.user_token_addr;
+    trade_match.source_token_mint = order.source_token_mint;
+    trade_match.dest_token_mint = order.dest_token_mint;
     
-    msg!("Here is for transfer token");
-    token::transfer(cpi_context, params.source_sell_amount)?;
+    
+    trade_match.eid = order.eid;
+    trade_match.bump = ctx.bumps.trade_match;
+    trade_match.trade_match_id = admin_panel.match_count;
+    trade_match.src_index = params.src_index;
+    trade_match.dst_index = params.dst_index;
+    trade_match.source_sell_amount = params.src_quantity;
+    trade_match.dest_buy_amount = params.dst_quantity;
+    trade_match.is_valiable = false;
+    
+    admin_panel.match_count += 1;
 
     Ok(())
 }

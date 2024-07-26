@@ -66,39 +66,39 @@ impl LzReceive<'_> {
         let trade_match = ctx.accounts.trade_match.as_mut();
 
         // ---------------------Analyzing payload from Arb(Have to check status later)---------------------------------
-        let msg_vec:Vec<[u8; 32]> = split_into_chunks(params.message);
-        require!(msg_vec.len() == 9, CustomError::WrongMsgTypeError);
-        let sender = msg_vec[0];
-        let src_token = msg_vec[2];
-        let dst_token = msg_vec[3];
-        let dst_index = vec_to_u64(msg_vec[5]);
-        let taker = msg_vec[6];
-        let min_amount = vec_to_u64(msg_vec[7]);
-        let status = vec_to_u8(msg_vec[8]);
+        // let msg_vec:Vec<[u8; 32]> = split_into_chunks(params.message);
+        // require!(msg_vec.len() == 9, CustomError::WrongMsgTypeError);
+        // let sender = msg_vec[0];
+        // let src_token = msg_vec[2];
+        // let dst_token = msg_vec[3];
+        // let dst_index = vec_to_u64(msg_vec[5]);
+        // let taker = msg_vec[6];
+        // let min_amount = vec_to_u64(msg_vec[7]);
+        // let status = vec_to_u8(msg_vec[8]);
 
-        require!(trade_match.trade_match_id == dst_index, CustomError::WrongMsgDstIndex);
+        // require!(trade_match.trade_match_id == dst_index, CustomError::WrongMsgDstIndex);
         
-        let sol_src_token = Vec::<u8>::new();
-        src_token.map(|value| sol_src_token.push(value));
-        require!(sol_src_token == dst_token[..sol_src_token.len()], CustomError::WrongMsgSrcToken);
-        require!(trade_match.dest_token_mint == src_token[..trade_match.dest_token_mint.len()], CustomError::WrongMsgDstToken);
+        // let sol_src_token = Vec::<u8>::new();
+        // src_token.map(|value| sol_src_token.push(value));
+        // require!(sol_src_token == dst_token[..sol_src_token.len()], CustomError::WrongMsgSrcToken);
+        // require!(trade_match.dest_token_mint == src_token[..trade_match.dest_token_mint.len()], CustomError::WrongMsgDstToken);
 
-        // ---------------------Transfer the source token from the staking account----------------------------------
-        let cpi_accounts = Transfer {
-            from: ctx.accounts.staking_account.to_account_info(),
-            to: ctx.accounts.token_account.to_account_info(),
-            authority: ctx.accounts.admin_panel.key().to_account_info(),
-        };
+        // // ---------------------Transfer the source token from the staking account----------------------------------
+        // let cpi_accounts = Transfer {
+        //     from: ctx.accounts.staking_account.to_account_info(),
+        //     to: ctx.accounts.token_account.to_account_info(),
+        //     authority: ctx.accounts.admin_panel.key().to_account_info(),
+        // };
 
-        let cpi_context = CpiContext::new(ctx.accounts.token_program.to_account_info(), cpi_accounts);
+        // let cpi_context = CpiContext::new(ctx.accounts.token_program.to_account_info(), cpi_accounts);
 
-        let signer_seeds: &[&[&[u8]]] = &[&[b"admin_panel", &[admin_panel.admin_panel_bump]]];
+        // let signer_seeds: &[&[&[u8]]] = &[&[b"admin_panel", &[admin_panel.admin_panel_bump]]];
         
-        msg!("Here is for transfer token");
-        // token::transfer(cpi_context.with_signer(signer_seeds), min_amount)?;
-        token::transfer(cpi_context, min_amount)?;
+        // msg!("Here is for transfer token");
+        // // token::transfer(cpi_context.with_signer(signer_seeds), min_amount)?;
+        // token::transfer(cpi_context, min_amount)?;
         
-        trade_match.is_valiable = false;
+        // trade_match.is_valiable = false;
         Ok(())
     }
 }

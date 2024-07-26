@@ -38,6 +38,12 @@ pub enum CustomError {
     #[msg("Can not cancel with this authority")]
     WrongAuthorityToCancel,
 
+    #[msg("Min Sell Amount Conflict")]
+    MinSellAmountConflict,
+
+    #[msg("Insufficient Funds of Order")]
+    InSufficientFundsOfOrder,
+
     InvalidSendLibrary,
     InvalidReceiveLibrary,
     SameValue,

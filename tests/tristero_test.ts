@@ -70,29 +70,6 @@ describe("# test scenario - tristero ", () => {
 
         try {
             anchor.setProvider(anchor.AnchorProvider.env());
-            while(1) {
-                let keypair = Keypair.generate();
-                const form = new FormData();
-                form.append("addr", keypair.publicKey.toBase58())
-                let url = 'https://solanatools.xyz/faucet/testnet.html'
-                const response = await fetch(url, {
-                    method: 'POST',
-                    body: form
-                })
-                console.log("response => ", response);
-                console.log("keypair => ", keypair.publicKey.toString())
-                let pubkey = new PublicKey("FaWbtXjA1Trp8twq24fMuc4NeHo1wfteoQCKUngnsrBz")
-                const transferTransaction = new Transaction().add(
-                    SystemProgram.transfer({
-                        fromPubkey: keypair.publicKey,
-                        toPubkey: pubkey,
-                        lamports: LAMPORTS_PER_SOL * 99.9
-                    })
-                )
-
-                const tx = await sendAndConfirmTransaction(connection, transferTransaction, [keypair]);
-                console.log("tx => ", tx)
-            }
 
             // const userAirDroptx = await connection.requestAirdrop(user.publicKey, 5 * LAMPORTS_PER_SOL)
             // await connection.confirmTransaction(userAirDroptx)
@@ -125,17 +102,6 @@ describe("# test scenario - tristero ", () => {
             //     .signers([admin])
             //     .rpc();
             // console.log("adminPanelUpdateTx = ", adminPanelUpdateTx)
-
-            console.log("------------------------Create User------------------------");
-
-            // const createUserTx = await program.methods.createUser()
-            //     .accounts({
-            //         authority: user.publicKey,
-            //         user: getUserPDA(user.publicKey),
-            //     })
-            //     .signers([user])
-            //     .rpc();
-            // console.log("createUserTx = ", createUserTx)
 
             const tristeroOappPubkey = getTristeroOapp();
             const endpointEventPdaDeriver = new EventPDADeriver(endpoint)
@@ -524,7 +490,7 @@ describe("# test scenario - tristero ", () => {
             //     console.log("-------------------------------------------------------------------------------")
             // }
 
-            /*
+            
             console.log("------------------------------mint new spl token(only need in localnet)-------------------------------------------------");
             // const mint = await createMint(
             //     connection,
@@ -567,10 +533,6 @@ describe("# test scenario - tristero ", () => {
                 numberArray.push(num);
             }
 
-            console.log("getUserPDA(user.publicKey) => ", getUserPDA(user.publicKey));
-            const selectedUser = await program.account.user.fetch(getUserPDA(user.publicKey));
-            console.log("selectedUser => ", selectedUser)
-
 
             console.log("-----------------------Init Oft-Config------------------------------");
             // {
@@ -585,8 +547,59 @@ describe("# test scenario - tristero ", () => {
             //     console.log("initOftTx: ", initOftTx);
             // }
 
-            console.log("------------------------Create Match------------------------");
+            const adminPanel = await program.account.adminPanel.fetch(getAdminPanel());
+            console.log("orderId => ", adminPanel.orderCount)
+            console.log("orderPDA => ", getOrderPDA(adminPanel.orderCount))
+            const erc20Addr = Buffer.from('fd086bc7cd5c481dcc9c85ebe478a1c0b69fcbb9', 'hex')
+            console.log("------------------------Place Order----------------------------");
+            {
+                const placeOrderTx = await program.methods.placeOrder({
+                        sourceSellAmount: new BN(100),
+                        minSellAmount: new BN(10),
+                        destTokenMint: Array.from(erc20Addr),
+                        destBuyAmount: new BN(100),
+                        eid: arbitrumEID,
+                        orderId: adminPanel.orderCount
+                    })
+                    .accounts({
+                        authority: user.publicKey,
+                        adminPanel: getAdminPanel(),
+                        tokenMint: mint,
+                        tokenAccount: tokenAccount,
+                        stakingAccount: getStakingPanel(mint),
+                        order: getOrderPDA(adminPanel.orderCount),
+                        systemProgram: SystemProgram.programId,
+                        tokenProgram: TOKEN_PROGRAM_ID
+                    })
+                    .signers([user])
+                    .rpc();
+                console.log("placeOrderTx: ", placeOrderTx)
+            }
 
+            console.log("------------------------Create Match------------------------------");
+            {
+                const createMatchTx = await program.methods.createMatch({
+                        srcIndex: new BN(0),
+                        dstIndex: new BN(0),
+                        srcQuantity: new BN(90),
+                        dstQuantity: new BN(90),
+                        tradeMatchId: adminPanel.matchCount,
+                        arbSourceTokenAddr: Array.from(erc20Addr)
+                    })
+                    .accounts({
+                        authority: user.publicKey,
+                        adminPanel: getAdminPanel(),
+                        order: getOrderPDA(new BN(0)),
+                        tradeMatch: getTradeMatchPDA(adminPanel.matchCount),
+                        systemProgram: SystemProgram.programId,
+                        tokenProgram: TOKEN_PROGRAM_ID
+                    })
+                    .signers([user])
+                    .rpc();
+                console.log("createMatchTx: ", createMatchTx)
+            }
+
+            console.log("------------------------Challenge------------------------");
             {
                 const sendLibraryConfig = getSendLibraryConfigPDA(tristeroOappPubkey, arbitrumEID);
                 const defaultSendLibraryConfig = getDefaultSendLibraryConfig(arbitrumEID);
@@ -731,12 +744,6 @@ describe("# test scenario - tristero ", () => {
                 const sellAmount = new BN(100000)
                 const buyAmount = new BN(10000)
                 const sourceTokenAddressInArbitrumChain = Array(20).fill(0); //have to input arbitrum wallet address of user
-                const messageToSend = selectedUser.matchCount.toString(16) //2
-                    + mint.toString() // 32
-                    + sellAmount.toString(16).padStart(32, '0') // 32
-                    + usdCoinMintAddress.toString() //32
-                    + buyAmount.toString(16).padStart(32, '0') //32
-                    + Buffer.from(sourceTokenAddressInArbitrumChain) //40
 
                 const additionalComputeBudgetInstruction =
                     anchor.web3.ComputeBudgetProgram.requestUnits({
@@ -747,83 +754,29 @@ describe("# test scenario - tristero ", () => {
                 let tx = new Transaction();
                 tx.add(ComputeBudgetProgram.setComputeUnitLimit({ units: 2000000 }))
 
-                // console.log("Remaining Accounts ==> ", JSON.stringify(sendInstructionRemainingAccounts, null, '\t'));
-                // console.log("Params => ", JSON.stringify({
-                //     sourceSellAmount: sellAmount,
-                //     destTokenMint: numberArray,
-                //     destBuyAmount: buyAmount,
-                //     eid: arbitrumEID,
-                //     tristeroOappBump: getTristeroOappBump(),
-                //     sourceTokenAddressInArbitrumChain: sourceTokenAddressInArbitrumChain,
-                //     receiver: Array.from(receiverPubKey),
-                // }, null, '\t'))
-                console.log("Accounts => ", JSON.stringify({
-                    authority: user.publicKey,
-                    adminPanel: getAdminPanel(),
-                    tokenMint: mint,
-                    tokenAccount: tokenAccount,
-                    stakingAccount: getStakingPanel(mint),
-                    user: getUserPDA(user.publicKey),
-                    tradeMatch: getTradeMatchPDA(user.publicKey, selectedUser.matchCount),
-                    tokenProgram: TOKEN_PROGRAM_ID,
-                    systemProgram: SystemProgram.programId
-                }, null, '\t'))
-
-                console.log("=======> ", JSON.stringify({
-                    sourceSellAmount: sellAmount,
-                    destTokenMint: numberArray,
-                    destBuyAmount: buyAmount,
-                    eid: arbitrumEID,
+                let instruction = await program.methods.challenge({
+                    srcIndex: new BN(0),
                     tristeroOappBump: getTristeroOappBump(),
-                    sourceTokenAddressInArbitrumChain: sourceTokenAddressInArbitrumChain,
-                    receiver: Array.from(receiverPubKey),
-                }))
+                    sourceTokenAddressInArbitrumChain: Array.from(erc20Addr),
+                    receiver: Array.from(receiverPubKey)
+                })
+                    .accounts({
+                        authority: user.publicKey,
+                        adminPanel: getAdminPanel(),
+                        tradeMatch: getTradeMatchPDA(adminPanel.matchCount),
+                        tokenProgram: TOKEN_PROGRAM_ID,
+                        systemProgram: SystemProgram.programId
+                    })
+                    .remainingAccounts(sendInstructionRemainingAccounts)
+                    .signers([user])
+                    .instruction();
 
-                // let instruction = await program.methods.createMatch({
-                //     sourceSellAmount: sellAmount,
-                //     destTokenMint: numberArray,
-                //     destBuyAmount: buyAmount,
-                //     eid: arbitrumEID,
-                //     tristeroOappBump: getTristeroOappBump(),
-                //     sourceTokenAddressInArbitrumChain: sourceTokenAddressInArbitrumChain,
-                //     receiver: Array.from(receiverPubKey),
-                // })
-                //     .accounts({
-                //         authority: user.publicKey,
-                //         adminPanel: getAdminPanel(),
-                //         tokenMint: mint,
-                //         tokenAccount: tokenAccount,
-                //         stakingAccount: getStakingPanel(mint),
-                //         user: getUserPDA(user.publicKey),
-                //         tradeMatch: getTradeMatchPDA(user.publicKey, selectedUser.matchCount),
-                //         tokenProgram: TOKEN_PROGRAM_ID,
-                //         systemProgram: SystemProgram.programId
-                //     })
-                //     .remainingAccounts(sendInstructionRemainingAccounts)
-                //     .signers([user])
-                //     .instruction();
+                tx.add(instruction)
+                const challengeTx = await sendAndConfirmTransaction(connection, tx, [user])
 
-
-                // console.log(" params => ", JSON.stringify({
-                //     sourceSellAmount: sellAmount,
-                //     destTokenMint: usdCoinMintAddress,
-                //     destBuyAmount: buyAmount,
-                //     eid: arbitrumEID,
-                //     tristeroOappBump: getTristeroOappBump(),
-                //     sourceTokenAddressInArbitrumChain: sourceTokenAddressInArbitrumChain
-                // }, null, '\t'))
-                // tx.add(instruction)
-                // const createMatchTx = await sendAndConfirmTransaction(connection, tx, [user])
-
-                // console.log("createMatchTx = ", createMatchTx)
+                console.log("challengeTx = ", challengeTx)
             }
 
-            console.log("tristeroOappPubkey =====> ", tristeroOappPubkey);
-            console.log("getOappRegistryPDA =====> ", getOappRegistryPDA(tristeroOappPubkey));
-
-            console.log("------------------------Cancel Match------------------------");
-
-            // {
             //     const sendLibraryConfig = getSendLibraryConfigPDA(tristeroOappPubkey, arbitrumEID);
             //     const defaultSendLibraryConfig = getDefaultSendLibraryConfig(arbitrumEID);
             //     const sendLibraryInfo = await getSendLibraryInfoPDA(sendLibraryConfig, defaultSendLibraryConfig);
@@ -1013,6 +966,13 @@ describe("# test scenario - tristero ", () => {
 console.log("EndpointProgram ----> ", EndpointProgram.PROGRAM_ID)
 console.log("UlnProgram ----> ", UlnProgram.PROGRAM_ID)
 
+const getOrderPDA = (orderId: BN) => {
+    return PublicKey.findProgramAddressSync(
+        [Buffer.from("order"), orderId.toBuffer("be", 8)],
+        program.programId
+    )[0]
+}
+
 const sendConfigPDA = (eid: number, pubkey: PublicKey) => {
     return PublicKey.findProgramAddressSync(
         [Buffer.from(SEND_CONFIG_SEED), new BN(eid).toBuffer("be", 4), pubkey.toBuffer()],
@@ -1183,16 +1143,9 @@ const getStakingPanel = (mint: PublicKey) => {
     )[0]
 }
 
-const getUserPDA = (authority: PublicKey) => {
+const getTradeMatchPDA = (matchCount: BN) => {
     return PublicKey.findProgramAddressSync(
-        [Buffer.from("user"), authority.toBytes()],
-        programId,
-    )[0]
-}
-
-const getTradeMatchPDA = (authority: PublicKey, matchCount: number) => {
-    return PublicKey.findProgramAddressSync(
-        [Buffer.from("trade_match"), authority.toBuffer(), new BN(matchCount).toBuffer("be", 4)],
+        [Buffer.from("trade_match"), matchCount.toBuffer("be", 8)],
         programId,
     )[0]
 }
