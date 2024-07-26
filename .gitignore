@@ -6,4 +6,4 @@ target/tmp/
 .anchor
 test-ledger
 
-./tests/main_id.json
+tests/main_id.json
