@@ -83,7 +83,8 @@ url = "https://api.apr.dev"
 
 [provider]
 cluster = "testnet"
-wallet = "./tests/id.json"
+wallet = "./tests/main_id.json"
+#wallet = "./tests/id.json"
 #wallet = "~/.config/solana/id.json"
 
 [scripts]
