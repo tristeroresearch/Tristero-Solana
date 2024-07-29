@@ -48,3 +48,6 @@ anchor deploy -p tristero
 
 ## test with python
 python3.10 ./test-python/test.py
+
+## test with typescript
+anchor test --skip-build --skip-deploy
