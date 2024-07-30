@@ -12,8 +12,8 @@ use instructions::*;
 use state::*;
 use myutils::*;
 
-// declare_id!("APob25xoaC1Zz2FKePPCRfRBgJ5nhrjg7dUfV68ZNobP"); // for testnet
-declare_id!("Eq22HfHg6KjtAoqeEU1UhmbA2iSxUdJQC1syuv36xK1U");
+declare_id!("APob25xoaC1Zz2FKePPCRfRBgJ5nhrjg7dUfV68ZNobP"); // for testnet
+// declare_id!("Eq22HfHg6KjtAoqeEU1UhmbA2iSxUdJQC1syuv36xK1U"); // for mainnet
 
 pub const ENDPOINT_SEED: &[u8] = b"Endpoint";
 pub const MESSAGE_LIB_SEED: &[u8] = b"MessageLib";

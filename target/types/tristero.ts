@@ -239,12 +239,12 @@ export type Tristero = {
           "isMut": true,
           "isSigner": false,
           "docs": [
-            "user's token account address"
+            "token account address"
           ]
         },
         {
           "name": "stakingAccount",
-          "isMut": true,
+          "isMut": false,
           "isSigner": false
         },
         {
@@ -1281,12 +1281,12 @@ export const IDL: Tristero = {
           "isMut": true,
           "isSigner": false,
           "docs": [
-            "user's token account address"
+            "token account address"
           ]
         },
         {
           "name": "stakingAccount",
-          "isMut": true,
+          "isMut": false,
           "isSigner": false
         },
         {
