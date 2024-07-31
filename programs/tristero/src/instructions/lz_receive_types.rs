@@ -69,10 +69,9 @@ impl LzReceiveTypes<'_> {
             LzAccount { pubkey: token_mint, is_signer: false, is_writable: false }, // 2
         ]);
         // account 3
-        let token_dest = get_associated_token_address_with_program_id(
-            &to_address,
-            &token_mint,
-            &TOKEN_PROGRAM_ID
+        let (token_dest, _) = Pubkey::find_program_address(
+            &[b"refund_account", &to_address.to_bytes()],
+            ctx.program_id,
         );
         accounts.extend_from_slice(&[
             LzAccount { pubkey: token_dest, is_signer: false, is_writable: false }, // 3

@@ -223,7 +223,7 @@
         },
         {
           "name": "adminPanel",
-          "isMut": true,
+          "isMut": false,
           "isSigner": false
         },
         {
@@ -243,8 +243,13 @@
           ]
         },
         {
+          "name": "destOwner",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
           "name": "stakingAccount",
-          "isMut": false,
+          "isMut": true,
           "isSigner": false
         },
         {
