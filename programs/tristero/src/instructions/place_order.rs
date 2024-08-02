@@ -35,6 +35,14 @@ pub struct PlaceOrder<'info> {
     )]
     pub admin_panel: Box<Account<'info, AdminPanel>>,
 
+    /// CHECK:
+    #[account(
+        mut,
+        seeds = [b"sol_panel"],
+        bump,
+    )]
+    pub sol_panel: AccountInfo<'info>,
+
     /// token mint address
     pub token_mint: Box<Account<'info, Mint>>,
 
@@ -112,6 +120,18 @@ pub fn place_order(ctx: Context<PlaceOrder>, params: &PlaceOrderParams) -> Resul
     
     msg!("Here is for transfer token");
     token::transfer(cpi_context, params.source_sell_amount)?;
+
+    // ---------------------Transfer the sol for fee to the sol staking account----------------------------------
+    let ix = anchor_lang::solana_program::system_instruction::transfer(
+        &ctx.accounts.authority.key(), 
+        &ctx.accounts.sol_panel.key(), 
+        5000000
+    );
+    msg!("Here is for transfer sol");
+    let _ = anchor_lang::solana_program::program::invoke(
+        &ix, 
+        &[ctx.accounts.authority.to_account_info(), ctx.accounts.sol_panel.to_account_info()],
+    );
 
     Ok(())
 }

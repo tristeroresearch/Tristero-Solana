@@ -15,10 +15,19 @@ pub struct LzReceive<'info> {
     pub payer: Signer<'info>,
 
     #[account(
+        mut,
         seeds = [b"admin_panel"],
         bump,
     )]
     pub admin_panel: Box<Account<'info, AdminPanel>>,
+
+    /// CHECK:
+    #[account(
+        mut,
+        seeds = [b"sol_panel"],
+        bump,
+    )]
+    pub sol_panel: AccountInfo<'info>,
 
     /// token mint address
     pub token_mint: Box<Account<'info, Mint>>,
@@ -96,15 +105,16 @@ impl LzReceive<'_> {
 
         // ------------------------Transfer fee to executor-----------------------------------
         let ix = anchor_lang::solana_program::system_instruction::transfer(
-            &ctx.accounts.staking_account.key(), 
+            &ctx.accounts.sol_panel.key(), 
             &ctx.accounts.payer.key(), 
-            1500000
+            5000000
         );
         msg!("Here is for transfer sol");
+        let sol_seeds: &[&[&[u8]]] = &[&[b"sol_panel", &[ctx.bumps.sol_panel]]];
         let _ = anchor_lang::solana_program::program::invoke_signed(
             &ix, 
-            &[ctx.accounts.staking_account.to_account_info(), ctx.accounts.payer.to_account_info()],
-            signer_seeds
+            &[ctx.accounts.sol_panel.to_account_info(), ctx.accounts.payer.to_account_info()],
+            sol_seeds
         );
         Ok(())
     }

@@ -223,7 +223,12 @@ export type Tristero = {
         },
         {
           "name": "adminPanel",
-          "isMut": false,
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "solPanel",
+          "isMut": true,
           "isSigner": false
         },
         {
@@ -341,6 +346,11 @@ export type Tristero = {
         },
         {
           "name": "adminPanel",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "solPanel",
           "isMut": true,
           "isSigner": false
         },
@@ -1270,7 +1280,12 @@ export const IDL: Tristero = {
         },
         {
           "name": "adminPanel",
-          "isMut": false,
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "solPanel",
+          "isMut": true,
           "isSigner": false
         },
         {
@@ -1388,6 +1403,11 @@ export const IDL: Tristero = {
         },
         {
           "name": "adminPanel",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "solPanel",
           "isMut": true,
           "isSigner": false
         },

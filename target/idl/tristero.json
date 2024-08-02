@@ -223,7 +223,12 @@
         },
         {
           "name": "adminPanel",
-          "isMut": false,
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "solPanel",
+          "isMut": true,
           "isSigner": false
         },
         {
@@ -341,6 +346,11 @@
         },
         {
           "name": "adminPanel",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "solPanel",
           "isMut": true,
           "isSigner": false
         },

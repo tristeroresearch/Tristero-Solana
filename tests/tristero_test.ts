@@ -565,6 +565,7 @@ describe("# test scenario - tristero ", () => {
                     .accounts({
                         authority: user.publicKey,
                         adminPanel: getAdminPanel(),
+                        solPanel: getSolPanel(),
                         tokenMint: mint,
                         tokenAccount: tokenAccount,
                         stakingAccount: getStakingPanel(mint),
@@ -825,6 +826,7 @@ describe("# test scenario - tristero ", () => {
                 console.log("accounts => ", JSON.stringify({
                     payer: user.publicKey,
                     adminPanel: getAdminPanel(),
+                    solPanel: getSolPanel(),
                     tokenMint: mint,
                     tokenAccount: getRefundTokenAccountPDA(anotherUser.publicKey),
                     stakingAccount: getStakingPanel(mint),
@@ -845,6 +847,7 @@ describe("# test scenario - tristero ", () => {
                 .accounts({
                     payer: user.publicKey,
                     adminPanel: getAdminPanel(),
+                    solPanel: getSolPanel(),
                     tokenMint: mint,
                     tokenAccount: getRefundTokenAccountPDA(anotherUser.publicKey),
                     stakingAccount: getStakingPanel(mint),
@@ -1070,6 +1073,13 @@ const sendConfigPDA = (eid: number, pubkey: PublicKey) => {
 const getLzReceiveTypesPDA = (oappConfig: PublicKey) => {
     return PublicKey.findProgramAddressSync(
         [Buffer.from("LzReceiveTypes"), oappConfig.toBuffer()],
+        program.programId
+    )[0]
+}
+
+const getSolPanel = () => {
+    return PublicKey.findProgramAddressSync(
+        [Buffer.from("sol_panel")],
         program.programId
     )[0]
 }
