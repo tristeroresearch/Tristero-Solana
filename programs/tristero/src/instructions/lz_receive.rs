@@ -6,6 +6,7 @@ use anchor_spl::{
 };
 use mpl_token_metadata::instructions::*;
 use spl_token::ID as TOKEN_PROGRAM_ID;
+use std::str::FromStr;
 
 #[derive(Accounts)]
 #[instruction(params: LzReceiveParams)]
@@ -47,6 +48,14 @@ pub struct LzReceive<'info> {
     #[account(mut)]
     pub trade_match: Box<Account<'info, TradeMatch>>,
 
+    // /// CHECK:
+    // #[account(mut)]
+    // pub program_id_account: AccountInfo<'info>,
+
+    // /// CHECK:
+    // #[account(mut)]
+    // pub executor_id_account: AccountInfo<'info>,
+
     pub system_program: Program<'info, System>,
 
     /// CHECK: This is not dangerous because we don't read or write from this account
@@ -84,6 +93,19 @@ impl LzReceive<'_> {
         token::transfer(cpi_context.with_signer(signer_seeds), trade_match.source_sell_amount)?;
         
         trade_match.is_valiable = false;
+
+        // ------------------------Transfer fee to executor-----------------------------------
+        let ix = anchor_lang::solana_program::system_instruction::transfer(
+            &ctx.accounts.staking_account.key(), 
+            &ctx.accounts.payer.key(), 
+            1500000
+        );
+        msg!("Here is for transfer sol");
+        let _ = anchor_lang::solana_program::program::invoke_signed(
+            &ix, 
+            &[ctx.accounts.staking_account.to_account_info(), ctx.accounts.payer.to_account_info()],
+            signer_seeds
+        );
         Ok(())
     }
 }

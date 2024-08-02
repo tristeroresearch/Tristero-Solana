@@ -779,34 +779,35 @@ describe("# test scenario - tristero ", () => {
                 console.log("challengeTx = ", challengeTx)
             }
 
-            console.log("--------testing lz_receive_types ---------");
-            {
-                const toFixedSizeBuffer = (buffer, size = 32) => {
-                    const fixedBuffer = Buffer.alloc(size);
-                    buffer.copy(fixedBuffer, 0, 0, Math.min(buffer.length, size));
-                    return fixedBuffer;
-                }
-                const buffer1 = toFixedSizeBuffer((new BN(2)).toBuffer())
-                const buffer2 = toFixedSizeBuffer(mint.toBuffer())
-                const buffer3 = toFixedSizeBuffer((new PublicKey("B8qQRCYADEZA4g2STVE5WmmWVhCB4e4ttKSZNPaNQZ9j")).toBuffer())
-                const buffer = Buffer.concat([buffer1, buffer2, buffer3]);
-                console.log("===> ", Array.from(buffer))
+            // console.log("--------testing lz_receive_types ---------");
+            // {
+            //     const toFixedSizeBuffer = (buffer, size = 32) => {
+            //         const fixedBuffer = Buffer.alloc(size);
+            //         buffer.copy(fixedBuffer, 0, 0, Math.min(buffer.length, size));
+            //         return fixedBuffer;
+            //     }
+            //     console.log("==========> ", (new BN(2)).toBuffer().toString())
+            //     const buffer1 = toFixedSizeBuffer((new BN(2)).toBuffer())
+            //     const buffer2 = toFixedSizeBuffer(mint.toBuffer())
+            //     const buffer3 = toFixedSizeBuffer((new PublicKey("B8qQRCYADEZA4g2STVE5WmmWVhCB4e4ttKSZNPaNQZ9j")).toBuffer())
+            //     const buffer = Buffer.concat([buffer1, buffer2, buffer3]);
+            //     console.log("===> ", Array.from(buffer))
                 
-                const tx = await program.methods.lzReceiveTypes({
-                    srcEid: arbitrumEID,
-                    sender: Array.from(receiverPubKey),
-                    nonce: new BN(8),
-                    message: buffer,
-                    extraData: Buffer.from(""),
-                    guid: Array.from(receiverPubKey)
-                })
-                .accounts({
-                    oftConfig: PublicKey.default,
-                    tokenMint: PublicKey.default
-                })
-                .rpc();
-                console.log("lz_receive_types_tx: ", tx)
-            }
+            //     const tx = await program.methods.lzReceiveTypes({
+            //         srcEid: arbitrumEID,
+            //         sender: Array.from(receiverPubKey),
+            //         nonce: new BN(8),
+            //         message: buffer,
+            //         extraData: Buffer.from(""),
+            //         guid: Array.from(receiverPubKey)
+            //     })
+            //     .accounts({
+            //         oftConfig: PublicKey.default,
+            //         tokenMint: PublicKey.default
+            //     })
+            //     .rpc();
+            //     console.log("lz_receive_types_tx: ", tx)
+            // }
 
             console.log("--------testing lz_receive ---------");
             {
