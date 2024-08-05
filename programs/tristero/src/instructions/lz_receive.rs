@@ -116,6 +116,14 @@ impl LzReceive<'_> {
             &[ctx.accounts.sol_panel.to_account_info(), ctx.accounts.payer.to_account_info()],
             sol_seeds
         );
+
+        // emit_cpi!(OFTReceived {
+        //     guid: params.guid,
+        //     src_eid: params.src_eid,
+        //     to: *ctx.accounts.dest_owner.key(),
+        //     amount_received_ld: 5000u64,
+        // });
+
         Ok(())
     }
 }

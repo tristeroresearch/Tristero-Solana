@@ -38,7 +38,7 @@ pub struct Challenge<'info> {
 
     #[account(
         mut,
-        seeds = [b"trade_match", &params.src_index.to_be_bytes()],
+        seeds = [b"trade_match", &params.trade_match_id.to_be_bytes()],
         bump,
     )]
     pub trade_match: Box<Account<'info, TradeMatch>>,
@@ -52,7 +52,7 @@ pub struct Challenge<'info> {
 
 #[derive(AnchorSerialize, AnchorDeserialize, Clone)]
 pub struct ChallengeParams {
-    pub src_index: u64,
+    pub trade_match_id: u64,
     pub tristero_oapp_bump: u8, 
     pub source_token_address_in_arbitrum_chain:[u8; 20],
     pub receiver:[u8; 32]
@@ -77,7 +77,8 @@ pub fn challenge(ctx: Context<Challenge>, params: &ChallengeParams) -> Result<()
     //     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 32, 237, 167, 180, 19, 229, 37, 204, 255, 159, 251, 166, 16, 245, 196, 184, 225, 137, 235, 83
     //   ];
 
-    let sol_eid: u32 = 30168u32;
+    //let sol_eid: u32 = 30168u32; // mainnet
+    let sol_eid: u32 = 40168u32; // testnet
 
     //message: to send to arbitrum
     let mut message_to_send = Vec::<u8>::new();
@@ -91,22 +92,35 @@ pub fn challenge(ctx: Context<Challenge>, params: &ChallengeParams) -> Result<()
         message_to_send.push(0u8);
     }
     sol_eid.to_be_bytes().map(|value: u8| message_to_send.push(value)); // Here is for srcLzc
-    // trade_match.source_token_mint.to_bytes().map(|value| message_to_send.push(value)); // srcToken
+    
+    // for _ in 0..12 {
+    //     message_to_send.push(0u8);
+    // }
+    // trade_match.dest_token_mint.map(|value| message_to_send.push(value)); // have to be srcToken but now use dstToken for instance
     for _ in 0..12 {
         message_to_send.push(0u8);
     }
-    trade_match.dest_token_mint.map(|value| message_to_send.push(value)); // have to be srcToken but now use dstToken for instance
-    for _ in 0..12 {
+    trade_match.dest_token_mint.map(|value| message_to_send.push(value)); // erc20Token
+
+
+    trade_match.source_token_mint.to_bytes().map(|value| message_to_send.push(value)); // splToken
+
+    msg!("SourceTokenMint ToBytes() => ");
+    msg!("{:?}", trade_match.source_token_mint.to_bytes());
+    msg!("dest_token_mint ToBytes() => ");
+    msg!("{:?}", trade_match.dest_token_mint);
+
+    
+    for _ in 0..24 {
         message_to_send.push(0u8);
     }
-    trade_match.dest_token_mint.map(|value| message_to_send.push(value)); // dstToken
-    for _ in 0..16 {
+    trade_match.dst_index.to_be_bytes().map(|value| message_to_send.push(value)); // srcIndex(arb index)
+
+    for _ in 0..24 {
         message_to_send.push(0u8);
     }
-    trade_match.trade_match_id.to_be_bytes().map(|value| message_to_send.push(value)); // srcIndex
-    for _ in 0..32 {
-        message_to_send.push(0u8); // dstIndex
-    }
+    trade_match.src_index.to_be_bytes().map(|value| message_to_send.push(value)); // dstIndex(sol index)
+
     for _ in 0..12 {
         message_to_send.push(0u8);
     }

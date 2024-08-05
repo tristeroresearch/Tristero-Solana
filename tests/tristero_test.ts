@@ -51,7 +51,7 @@ const anotherUser = anchor.web3.Keypair.fromSecretKey(Uint8Array.from(otherJson)
 const admin = anchor.web3.Keypair.fromSecretKey(Uint8Array.from(adminJson))
 const receiverPubKey = Buffer.alloc(32, 0);
 // const paddedBuffer = Buffer.from('20eda7b413e525ccff9ffba610f5c4b8e189eb53', 'hex') // have to change to arbitrum side
-const paddedBuffer = Buffer.from('3D3D38bDF46b546685472C658073E74684Ae5a96', 'hex')
+const paddedBuffer = Buffer.from('E109512eFd618066aE3D4779ea3052825cb78744', 'hex')
 paddedBuffer.copy(receiverPubKey, 12);
 console.log("receiverPubKey => ", receiverPubKey)
 const arbitrumEID = 40231; // Here is for Arbitrum Sepolia Testnet
@@ -551,7 +551,8 @@ describe("# test scenario - tristero ", () => {
             const adminPanel = await program.account.adminPanel.fetch(getAdminPanel());
             console.log("orderId => ", adminPanel.orderCount)
             console.log("orderPDA => ", getOrderPDA(adminPanel.orderCount))
-            const erc20Addr = Buffer.from('fd086bc7cd5c481dcc9c85ebe478a1c0b69fcbb9', 'hex')
+            const erc20Addr = Buffer.from('75faf114eafb1bdbe2f0316df893fd58ce46aa4d', 'hex')
+            const arbWalletAddr = Buffer.from('De7014167c36c39aAfb56aA0Bd87776d8911369A', 'hex')
             console.log("------------------------Place Order----------------------------");
             {
                 const placeOrderTx = await program.methods.placeOrder({
@@ -581,17 +582,17 @@ describe("# test scenario - tristero ", () => {
             console.log("------------------------Create Match------------------------------");
             {
                 const createMatchTx = await program.methods.createMatch({
-                        srcIndex: new BN(0),
-                        dstIndex: new BN(0),
+                        srcIndex: new BN(59),
+                        dstIndex: new BN(4),
                         srcQuantity: new BN(90),
                         dstQuantity: new BN(90),
                         tradeMatchId: adminPanel.matchCount,
-                        arbSourceTokenAddr: Array.from(erc20Addr)
+                        arbSourceTokenAddr: Array.from(arbWalletAddr)
                     })
                     .accounts({
                         authority: user.publicKey,
                         adminPanel: getAdminPanel(),
-                        order: getOrderPDA(new BN(0)),
+                        order: getOrderPDA(new BN(59)),
                         tradeMatch: getTradeMatchPDA(adminPanel.matchCount),
                         systemProgram: SystemProgram.programId,
                         tokenProgram: TOKEN_PROGRAM_ID
@@ -757,9 +758,9 @@ describe("# test scenario - tristero ", () => {
                 tx.add(ComputeBudgetProgram.setComputeUnitLimit({ units: 2000000 }))
 
                 let instruction = await program.methods.challenge({
-                    srcIndex: adminPanel.matchCount,
+                    tradeMatchId: adminPanel.matchCount,
                     tristeroOappBump: getTristeroOappBump(),
-                    sourceTokenAddressInArbitrumChain: Array.from(erc20Addr),
+                    sourceTokenAddressInArbitrumChain: Array.from(arbWalletAddr),
                     receiver: Array.from(receiverPubKey)
                 })
                     .accounts({
@@ -811,55 +812,55 @@ describe("# test scenario - tristero ", () => {
             // }
 
             console.log("--------testing lz_receive ---------");
-            {
-                const toFixedSizeBuffer = (buffer, size = 32) => {
-                    const fixedBuffer = Buffer.alloc(size);
-                    buffer.copy(fixedBuffer, 0, 0, Math.min(buffer.length, size));
-                    return fixedBuffer;
-                }
-                const buffer1 = toFixedSizeBuffer((new BN(2)).toBuffer())
-                const buffer2 = toFixedSizeBuffer(mint.toBuffer())
-                const buffer3 = toFixedSizeBuffer((new PublicKey("B8qQRCYADEZA4g2STVE5WmmWVhCB4e4ttKSZNPaNQZ9j")).toBuffer())
-                const buffer = Buffer.concat([buffer1, buffer2, buffer3]);
-                console.log("===> ", Array.from(buffer))
+            // {
+            //     const toFixedSizeBuffer = (buffer, size = 32) => {
+            //         const fixedBuffer = Buffer.alloc(size);
+            //         buffer.copy(fixedBuffer, 0, 0, Math.min(buffer.length, size));
+            //         return fixedBuffer;
+            //     }
+            //     const buffer1 = toFixedSizeBuffer((new BN(2)).toBuffer())
+            //     const buffer2 = toFixedSizeBuffer(mint.toBuffer())
+            //     const buffer3 = toFixedSizeBuffer((new PublicKey("B8qQRCYADEZA4g2STVE5WmmWVhCB4e4ttKSZNPaNQZ9j")).toBuffer())
+            //     const buffer = Buffer.concat([buffer1, buffer2, buffer3]);
+            //     console.log("===> ", Array.from(buffer))
 
-                console.log("accounts => ", JSON.stringify({
-                    payer: user.publicKey,
-                    adminPanel: getAdminPanel(),
-                    solPanel: getSolPanel(),
-                    tokenMint: mint,
-                    tokenAccount: getRefundTokenAccountPDA(anotherUser.publicKey),
-                    stakingAccount: getStakingPanel(mint),
-                    systemProgram: SystemProgram.programId,
-                    tokenProgram: TOKEN_PROGRAM_ID,
-                    tradeMatch: getTradeMatchPDA(adminPanel.matchCount),
-                    destOwner: anotherUser.publicKey
-                }))
+            //     console.log("accounts => ", JSON.stringify({
+            //         payer: user.publicKey,
+            //         adminPanel: getAdminPanel(),
+            //         solPanel: getSolPanel(),
+            //         tokenMint: mint,
+            //         tokenAccount: getRefundTokenAccountPDA(anotherUser.publicKey),
+            //         stakingAccount: getStakingPanel(mint),
+            //         systemProgram: SystemProgram.programId,
+            //         tokenProgram: TOKEN_PROGRAM_ID,
+            //         tradeMatch: getTradeMatchPDA(adminPanel.matchCount),
+            //         destOwner: anotherUser.publicKey
+            //     }))
                 
-                const tx = await program.methods.lzReceive({
-                    srcEid: arbitrumEID,
-                    sender: Array.from(receiverPubKey),
-                    nonce: new BN(8),
-                    message: buffer,
-                    extraData: Buffer.from(""),
-                    guid: Array.from(receiverPubKey)
-                })
-                .accounts({
-                    payer: user.publicKey,
-                    adminPanel: getAdminPanel(),
-                    solPanel: getSolPanel(),
-                    tokenMint: mint,
-                    tokenAccount: getRefundTokenAccountPDA(anotherUser.publicKey),
-                    stakingAccount: getStakingPanel(mint),
-                    systemProgram: SystemProgram.programId,
-                    tokenProgram: TOKEN_PROGRAM_ID,
-                    tradeMatch: getTradeMatchPDA(adminPanel.matchCount),
-                    destOwner: anotherUser.publicKey
-                })
-                .signers([user])
-                .rpc();
-                console.log("lz_receive_tx: ", tx)
-            }
+            //     const tx = await program.methods.lzReceive({
+            //         srcEid: arbitrumEID,
+            //         sender: Array.from(receiverPubKey),
+            //         nonce: new BN(8),
+            //         message: buffer,
+            //         extraData: Buffer.from(""),
+            //         guid: Array.from(receiverPubKey)
+            //     })
+            //     .accounts({
+            //         payer: user.publicKey,
+            //         adminPanel: getAdminPanel(),
+            //         solPanel: getSolPanel(),
+            //         tokenMint: mint,
+            //         tokenAccount: getRefundTokenAccountPDA(anotherUser.publicKey),
+            //         stakingAccount: getStakingPanel(mint),
+            //         systemProgram: SystemProgram.programId,
+            //         tokenProgram: TOKEN_PROGRAM_ID,
+            //         tradeMatch: getTradeMatchPDA(adminPanel.matchCount),
+            //         destOwner: anotherUser.publicKey
+            //     })
+            //     .signers([user])
+            //     .rpc();
+            //     console.log("lz_receive_tx: ", tx)
+            // }
             //     const sendLibraryConfig = getSendLibraryConfigPDA(tristeroOappPubkey, arbitrumEID);
             //     const defaultSendLibraryConfig = getDefaultSendLibraryConfig(arbitrumEID);
             //     const sendLibraryInfo = await getSendLibraryInfoPDA(sendLibraryConfig, defaultSendLibraryConfig);

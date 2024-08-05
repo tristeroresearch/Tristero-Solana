@@ -616,7 +616,7 @@ export type Tristero = {
         "kind": "struct",
         "fields": [
           {
-            "name": "srcIndex",
+            "name": "tradeMatchId",
             "type": "u64"
           },
           {
@@ -911,6 +911,38 @@ export type Tristero = {
           }
         ]
       }
+    }
+  ],
+  "events": [
+    {
+      "name": "OFTReceived",
+      "fields": [
+        {
+          "name": "guid",
+          "type": {
+            "array": [
+              "u8",
+              32
+            ]
+          },
+          "index": false
+        },
+        {
+          "name": "srcEid",
+          "type": "u32",
+          "index": false
+        },
+        {
+          "name": "to",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "amountReceivedLd",
+          "type": "u64",
+          "index": false
+        }
+      ]
     }
   ],
   "errors": [
@@ -1673,7 +1705,7 @@ export const IDL: Tristero = {
         "kind": "struct",
         "fields": [
           {
-            "name": "srcIndex",
+            "name": "tradeMatchId",
             "type": "u64"
           },
           {
@@ -1968,6 +2000,38 @@ export const IDL: Tristero = {
           }
         ]
       }
+    }
+  ],
+  "events": [
+    {
+      "name": "OFTReceived",
+      "fields": [
+        {
+          "name": "guid",
+          "type": {
+            "array": [
+              "u8",
+              32
+            ]
+          },
+          "index": false
+        },
+        {
+          "name": "srcEid",
+          "type": "u32",
+          "index": false
+        },
+        {
+          "name": "to",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "amountReceivedLd",
+          "type": "u64",
+          "index": false
+        }
+      ]
     }
   ],
   "errors": [
