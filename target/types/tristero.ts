@@ -831,7 +831,7 @@ export type Tristero = {
         "kind": "struct",
         "fields": [
           {
-            "name": "srcIndex",
+            "name": "tradeMatchId",
             "type": "u64"
           },
           {
@@ -1920,7 +1920,7 @@ export const IDL: Tristero = {
         "kind": "struct",
         "fields": [
           {
-            "name": "srcIndex",
+            "name": "tradeMatchId",
             "type": "u64"
           },
           {

@@ -582,8 +582,8 @@ describe("# test scenario - tristero ", () => {
             console.log("------------------------Create Match------------------------------");
             {
                 const createMatchTx = await program.methods.createMatch({
-                        srcIndex: new BN(59),
-                        dstIndex: new BN(4),
+                        srcIndex: new BN(60),
+                        dstIndex: new BN(5),
                         srcQuantity: new BN(90),
                         dstQuantity: new BN(90),
                         tradeMatchId: adminPanel.matchCount,
@@ -592,7 +592,7 @@ describe("# test scenario - tristero ", () => {
                     .accounts({
                         authority: user.publicKey,
                         adminPanel: getAdminPanel(),
-                        order: getOrderPDA(new BN(59)),
+                        order: getOrderPDA(new BN(60)),
                         tradeMatch: getTradeMatchPDA(adminPanel.matchCount),
                         systemProgram: SystemProgram.programId,
                         tokenProgram: TOKEN_PROGRAM_ID
