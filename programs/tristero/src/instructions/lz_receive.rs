@@ -109,8 +109,8 @@ impl LzReceive<'_> {
         let trade_match = ctx.accounts.trade_match.as_mut();
 
         let msg_vec:Vec<[u8; 32]> = split_into_chunks(params.message.clone());
-        let arb_receive_addr = msg_vec[4];
-        let msg_type =  vec_to_u64(msg_vec[5]);
+        
+        let msg_type =  vec_to_u64(msg_vec[4]);
 
         if msg_type == 1u64 {
             // ---------------------Transfer the source token from the staking account----------------------------------
@@ -143,6 +143,8 @@ impl LzReceive<'_> {
                 sol_seeds
             );
         } else {
+            let arb_receive_addr = msg_vec[5];
+            
             // ---------------------Transfer from staking account to Arb user's token account----------------------------------
             let cpi_accounts = Transfer {
                 from: ctx.accounts.staking_account.to_account_info(),
