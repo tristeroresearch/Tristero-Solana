@@ -80,7 +80,6 @@ pub struct SendStored<'info> {
 #[derive(AnchorSerialize, AnchorDeserialize, Clone)]
 pub struct SendStoredParams {
     pub trade_match_id: u64,
-    pub eid: u32,
     pub tristero_oapp_bump: u8, 
     pub source_token_address_in_arbitrum_chain: [u8; 32],
     pub receiver:[u8; 32]

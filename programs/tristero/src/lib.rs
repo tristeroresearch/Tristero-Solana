@@ -81,6 +81,10 @@ pub mod tristero {
     pub fn place_order(mut ctx: Context<PlaceOrder>, params: PlaceOrderParams) -> Result<()> {
         instructions::place_order(ctx, &params)
     }
+
+    pub fn send_stored(mut ctx: Context<SendStored>, params: SendStoredParams) -> Result<()> {
+        instructions::send_stored(ctx, &params)
+    }
 } 
 
 #[cfg(feature = "cpi")]
