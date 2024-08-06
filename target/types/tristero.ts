@@ -899,10 +899,6 @@ export type Tristero = {
             "type": "u64"
           },
           {
-            "name": "eid",
-            "type": "u32"
-          },
-          {
             "name": "tristeroOappBump",
             "type": "u8"
           },
@@ -911,7 +907,7 @@ export type Tristero = {
             "type": {
               "array": [
                 "u8",
-                32
+                20
               ]
             }
           },
@@ -2052,10 +2048,6 @@ export const IDL: Tristero = {
             "type": "u64"
           },
           {
-            "name": "eid",
-            "type": "u32"
-          },
-          {
             "name": "tristeroOappBump",
             "type": "u8"
           },
@@ -2064,7 +2056,7 @@ export const IDL: Tristero = {
             "type": {
               "array": [
                 "u8",
-                32
+                20
               ]
             }
           },

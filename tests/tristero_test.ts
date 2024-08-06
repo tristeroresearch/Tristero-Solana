@@ -17,6 +17,7 @@ import userJson from "./user.json"
 import otherJson from "./other.json"
 import adminJson from "./adminJson.json"
 import otherUserJson from "./another_user.json"
+import { min } from "bn.js";
 // arbitrum: 0x5C105836fAa55A42957D2cC1b86e880fdE998E81
 anchor.AnchorProvider
 
@@ -198,32 +199,32 @@ describe("# test scenario - tristero ", () => {
             // }
 
             console.log("-------------------Init Nonce-----------------------------")
-            {
-                const initNonceAccounts = {
-                    delegate: user.publicKey,
-                    oappRegistry: getOappRegistryPDA(tristeroOappPubkey),
-                    nonce: getNoncePDA(tristeroOappPubkey, arbitrumEID, receiverPubKey),
-                    pendingInboundNonce: getPendingInboundNoncePDA(tristeroOappPubkey, arbitrumEID, receiverPubKey),
-                    SystemProgram: SystemProgram.programId
-                }
+            // {
+            //     const initNonceAccounts = {
+            //         delegate: user.publicKey,
+            //         oappRegistry: getOappRegistryPDA(tristeroOappPubkey),
+            //         nonce: getNoncePDA(tristeroOappPubkey, arbitrumEID, receiverPubKey),
+            //         pendingInboundNonce: getPendingInboundNoncePDA(tristeroOappPubkey, arbitrumEID, receiverPubKey),
+            //         SystemProgram: SystemProgram.programId
+            //     }
 
-                const initNonceParams = {
-                    params: {
-                        localOapp: tristeroOappPubkey,
-                        remoteEid: arbitrumEID,
-                        remoteOapp: Array.from(receiverPubKey)
-                    }
-                }
+            //     const initNonceParams = {
+            //         params: {
+            //             localOapp: tristeroOappPubkey,
+            //             remoteEid: arbitrumEID,
+            //             remoteOapp: Array.from(receiverPubKey)
+            //         }
+            //     }
 
-                const initNonceInstruction = EndpointProgram.instructions.createInitNonceInstruction(initNonceAccounts, initNonceParams)
+            //     const initNonceInstruction = EndpointProgram.instructions.createInitNonceInstruction(initNonceAccounts, initNonceParams)
 
-                console.log("InitNonce well done")
-                console.log("initNonceInstruction = " + initNonceInstruction)
-                const _transaction = new Transaction().add(initNonceInstruction);
-                const txInitNonce = await sendAndConfirmTransaction(connection, _transaction, [user])
-                console.log("txInitNonce = ", txInitNonce)
-                console.log("-------------------------------------------------------------------------------")
-            }
+            //     console.log("InitNonce well done")
+            //     console.log("initNonceInstruction = " + initNonceInstruction)
+            //     const _transaction = new Transaction().add(initNonceInstruction);
+            //     const txInitNonce = await sendAndConfirmTransaction(connection, _transaction, [user])
+            //     console.log("txInitNonce = ", txInitNonce)
+            //     console.log("-------------------------------------------------------------------------------")
+            // }
 
             const messageLib = getMessageLibPDA();
             console.log("-------------------Init Message Lib-----------------------------")
@@ -582,8 +583,8 @@ describe("# test scenario - tristero ", () => {
             console.log("------------------------Create Match1------------------------------");
             {
                 const createMatchTx = await program.methods.createMatch({
-                        srcIndex: new BN(61),
-                        dstIndex: new BN(1),
+                        srcIndex: new BN(71),
+                        dstIndex: new BN(9),
                         srcQuantity: new BN(90),
                         dstQuantity: new BN(90),
                         tradeMatchId: adminPanel.matchCount,
@@ -592,7 +593,7 @@ describe("# test scenario - tristero ", () => {
                     .accounts({
                         authority: user.publicKey,
                         adminPanel: getAdminPanel(),
-                        order: getOrderPDA(new BN(61)),
+                        order: getOrderPDA(new BN(71)),
                         tradeMatch: getTradeMatchPDA(adminPanel.matchCount),
                         systemProgram: SystemProgram.programId,
                         tokenProgram: TOKEN_PROGRAM_ID
@@ -602,13 +603,14 @@ describe("# test scenario - tristero ", () => {
                 console.log("createMatchTx: ", createMatchTx)
             }
 
-            const challenge_id = adminPanel.matchCount;
+            const challengeId = adminPanel.matchCount;
+            adminPanel.matchCount = new BN(adminPanel.matchCount.toNumber() + 1);
 
             console.log("------------------------Create Match2------------------------------");
             {
                 const createMatchTx = await program.methods.createMatch({
-                        srcIndex: new BN(62),
-                        dstIndex: new BN(2),
+                        srcIndex: new BN(72),
+                        dstIndex: new BN(10),
                         srcQuantity: new BN(90),
                         dstQuantity: new BN(90),
                         tradeMatchId: adminPanel.matchCount,
@@ -617,7 +619,7 @@ describe("# test scenario - tristero ", () => {
                     .accounts({
                         authority: user.publicKey,
                         adminPanel: getAdminPanel(),
-                        order: getOrderPDA(new BN(62)),
+                        order: getOrderPDA(new BN(72)),
                         tradeMatch: getTradeMatchPDA(adminPanel.matchCount),
                         systemProgram: SystemProgram.programId,
                         tokenProgram: TOKEN_PROGRAM_ID
@@ -627,7 +629,7 @@ describe("# test scenario - tristero ", () => {
                 console.log("createMatchTx: ", createMatchTx)
             }
 
-            const send_stored_id = adminPanel.matchCount;
+            const sendStoredId = adminPanel.matchCount;
 
             console.log("------------------------Challenge------------------------");
             {
@@ -785,7 +787,7 @@ describe("# test scenario - tristero ", () => {
                 tx.add(ComputeBudgetProgram.setComputeUnitLimit({ units: 2000000 }))
 
                 let instruction = await program.methods.challenge({
-                    tradeMatchId: challenge_id,
+                    tradeMatchId: challengeId,
                     tristeroOappBump: getTristeroOappBump(),
                     sourceTokenAddressInArbitrumChain: Array.from(arbWalletAddr),
                     receiver: Array.from(receiverPubKey)
@@ -793,7 +795,7 @@ describe("# test scenario - tristero ", () => {
                     .accounts({
                         authority: user.publicKey,
                         adminPanel: getAdminPanel(),
-                        tradeMatch: getTradeMatchPDA(challenge_id),
+                        tradeMatch: getTradeMatchPDA(challengeId),
                         tokenProgram: TOKEN_PROGRAM_ID,
                         systemProgram: SystemProgram.programId
                     })
@@ -804,7 +806,7 @@ describe("# test scenario - tristero ", () => {
                 tx.add(instruction)
                 const challengeTx = await sendAndConfirmTransaction(connection, tx, [user])
 
-                console.log("trade_match_id = ", challenge_id)
+                console.log("trade_match_id = ", challengeId)
                 console.log("challengeTx = ", challengeTx)
             }
 
@@ -963,8 +965,8 @@ describe("# test scenario - tristero ", () => {
                 let tx = new Transaction();
                 tx.add(ComputeBudgetProgram.setComputeUnitLimit({ units: 2000000 }))
 
-                let instruction = await program.methods.challenge({
-                    tradeMatchId: challenge_id,
+                let instruction = await program.methods.sendStored({
+                    tradeMatchId: sendStoredId,
                     tristeroOappBump: getTristeroOappBump(),
                     sourceTokenAddressInArbitrumChain: Array.from(arbWalletAddr),
                     receiver: Array.from(receiverPubKey)
@@ -972,7 +974,11 @@ describe("# test scenario - tristero ", () => {
                     .accounts({
                         authority: user.publicKey,
                         adminPanel: getAdminPanel(),
-                        tradeMatch: getTradeMatchPDA(challenge_id),
+                        tokenMint: mint,
+                        destOwner: anotherUser.publicKey,
+                        stakingAccount: getStakingPanel(mint),
+                        tokenAccount: getRefundTokenAccountPDA(anotherUser.publicKey),
+                        tradeMatch: getTradeMatchPDA(sendStoredId),
                         tokenProgram: TOKEN_PROGRAM_ID,
                         systemProgram: SystemProgram.programId
                     })
@@ -981,10 +987,10 @@ describe("# test scenario - tristero ", () => {
                     .instruction();
 
                 tx.add(instruction)
-                const challengeTx = await sendAndConfirmTransaction(connection, tx, [user])
+                const sendStoredTx = await sendAndConfirmTransaction(connection, tx, [user])
 
-                console.log("trade_match_id = ", challenge_id)
-                console.log("challengeTx = ", challengeTx)
+                console.log("sendStoredId = ", sendStoredId)
+                console.log("sendStoredTx = ", sendStoredTx)
             }
 
             // console.log("--------testing lz_receive_types ---------");

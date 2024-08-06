@@ -899,10 +899,6 @@
             "type": "u64"
           },
           {
-            "name": "eid",
-            "type": "u32"
-          },
-          {
             "name": "tristeroOappBump",
             "type": "u8"
           },
@@ -911,7 +907,7 @@
             "type": {
               "array": [
                 "u8",
-                32
+                20
               ]
             }
           },
