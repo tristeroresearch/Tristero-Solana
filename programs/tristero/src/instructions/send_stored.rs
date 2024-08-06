@@ -178,7 +178,7 @@ pub fn send_stored(ctx: Context<SendStored>, params: &SendStoredParams) -> Resul
     for _ in 0..31 {
         message_to_send.push(0u8);
     }
-    message_to_send.push(2u8); // Here is for _msgType
+    message_to_send.push(1u8); // Here is for _msgType
 
     // for _ in 0..32 { // Here is for _extraOptionsLength
     //     message_to_send.push(0u8);

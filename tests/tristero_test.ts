@@ -583,7 +583,7 @@ describe("# test scenario - tristero ", () => {
             {
                 const createMatchTx = await program.methods.createMatch({
                         srcIndex: new BN(60),
-                        dstIndex: new BN(5),
+                        dstIndex: new BN(0),
                         srcQuantity: new BN(90),
                         dstQuantity: new BN(90),
                         tradeMatchId: adminPanel.matchCount,
