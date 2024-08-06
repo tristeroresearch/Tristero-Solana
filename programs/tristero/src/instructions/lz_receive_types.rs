@@ -60,11 +60,17 @@ impl LzReceiveTypes<'_> {
             &program_id,
         );
 
+        let (oapp, _) = Pubkey::find_program_address(
+            &[b"TristeroOapp"], 
+            &program_id
+        );
+
         // account 0..1
         let mut accounts = vec![
             LzAccount { pubkey: Pubkey::default(), is_signer: true, is_writable: true }, // 0
-            LzAccount { pubkey: admin_panel, is_signer: false, is_writable: true },      // 1
-            LzAccount { pubkey: sol_panel, is_signer: false, is_writable: true },      // 2
+            LzAccount { pubkey: oapp, is_signer: false, is_writable: true }, //1
+            LzAccount { pubkey: admin_panel, is_signer: false, is_writable: true },      // 2
+            LzAccount { pubkey: sol_panel, is_signer: false, is_writable: true },      // 3
         ];
 
         // analyze msg from arb, msg consists of trade_match_id, dest_token_mint, to_address
@@ -76,7 +82,7 @@ impl LzReceiveTypes<'_> {
         msg!("trade_match_id => {:#?}, token_mint => {:#?}, to_address => {:#?}", trade_match_id, token_mint, to_address);
 
         accounts.extend_from_slice(&[
-            LzAccount { pubkey: token_mint, is_signer: false, is_writable: true }, // 3
+            LzAccount { pubkey: token_mint, is_signer: false, is_writable: true }, // 4
         ]);
         // account 3
         let (token_dest, _) = Pubkey::find_program_address(
@@ -84,8 +90,8 @@ impl LzReceiveTypes<'_> {
             &program_id,
         );
         accounts.extend_from_slice(&[
-            LzAccount { pubkey: token_dest, is_signer: false, is_writable: true }, // 4
-            LzAccount { pubkey: to_address, is_signer: false, is_writable: true }, // 5
+            LzAccount { pubkey: token_dest, is_signer: false, is_writable: true }, // 5
+            LzAccount { pubkey: to_address, is_signer: false, is_writable: true }, // 6
         ]);
 
         // account 5
@@ -94,7 +100,7 @@ impl LzReceiveTypes<'_> {
             &program_id
         );
         accounts.extend_from_slice(&[
-            LzAccount { pubkey: staking_account, is_signer: false, is_writable: true }, // 6
+            LzAccount { pubkey: staking_account, is_signer: false, is_writable: true }, // 7
         ]);
 
         // account 6
@@ -104,13 +110,13 @@ impl LzReceiveTypes<'_> {
         );
 
         accounts.extend_from_slice(&[
-            LzAccount { pubkey: trade_match, is_signer: false, is_writable: true }, // 7
+            LzAccount { pubkey: trade_match, is_signer: false, is_writable: true }, // 8
         ]);
 
         // account 9, 10
         accounts.extend_from_slice(&[
-            LzAccount { pubkey: system_program::ID, is_signer: false, is_writable: false }, // 8
-            LzAccount { pubkey: TOKEN_PROGRAM_ID, is_signer: false, is_writable: false } // 9
+            LzAccount { pubkey: system_program::ID, is_signer: false, is_writable: false }, // 9
+            LzAccount { pubkey: TOKEN_PROGRAM_ID, is_signer: false, is_writable: false } // 10
         ]);
 
         Ok(accounts)
