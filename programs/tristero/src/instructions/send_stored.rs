@@ -184,7 +184,7 @@ pub fn send_stored(ctx: Context<SendStored>, params: &SendStoredParams) -> Resul
     // }
 
     let cpi_params = SendParams {
-        dst_eid: params.eid,
+        dst_eid: trade_match.eid,
         receiver: params.receiver,
         message: message_to_send, 
         options: receive_options.to_vec(),
