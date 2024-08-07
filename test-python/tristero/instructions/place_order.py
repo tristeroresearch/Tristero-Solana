@@ -9,37 +9,47 @@ from .. import types
 from ..program_id import PROGRAM_ID
 
 
-class CreateMatchArgs(typing.TypedDict):
-    params: types.create_match_params.CreateMatchParams
+class PlaceOrderArgs(typing.TypedDict):
+    params: types.place_order_params.PlaceOrderParams
 
 
-layout = borsh.CStruct("params" / types.create_match_params.CreateMatchParams.layout)
+layout = borsh.CStruct("params" / types.place_order_params.PlaceOrderParams.layout)
 
 
-class CreateMatchAccounts(typing.TypedDict):
+class PlaceOrderAccounts(typing.TypedDict):
     authority: Pubkey
     admin_panel: Pubkey
+    sol_panel: Pubkey
+    token_mint: Pubkey
+    token_account: Pubkey
+    staking_account: Pubkey
     order: Pubkey
-    trade_match: Pubkey
 
 
-def create_match(
-    args: CreateMatchArgs,
-    accounts: CreateMatchAccounts,
+def place_order(
+    args: PlaceOrderArgs,
+    accounts: PlaceOrderAccounts,
     program_id: Pubkey = PROGRAM_ID,
     remaining_accounts: typing.Optional[typing.List[AccountMeta]] = None,
 ) -> Instruction:
     keys: list[AccountMeta] = [
         AccountMeta(pubkey=accounts["authority"], is_signer=True, is_writable=True),
         AccountMeta(pubkey=accounts["admin_panel"], is_signer=False, is_writable=True),
+        AccountMeta(pubkey=accounts["sol_panel"], is_signer=False, is_writable=True),
+        AccountMeta(pubkey=accounts["token_mint"], is_signer=False, is_writable=False),
+        AccountMeta(
+            pubkey=accounts["token_account"], is_signer=False, is_writable=True
+        ),
+        AccountMeta(
+            pubkey=accounts["staking_account"], is_signer=False, is_writable=True
+        ),
         AccountMeta(pubkey=accounts["order"], is_signer=False, is_writable=True),
-        AccountMeta(pubkey=accounts["trade_match"], is_signer=False, is_writable=True),
         AccountMeta(pubkey=SYS_PROGRAM_ID, is_signer=False, is_writable=False),
         AccountMeta(pubkey=TOKEN_PROGRAM_ID, is_signer=False, is_writable=False),
     ]
     if remaining_accounts is not None:
         keys += remaining_accounts
-    identifier = b"k\x02\xb8\x91F\x8e\x11\xa5"
+    identifier = b"3\xc2\x9b\xafm\x82`j"
     encoded_args = layout.build(
         {
             "params": args["params"].to_encodable(),

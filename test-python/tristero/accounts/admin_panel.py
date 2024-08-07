@@ -16,6 +16,8 @@ class AdminPanelJSON(typing.TypedDict):
     payment_wallet: str
     admin_panel_bump: int
     freeze_fee: int
+    match_count: int
+    order_count: int
 
 
 @dataclass
@@ -26,11 +28,15 @@ class AdminPanel:
         "payment_wallet" / BorshPubkey,
         "admin_panel_bump" / borsh.U8,
         "freeze_fee" / borsh.U64,
+        "match_count" / borsh.U64,
+        "order_count" / borsh.U64,
     )
     admin_wallet: Pubkey
     payment_wallet: Pubkey
     admin_panel_bump: int
     freeze_fee: int
+    match_count: int
+    order_count: int
 
     @classmethod
     async def fetch(
@@ -80,6 +86,8 @@ class AdminPanel:
             payment_wallet=dec.payment_wallet,
             admin_panel_bump=dec.admin_panel_bump,
             freeze_fee=dec.freeze_fee,
+            match_count=dec.match_count,
+            order_count=dec.order_count,
         )
 
     def to_json(self) -> AdminPanelJSON:
@@ -88,6 +96,8 @@ class AdminPanel:
             "payment_wallet": str(self.payment_wallet),
             "admin_panel_bump": self.admin_panel_bump,
             "freeze_fee": self.freeze_fee,
+            "match_count": self.match_count,
+            "order_count": self.order_count,
         }
 
     @classmethod
@@ -97,4 +107,6 @@ class AdminPanel:
             payment_wallet=Pubkey.from_string(obj["payment_wallet"]),
             admin_panel_bump=obj["admin_panel_bump"],
             freeze_fee=obj["freeze_fee"],
+            match_count=obj["match_count"],
+            order_count=obj["order_count"],
         )

@@ -52,7 +52,7 @@ const anotherUser = anchor.web3.Keypair.fromSecretKey(Uint8Array.from(otherJson)
 const admin = anchor.web3.Keypair.fromSecretKey(Uint8Array.from(adminJson))
 const receiverPubKey = Buffer.alloc(32, 0);
 // const paddedBuffer = Buffer.from('20eda7b413e525ccff9ffba610f5c4b8e189eb53', 'hex') // have to change to arbitrum side
-const paddedBuffer = Buffer.from('2d0C2DE05625e451a21E596CDEA522E71ef8aB20', 'hex')
+const paddedBuffer = Buffer.from('644DFf7307Bb76187f559CDC8aC926D827158E4B', 'hex')
 paddedBuffer.copy(receiverPubKey, 12);
 console.log("receiverPubKey => ", receiverPubKey)
 const arbitrumEID = 40231; // Here is for Arbitrum Sepolia Testnet
@@ -199,32 +199,32 @@ describe("# test scenario - tristero ", () => {
             // }
 
             console.log("-------------------Init Nonce-----------------------------")
-            // {
-            //     const initNonceAccounts = {
-            //         delegate: user.publicKey,
-            //         oappRegistry: getOappRegistryPDA(tristeroOappPubkey),
-            //         nonce: getNoncePDA(tristeroOappPubkey, arbitrumEID, receiverPubKey),
-            //         pendingInboundNonce: getPendingInboundNoncePDA(tristeroOappPubkey, arbitrumEID, receiverPubKey),
-            //         SystemProgram: SystemProgram.programId
-            //     }
+            {
+                const initNonceAccounts = {
+                    delegate: user.publicKey,
+                    oappRegistry: getOappRegistryPDA(tristeroOappPubkey),
+                    nonce: getNoncePDA(tristeroOappPubkey, arbitrumEID, receiverPubKey),
+                    pendingInboundNonce: getPendingInboundNoncePDA(tristeroOappPubkey, arbitrumEID, receiverPubKey),
+                    SystemProgram: SystemProgram.programId
+                }
 
-            //     const initNonceParams = {
-            //         params: {
-            //             localOapp: tristeroOappPubkey,
-            //             remoteEid: arbitrumEID,
-            //             remoteOapp: Array.from(receiverPubKey)
-            //         }
-            //     }
+                const initNonceParams = {
+                    params: {
+                        localOapp: tristeroOappPubkey,
+                        remoteEid: arbitrumEID,
+                        remoteOapp: Array.from(receiverPubKey)
+                    }
+                }
 
-            //     const initNonceInstruction = EndpointProgram.instructions.createInitNonceInstruction(initNonceAccounts, initNonceParams)
+                const initNonceInstruction = EndpointProgram.instructions.createInitNonceInstruction(initNonceAccounts, initNonceParams)
 
-            //     console.log("InitNonce well done")
-            //     console.log("initNonceInstruction = " + initNonceInstruction)
-            //     const _transaction = new Transaction().add(initNonceInstruction);
-            //     const txInitNonce = await sendAndConfirmTransaction(connection, _transaction, [user])
-            //     console.log("txInitNonce = ", txInitNonce)
-            //     console.log("-------------------------------------------------------------------------------")
-            // }
+                console.log("InitNonce well done")
+                console.log("initNonceInstruction = " + initNonceInstruction)
+                const _transaction = new Transaction().add(initNonceInstruction);
+                const txInitNonce = await sendAndConfirmTransaction(connection, _transaction, [user])
+                console.log("txInitNonce = ", txInitNonce)
+                console.log("-------------------------------------------------------------------------------")
+            }
 
             const messageLib = getMessageLibPDA();
             console.log("-------------------Init Message Lib-----------------------------")
@@ -583,8 +583,8 @@ describe("# test scenario - tristero ", () => {
             console.log("------------------------Create Match1------------------------------");
             {
                 const createMatchTx = await program.methods.createMatch({
-                        srcIndex: new BN(71),
-                        dstIndex: new BN(9),
+                        srcIndex: new BN(73),
+                        dstIndex: new BN(0),
                         srcQuantity: new BN(90),
                         dstQuantity: new BN(90),
                         tradeMatchId: adminPanel.matchCount,
@@ -593,7 +593,7 @@ describe("# test scenario - tristero ", () => {
                     .accounts({
                         authority: user.publicKey,
                         adminPanel: getAdminPanel(),
-                        order: getOrderPDA(new BN(71)),
+                        order: getOrderPDA(new BN(73)),
                         tradeMatch: getTradeMatchPDA(adminPanel.matchCount),
                         systemProgram: SystemProgram.programId,
                         tokenProgram: TOKEN_PROGRAM_ID
@@ -609,8 +609,8 @@ describe("# test scenario - tristero ", () => {
             console.log("------------------------Create Match2------------------------------");
             {
                 const createMatchTx = await program.methods.createMatch({
-                        srcIndex: new BN(72),
-                        dstIndex: new BN(10),
+                        srcIndex: new BN(74),
+                        dstIndex: new BN(1),
                         srcQuantity: new BN(90),
                         dstQuantity: new BN(90),
                         tradeMatchId: adminPanel.matchCount,
@@ -619,7 +619,7 @@ describe("# test scenario - tristero ", () => {
                     .accounts({
                         authority: user.publicKey,
                         adminPanel: getAdminPanel(),
-                        order: getOrderPDA(new BN(72)),
+                        order: getOrderPDA(new BN(74)),
                         tradeMatch: getTradeMatchPDA(adminPanel.matchCount),
                         systemProgram: SystemProgram.programId,
                         tokenProgram: TOKEN_PROGRAM_ID

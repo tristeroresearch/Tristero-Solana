@@ -9,37 +9,35 @@ from .. import types
 from ..program_id import PROGRAM_ID
 
 
-class CreateMatchArgs(typing.TypedDict):
-    params: types.create_match_params.CreateMatchParams
+class ChallengeArgs(typing.TypedDict):
+    params: types.challenge_params.ChallengeParams
 
 
-layout = borsh.CStruct("params" / types.create_match_params.CreateMatchParams.layout)
+layout = borsh.CStruct("params" / types.challenge_params.ChallengeParams.layout)
 
 
-class CreateMatchAccounts(typing.TypedDict):
+class ChallengeAccounts(typing.TypedDict):
     authority: Pubkey
     admin_panel: Pubkey
-    order: Pubkey
     trade_match: Pubkey
 
 
-def create_match(
-    args: CreateMatchArgs,
-    accounts: CreateMatchAccounts,
+def challenge(
+    args: ChallengeArgs,
+    accounts: ChallengeAccounts,
     program_id: Pubkey = PROGRAM_ID,
     remaining_accounts: typing.Optional[typing.List[AccountMeta]] = None,
 ) -> Instruction:
     keys: list[AccountMeta] = [
         AccountMeta(pubkey=accounts["authority"], is_signer=True, is_writable=True),
         AccountMeta(pubkey=accounts["admin_panel"], is_signer=False, is_writable=True),
-        AccountMeta(pubkey=accounts["order"], is_signer=False, is_writable=True),
         AccountMeta(pubkey=accounts["trade_match"], is_signer=False, is_writable=True),
         AccountMeta(pubkey=SYS_PROGRAM_ID, is_signer=False, is_writable=False),
         AccountMeta(pubkey=TOKEN_PROGRAM_ID, is_signer=False, is_writable=False),
     ]
     if remaining_accounts is not None:
         keys += remaining_accounts
-    identifier = b"k\x02\xb8\x91F\x8e\x11\xa5"
+    identifier = b"\x10k\x0e'\xf4\x96Q\xbb"
     encoded_args = layout.build(
         {
             "params": args["params"].to_encodable(),

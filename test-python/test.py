@@ -1,4 +1,5 @@
 import asyncio
+import binascii
 from solders.pubkey import Pubkey
 from solders.keypair import Keypair
 from solders.account import Account
@@ -7,7 +8,7 @@ from solders.message import Message
 from solders.token.associated import get_associated_token_address
 from solders.bankrun import start_anchor
 from solders.transaction import TransactionError, VersionedTransaction
-from anchorpy import Provider, Program, WorkspaceType, workspace, Idl, Context, create_workspace, close_workspace
+from anchorpy import Provider, Program, WorkspaceType, workspace, Idl, Context, create_workspace, close_workspace, Wallet
 from solders.system_program import ID as SYS_PROGRAM_ID
 from pathlib import Path
 from solana.rpc.async_api import AsyncClient
@@ -17,13 +18,16 @@ from solders.instruction import Instruction, AccountMeta
 from solders.message import Message
 from solders.compute_budget import set_compute_unit_limit
 from tristero.instructions.create_match import create_match, CreateMatchAccounts
-from tristero.types.create_match_params import CreateMatchParams
-from tristero.types.create_match_params import CreateMatchParamsJSON
+from tristero.instructions.place_order import place_order, PlaceOrderAccounts
+from tristero.instructions.challenge import challenge, ChallengeAccounts
+from tristero.types.create_match_params import CreateMatchParams, CreateMatchParamsJSON
+from tristero.types.place_order_params import PlaceOrderParams, PlaceOrderParamsJSON
+from tristero.types.challenge_params import ChallengeParams, ChallengeParamsJSON
 from tristero.accounts.admin_panel import AdminPanel
 import json
 import struct
 
-tristero_program_id = Pubkey.from_string("5wrxGvTGkUCAusBSpkgGjW7N4G1xvWA2Aw1Pk1fAmuMf")
+tristero_program_id = Pubkey.from_string("APob25xoaC1Zz2FKePPCRfRBgJ5nhrjg7dUfV68ZNobP")
 endpoint_program_id = Pubkey.from_string("76y77prsiCMvXMjuoZ5VRrhG5qYBrUMYTE5WgHqgjEn6")
 executor_program_id = Pubkey.from_string("6doghB248px58JSSwG4qejQ46kFMW4AMj7vzJnWZHNZn")
 send_library_program_id = Pubkey.from_string("7a4WjyR8VZ7yZz5XJAKm39BUGn5iT9CKcv2pmG9tdXVH")
@@ -48,9 +52,61 @@ user = Keypair.from_bytes(bytes(user_json))
 other_user = Keypair.from_bytes(bytes(other_json))
 admin = Keypair.from_bytes(bytes(admin_json))
 
+# # Set up the provider for AnchorPy
+# provider = Provider(client, user.secret())
+
+# # Initialize the program
+# program = Program("./target/idl/tristero.json", tristero_program_id, provider)
+
 LAMPORTS_PER_SOL = 1_000_000_000
 ARBITRUM_EID = 40231
-RECEIVER_PUBKEY = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 32, 237, 167, 180, 19, 229, 37, 204, 255, 159, 251, 166, 16, 245, 196, 184, 225, 137, 235, 83]
+
+# RECEIVER_PUBKEY = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 32, 237, 167, 180, 19, 229, 37, 204, 255, 159, 251, 166, 16, 245, 196, 184, 225, 137, 235, 83]
+RECEIVER_PUBKEY = bytearray(32)
+
+# Hexadecimal string to be converted to bytes
+hex_string = '644DFf7307Bb76187f559CDC8aC926D827158E4B'
+
+# Convert the hexadecimal string to bytes
+padded_buffer = binascii.unhexlify(hex_string)
+
+# Copy the bytes to the RECEIVER_PUBKEY bytearray starting at position 12
+RECEIVER_PUBKEY[12:12 + len(padded_buffer)] = padded_buffer
+
+# Print the result
+print("receiverPubKey =>", RECEIVER_PUBKEY)
+
+def get_order_pda(order_id):
+    # Convert the order ID to a buffer
+    order_id_buffer = order_id.to_bytes(8, byteorder="big")
+
+    # Create the seeds
+    seeds = [
+        b"order",
+        order_id_buffer
+    ]
+
+    # Find the program address
+    return Pubkey.find_program_address(seeds, tristero_program_id)[0]
+
+def get_refund_token_account_pda(pubkey):
+    # Create the seeds
+    seeds = [
+        b"refund_account",
+        bytes(pubkey)
+    ]
+
+    # Find the program address
+    return Pubkey.find_program_address(seeds, tristero_program_id)[0]
+
+def get_sol_panel():
+    # Create the seeds
+    seeds = [
+        b"sol_panel"
+    ]
+
+    # Find the program address
+    return Pubkey.find_program_address(seeds, tristero_program_id)[0]
 
 def get_oapp_pda(authority):
     (distributor, bump) = Pubkey.find_program_address(
@@ -199,7 +255,7 @@ def get_user_pda(authority):
     return distributor
 
 def get_trade_match_pda(match_count):
-    match_count_bytes = struct.pack(">B", match_count)
+    match_count_bytes = match_count.to_bytes(8, byteorder="big")
     (distributor, bump) = Pubkey.find_program_address(
         [b"trade_match", match_count_bytes],
         tristero_program_id,
@@ -225,232 +281,275 @@ async def main():
     with Path("./target/idl/tristero.json").open() as f:
         raw_idl = f.read()
     idl = Idl.from_json(raw_idl)
+    client = AsyncClient("https://api.testnet.solana.com")
+    provider = Provider(client, Wallet.local())
     # Address of the deployed program.
-    program_id = Pubkey.from_string("5wrxGvTGkUCAusBSpkgGjW7N4G1xvWA2Aw1Pk1fAmuMf")
+    program_id = Pubkey.from_string("APob25xoaC1Zz2FKePPCRfRBgJ5nhrjg7dUfV68ZNobP")
     
-    register_tristero_oapp_params = {
-        "delegate": user.pubkey()
-    }
-    tristero_oapp_pubkey = get_tristero_oapp()
+    async with Program(idl, program_id, provider) as program:
+        print(f"program: ", program)
+        admin_panel_account = await program.account["AdminPanel"].fetch(get_admin_panel())
+        print(f"admin_panel_account: {admin_panel_account}")
     
-    
-    send_instruction_remaining_accounts = [
-        AccountMeta(
-            pubkey = Pubkey.from_string("76y77prsiCMvXMjuoZ5VRrhG5qYBrUMYTE5WgHqgjEn6"),
-            is_signer = False,
-            is_writable =  True
-        ),
-        AccountMeta(
-            pubkey = Pubkey.from_string("4qd1mSmxeBFqbsUDnDywj1bZD7UbxPn4nZwNoQWQ77im"),
-            is_signer = False,
-            is_writable =  True
-        ),
-        AccountMeta(
-            pubkey = Pubkey.from_string("7a4WjyR8VZ7yZz5XJAKm39BUGn5iT9CKcv2pmG9tdXVH"),
-            is_signer = False,
-            is_writable =  True
-        ),
-        AccountMeta(
-            pubkey = Pubkey.from_string("141X4oNUhGaSKnva8LecEYNgjtFBjvMwZg258hFtQRJP"),
-            is_signer = False,
-            is_writable =  True
-        ),
-        AccountMeta(
-            pubkey = Pubkey.from_string("9wgwtfS2NbYariF6kFCV4ifj4fVYQ5bNtQ7pj4jWrE2T"),
-            is_signer = False,
-            is_writable =  True
-        ),
-        AccountMeta(
-            pubkey = Pubkey.from_string("526PeNZfw8kSnDU4nmzJFVJzJWNhwmZykEyJr5XWz5Fv"),
-            is_signer = False,
-            is_writable =  True
-        ),
-        AccountMeta(
-            pubkey = Pubkey.from_string("2uk9pQh3tB5ErV7LGQJcbWjb4KeJ2UJki5qJZ8QG56G3"),
-            is_signer = False,
-            is_writable =  True
-        ),
-        AccountMeta(
-            pubkey = Pubkey.from_string("5uUTpCkgpz9CofViozMKtRvKfJTez9UfjoFX1DinEhS1"),
-            is_signer = False,
-            is_writable =  True
-        ),
-        AccountMeta(
-            pubkey = Pubkey.from_string("F8E8QGhKmHEx2esh5LpVizzcP4cHYhzXdXTwg9w3YYY2"),
-            is_signer = False,
-            is_writable =  True
-        ),
-        AccountMeta(
-            pubkey = Pubkey.from_string("76y77prsiCMvXMjuoZ5VRrhG5qYBrUMYTE5WgHqgjEn6"),
-            is_signer = False,
-            is_writable =  True
-        ),
-        AccountMeta(
-            pubkey = Pubkey.from_string("2XgGZG4oP29U3w5h4nTk1V2LFHL23zKDPJjs3psGzLKQ"),
-            is_signer = False,
-            is_writable =  True
-        ),
-        AccountMeta(
-            pubkey = Pubkey.from_string("3ZZXoLURkHz7RuK11xnxDCHkz1sPPDomqaFNAKxaC1fS"),
-            is_signer = False,
-            is_writable =  True
-        ),
-        AccountMeta(
-            pubkey = Pubkey.from_string("3y4LwxWFPhMNc4w8P4CfH5WVqwUnAm21PA4Pf7UMoxej"),
-            is_signer = False,
-            is_writable =  True
-        ),
-        AccountMeta(
-            pubkey = Pubkey.from_string("8oUck8bkDE1BnmfELXreAe8HS8cFR2FTqoFXA8daRNQ6"),
-            is_signer = False,
-            is_writable =  True
-        ),
-        AccountMeta(
-            pubkey = Pubkey.from_string("8oUck8bkDE1BnmfELXreAe8HS8cFR2FTqoFXA8daRNQ6"),
-            is_signer = False,
-            is_writable =  True
-        ),
-        AccountMeta(
-            pubkey = Pubkey.from_string("11111111111111111111111111111111"),
-            is_signer = False,
-            is_writable =  True
-        ),
-        AccountMeta(
-            pubkey = Pubkey.from_string("7n1YeBMVEUCJ4DscKAcpVQd6KXU7VpcEcc15ZuMcL4U3"),
-            is_signer = False,
-            is_writable =  True
-        ),
-        AccountMeta(
-            pubkey = Pubkey.from_string("7a4WjyR8VZ7yZz5XJAKm39BUGn5iT9CKcv2pmG9tdXVH"),
-            is_signer = False,
-            is_writable =  True
-        ),
-        AccountMeta(
-            pubkey = Pubkey.from_string("6doghB248px58JSSwG4qejQ46kFMW4AMj7vzJnWZHNZn"),
-            is_signer = False,
-            is_writable =  True
-        ),
-        AccountMeta(
-            pubkey = Pubkey.from_string("AwrbHeCyniXaQhiJZkLhgWdUCteeWSGaSN1sTfLiY7xK"),
-            is_signer = False,
-            is_writable =  True
-        ),
-        AccountMeta(
-            pubkey = Pubkey.from_string("8ahPGPjEbpgGaZx2NV1iG5Shj7TDwvsjkEDcGWjt94TP"),
-            is_signer = False,
-            is_writable =  True
-        ),
-        AccountMeta(
-            pubkey = Pubkey.from_string("CSFsUupvJEQQd1F4SsXGACJaxQX4eropQMkGV2696eeQ"),
-            is_signer = False,
-            is_writable =  True
-        ),
-        AccountMeta(
-            pubkey = Pubkey.from_string("HtEYV4xB4wvsj5fgTkcfuChYpvGYzgzwvNhgDZQNh7wW"),
-            is_signer = False,
-            is_writable =  True
-        ),
-        AccountMeta(
-            pubkey = Pubkey.from_string("4VDjp6XQaxoZf5RGwiPU9NR1EXSZn2TP4ATMmiSzLfhb"),
-            is_signer = False,
-            is_writable =  True
-        ),
-        AccountMeta(
-            pubkey = Pubkey.from_string("8ahPGPjEbpgGaZx2NV1iG5Shj7TDwvsjkEDcGWjt94TP"),
-            is_signer = False,
-            is_writable =  True
-        ),
-        AccountMeta(
-            pubkey = Pubkey.from_string("CSFsUupvJEQQd1F4SsXGACJaxQX4eropQMkGV2696eeQ"),
-            is_signer = False,
-            is_writable =  True
+        register_tristero_oapp_params = {
+            "delegate": user.pubkey()
+        }
+        tristero_oapp_pubkey = get_tristero_oapp()
+        
+        send_instruction_remaining_accounts = [
+            AccountMeta(
+                pubkey = Pubkey.from_string("76y77prsiCMvXMjuoZ5VRrhG5qYBrUMYTE5WgHqgjEn6"),
+                is_signer = False,
+                is_writable =  True
+            ),
+            AccountMeta(
+                pubkey = Pubkey.from_string("4qd1mSmxeBFqbsUDnDywj1bZD7UbxPn4nZwNoQWQ77im"),
+                is_signer = False,
+                is_writable =  True
+            ),
+            AccountMeta(
+                pubkey = Pubkey.from_string("7a4WjyR8VZ7yZz5XJAKm39BUGn5iT9CKcv2pmG9tdXVH"),
+                is_signer = False,
+                is_writable =  True
+            ),
+            AccountMeta(
+                pubkey = Pubkey.from_string("141X4oNUhGaSKnva8LecEYNgjtFBjvMwZg258hFtQRJP"),
+                is_signer = False,
+                is_writable =  True
+            ),
+            AccountMeta(
+                pubkey = Pubkey.from_string("9wgwtfS2NbYariF6kFCV4ifj4fVYQ5bNtQ7pj4jWrE2T"),
+                is_signer = False,
+                is_writable =  True
+            ),
+            AccountMeta(
+                pubkey = Pubkey.from_string("526PeNZfw8kSnDU4nmzJFVJzJWNhwmZykEyJr5XWz5Fv"),
+                is_signer = False,
+                is_writable =  True
+            ),
+            AccountMeta(
+                pubkey = Pubkey.from_string("2uk9pQh3tB5ErV7LGQJcbWjb4KeJ2UJki5qJZ8QG56G3"),
+                is_signer = False,
+                is_writable =  True
+            ),
+            AccountMeta(
+                pubkey = Pubkey.from_string("5uUTpCkgpz9CofViozMKtRvKfJTez9UfjoFX1DinEhS1"),
+                is_signer = False,
+                is_writable =  True
+            ),
+            AccountMeta(
+                pubkey = Pubkey.from_string("F8E8QGhKmHEx2esh5LpVizzcP4cHYhzXdXTwg9w3YYY2"),
+                is_signer = False,
+                is_writable =  True
+            ),
+            AccountMeta(
+                pubkey = Pubkey.from_string("76y77prsiCMvXMjuoZ5VRrhG5qYBrUMYTE5WgHqgjEn6"),
+                is_signer = False,
+                is_writable =  True
+            ),
+            AccountMeta(
+                pubkey = Pubkey.from_string("2XgGZG4oP29U3w5h4nTk1V2LFHL23zKDPJjs3psGzLKQ"),
+                is_signer = False,
+                is_writable =  True
+            ),
+            AccountMeta(
+                pubkey = Pubkey.from_string("3ZZXoLURkHz7RuK11xnxDCHkz1sPPDomqaFNAKxaC1fS"),
+                is_signer = False,
+                is_writable =  True
+            ),
+            AccountMeta(
+                pubkey = Pubkey.from_string("3y4LwxWFPhMNc4w8P4CfH5WVqwUnAm21PA4Pf7UMoxej"),
+                is_signer = False,
+                is_writable =  True
+            ),
+            AccountMeta(
+                pubkey = Pubkey.from_string("8oUck8bkDE1BnmfELXreAe8HS8cFR2FTqoFXA8daRNQ6"),
+                is_signer = False,
+                is_writable =  True
+            ),
+            AccountMeta(
+                pubkey = Pubkey.from_string("8oUck8bkDE1BnmfELXreAe8HS8cFR2FTqoFXA8daRNQ6"),
+                is_signer = False,
+                is_writable =  True
+            ),
+            AccountMeta(
+                pubkey = Pubkey.from_string("11111111111111111111111111111111"),
+                is_signer = False,
+                is_writable =  True
+            ),
+            AccountMeta(
+                pubkey = Pubkey.from_string("7n1YeBMVEUCJ4DscKAcpVQd6KXU7VpcEcc15ZuMcL4U3"),
+                is_signer = False,
+                is_writable =  True
+            ),
+            AccountMeta(
+                pubkey = Pubkey.from_string("7a4WjyR8VZ7yZz5XJAKm39BUGn5iT9CKcv2pmG9tdXVH"),
+                is_signer = False,
+                is_writable =  True
+            ),
+            AccountMeta(
+                pubkey = Pubkey.from_string("6doghB248px58JSSwG4qejQ46kFMW4AMj7vzJnWZHNZn"),
+                is_signer = False,
+                is_writable =  True
+            ),
+            AccountMeta(
+                pubkey = Pubkey.from_string("AwrbHeCyniXaQhiJZkLhgWdUCteeWSGaSN1sTfLiY7xK"),
+                is_signer = False,
+                is_writable =  True
+            ),
+            AccountMeta(
+                pubkey = Pubkey.from_string("8ahPGPjEbpgGaZx2NV1iG5Shj7TDwvsjkEDcGWjt94TP"),
+                is_signer = False,
+                is_writable =  True
+            ),
+            AccountMeta(
+                pubkey = Pubkey.from_string("CSFsUupvJEQQd1F4SsXGACJaxQX4eropQMkGV2696eeQ"),
+                is_signer = False,
+                is_writable =  True
+            ),
+            AccountMeta(
+                pubkey = Pubkey.from_string("HtEYV4xB4wvsj5fgTkcfuChYpvGYzgzwvNhgDZQNh7wW"),
+                is_signer = False,
+                is_writable =  True
+            ),
+            AccountMeta(
+                pubkey = Pubkey.from_string("4VDjp6XQaxoZf5RGwiPU9NR1EXSZn2TP4ATMmiSzLfhb"),
+                is_signer = False,
+                is_writable =  True
+            ),
+            AccountMeta(
+                pubkey = Pubkey.from_string("8ahPGPjEbpgGaZx2NV1iG5Shj7TDwvsjkEDcGWjt94TP"),
+                is_signer = False,
+                is_writable =  True
+            ),
+            AccountMeta(
+                pubkey = Pubkey.from_string("CSFsUupvJEQQd1F4SsXGACJaxQX4eropQMkGV2696eeQ"),
+                is_signer = False,
+                is_writable =  True
+            )
+        ]
+        
+        mint_addr = Pubkey.from_string("96dYLgk5D6rHm2V8Bi3djA3QXrAJrhENWuHC9m4kCmDq")
+        
+        admin_panel_pda = get_admin_panel()
+        
+        order_id = admin_panel_account.order_count
+        trade_match_id = admin_panel_account.match_count
+        
+        erc20_addr = binascii.unhexlify('75faf114eafb1bdbe2f0316df893fd58ce46aa4d')
+        arb_wallet_addr = binascii.unhexlify('De7014167c36c39aAfb56aA0Bd87776d8911369A')
+        
+        print(f"-----------------------Place Order--------------------------")
+        place_order_accounts: PlaceOrderAccounts = {
+            "authority": user.pubkey(),
+            "admin_panel": admin_panel_pda,
+            "sol_panel": get_sol_panel(),
+            "token_mint": mint_addr,
+            "token_account": Pubkey.from_string("CqVTHuqiBKuygw5UXiGmyinAaJzgyrcV5wxubK8C8fDQ"),
+            "staking_account": get_staking_panel(mint_addr),
+            "order": get_order_pda(order_id)
+        }
+        
+        place_order_params_json : PlaceOrderParamsJSON = {
+            "source_sell_amount": 100,
+            "min_sell_amount": 10,
+            "dest_token_mint": erc20_addr,
+            "dest_buy_amount": 100,
+            "order_id": order_id,
+            "eid": ARBITRUM_EID
+        }
+        
+        place_order_params = PlaceOrderParams.from_json(place_order_params_json)
+        
+        place_order_ix = place_order(
+            {
+                "params": place_order_params
+            },
+            place_order_accounts,
+            program_id
         )
-    ]
-    
-    
-    
-    mint_addr = Pubkey.from_string("96dYLgk5D6rHm2V8Bi3djA3QXrAJrhENWuHC9m4kCmDq")
-    
-    admin_panel_pda = get_admin_panel()
-    
-    admin_panel = AdminPanel.fetch(solana_client, admin_panel_pda, program_id = program_id)
-    
-    # calling create_match instruction
-    
-    create_match_accounts : CreateMatchAccounts = {
-        "authority": user.pubkey(),
-        "admin_panel": admin_panel_pda,
-        "token_mint": mint_addr,
-        "token_account": Pubkey.from_string("CqVTHuqiBKuygw5UXiGmyinAaJzgyrcV5wxubK8C8fDQ"),
-        "staking_account": get_staking_panel(mint_addr),
-        "trade_match": get_trade_match_pda(admin_panel.match_count),
-        "token_program": Pubkey.from_string("TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"),
-        "system_program": SYS_PROGRAM_ID
-    }
-    
-    create_match_params_json : CreateMatchParamsJSON = {
-        "source_sell_amount": 100000,
-        "dest_token_mint": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        "dest_buy_amount": 10000,
-        "eid": 40231,
-    }
-    
-    create_match_params = CreateMatchParams.from_json(create_match_params_json)
-    
-    create_match_ix = create_match(
-        {
-            "params": create_match_params
-        },
-        create_match_accounts,
-        program_id
-    )
-    latest_blockhash = solana_client.get_latest_blockhash()
-    blockhash = latest_blockhash.value.blockhash
-    signers = [user]
-    
-    txn = Transaction(recent_blockhash=blockhash, fee_payer=user.pubkey())
-    txn.add(set_compute_unit_limit(2000000))
-    txn.add(create_match_ix)
-    
-    create_match_tx = solana_client.send_transaction(txn, *signers).value
-    print(f"create_match_tx: {create_match_tx}")
-    
-    # challenge instruction
-    src_index = 0
-    
-    challenge_accounts : ChallengeAccounts = {
-        "authority": user.pubkey(),
-        "admin_panel": admin_panel_pda,
-        "trade_match": get_trade_match_pda(src_index),
-        "token_program": Pubkey.from_string("TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"),
-        "system_program": SYS_PROGRAM_ID
-    }
-    
-    challenge_params_json : ChallengeParamsJSON = {
-        "src_index": src_index,
-        "tristero_oapp_bump": 255,
-        "source_token_address_in_arbitrum_chain": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        "receiver":[0,0,0,0,0,0,0,0,0,0,0,0,150,232,28,79,246,194,96,207,147,185,46,28,24,125,108,177,26,78,202,17]
-    }
-    
-    challenge_params = ChallengeParams.from_json(challenge_params_json)
-    
-    challenge_ix = challenge(
-        {
-            "params": challenge_params
-        },
-        challenge_accounts,
-        program_id
-    )
-    latest_blockhash = solana_client.get_latest_blockhash()
-    blockhash = latest_blockhash.value.blockhash
-    signers = [user]
-    
-    txn = Transaction(recent_blockhash=blockhash, fee_payer=user.pubkey())
-    txn.add(set_compute_unit_limit(2000000))
-    txn.add(challenge_ix)
-    
-    challenge_tx = solana_client.send_transaction(txn, *signers).value
-    print(f"challenge_tx: {challenge_tx}")
+        
+        latest_blockhash = solana_client.get_latest_blockhash()
+        blockhash = latest_blockhash.value.blockhash
+        signers = [user]
+        
+        txn = Transaction(recent_blockhash=blockhash, fee_payer=user.pubkey())
+        txn.add(set_compute_unit_limit(2000000))
+        txn.add(place_order_ix)
+        
+        place_order_tx = solana_client.send_transaction(txn, *signers).value
+        print(f"place_order_tx: {place_order_tx}")
+        
+        # calling create_match instruction
+        print(f"-----------------------Create Match--------------------------")
+        create_match_accounts : CreateMatchAccounts = {
+            "authority": user.pubkey(),
+            "admin_panel": get_admin_panel(),
+            "order": get_order_pda(order_id-1),
+            "trade_match": get_trade_match_pda(trade_match_id)
+        }
+        
+        create_match_params_json : CreateMatchParamsJSON = {
+            "src_index": order_id-1,
+            "dst_index": 60,
+            "src_quantity": 100,
+            "dst_quantity": 100,
+            "trade_match_id": trade_match_id,
+            "arb_source_token_addr": arb_wallet_addr
+        }
+        
+        create_match_params = CreateMatchParams.from_json(create_match_params_json)
+        
+        create_match_ix = create_match(
+            {
+                "params": create_match_params
+            },
+            create_match_accounts,
+            program_id
+        )
+        latest_blockhash = solana_client.get_latest_blockhash()
+        blockhash = latest_blockhash.value.blockhash
+        signers = [user]
+        
+        txn = Transaction(recent_blockhash=blockhash, fee_payer=user.pubkey())
+        txn.add(set_compute_unit_limit(2000000))
+        txn.add(create_match_ix)
+        
+        create_match_tx = solana_client.send_transaction(txn, *signers).value
+        print(f"create_match_tx: {create_match_tx}")
+        
+        print(f"-------------------------Challenge----------------------------")
+        challenge_accounts : ChallengeAccounts = {
+            "authority": user.pubkey(),
+            "admin_panel": get_admin_panel(),
+            "trade_match": get_trade_match_pda(trade_match_id)
+        }
+        
+        challenge_params_json : ChallengeParamsJSON = {
+            "trade_match_id": trade_match_id,
+            "tristero_oapp_bump": get_tristero_oapp_bump(),
+            "source_token_address_in_arbitrum_chain": arb_wallet_addr,
+            "receiver": RECEIVER_PUBKEY
+        }
+        
+        challenge_params = ChallengeParams.from_json(challenge_params_json)
+        
+        challenge_ix = challenge(
+            {
+                "params": challenge_params
+            },
+            challenge_accounts,
+            program_id
+        )
+        latest_blockhash = solana_client.get_latest_blockhash()
+        blockhash = latest_blockhash.value.blockhash
+        signers = [user]
+        
+        txn = Transaction(recent_blockhash=blockhash, fee_payer=user.pubkey())
+        txn.add(set_compute_unit_limit(2000000))
+        txn.add(challenge_ix)
+        
+        challenge_tx = solana_client.send_transaction(txn, *signers).value
+        print(f"challenge_tx: {challenge_tx}")
 
 asyncio.run(main())

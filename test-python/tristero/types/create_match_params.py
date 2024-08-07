@@ -6,78 +6,69 @@ import borsh_construct as borsh
 
 
 class CreateMatchParamsJSON(typing.TypedDict):
-    source_sell_amount: int
-    dest_token_mint: list[int]
-    dest_buy_amount: int
-    eid: int
-    tristero_oapp_bump: int
-    source_token_address_in_arbitrum_chain: list[int]
-    receiver: list[int]
+    src_index: int
+    dst_index: int
+    src_quantity: int
+    dst_quantity: int
+    trade_match_id: int
+    arb_source_token_addr: list[int]
 
 
 @dataclass
 class CreateMatchParams:
     layout: typing.ClassVar = borsh.CStruct(
-        "source_sell_amount" / borsh.U64,
-        "dest_token_mint" / borsh.U8[20],
-        "dest_buy_amount" / borsh.U64,
-        "eid" / borsh.U32,
-        "tristero_oapp_bump" / borsh.U8,
-        "source_token_address_in_arbitrum_chain" / borsh.U8[20],
-        "receiver" / borsh.U8[32],
+        "src_index" / borsh.U64,
+        "dst_index" / borsh.U64,
+        "src_quantity" / borsh.U64,
+        "dst_quantity" / borsh.U64,
+        "trade_match_id" / borsh.U64,
+        "arb_source_token_addr" / borsh.U8[20],
     )
-    source_sell_amount: int
-    dest_token_mint: list[int]
-    dest_buy_amount: int
-    eid: int
-    tristero_oapp_bump: int
-    source_token_address_in_arbitrum_chain: list[int]
-    receiver: list[int]
+    src_index: int
+    dst_index: int
+    src_quantity: int
+    dst_quantity: int
+    trade_match_id: int
+    arb_source_token_addr: list[int]
 
     @classmethod
     def from_decoded(cls, obj: Container) -> "CreateMatchParams":
         return cls(
-            source_sell_amount=obj.source_sell_amount,
-            dest_token_mint=obj.dest_token_mint,
-            dest_buy_amount=obj.dest_buy_amount,
-            eid=obj.eid,
-            tristero_oapp_bump=obj.tristero_oapp_bump,
-            source_token_address_in_arbitrum_chain=obj.source_token_address_in_arbitrum_chain,
-            receiver=obj.receiver,
+            src_index=obj.src_index,
+            dst_index=obj.dst_index,
+            src_quantity=obj.src_quantity,
+            dst_quantity=obj.dst_quantity,
+            trade_match_id=obj.trade_match_id,
+            arb_source_token_addr=obj.arb_source_token_addr,
         )
 
     def to_encodable(self) -> dict[str, typing.Any]:
         return {
-            "source_sell_amount": self.source_sell_amount,
-            "dest_token_mint": self.dest_token_mint,
-            "dest_buy_amount": self.dest_buy_amount,
-            "eid": self.eid,
-            "tristero_oapp_bump": self.tristero_oapp_bump,
-            "source_token_address_in_arbitrum_chain": self.source_token_address_in_arbitrum_chain,
-            "receiver": self.receiver,
+            "src_index": self.src_index,
+            "dst_index": self.dst_index,
+            "src_quantity": self.src_quantity,
+            "dst_quantity": self.dst_quantity,
+            "trade_match_id": self.trade_match_id,
+            "arb_source_token_addr": self.arb_source_token_addr,
         }
 
     def to_json(self) -> CreateMatchParamsJSON:
         return {
-            "source_sell_amount": self.source_sell_amount,
-            "dest_token_mint": self.dest_token_mint,
-            "dest_buy_amount": self.dest_buy_amount,
-            "eid": self.eid,
-            "tristero_oapp_bump": self.tristero_oapp_bump,
-            "source_token_address_in_arbitrum_chain": self.source_token_address_in_arbitrum_chain,
-            "receiver": self.receiver,
+            "src_index": self.src_index,
+            "dst_index": self.dst_index,
+            "src_quantity": self.src_quantity,
+            "dst_quantity": self.dst_quantity,
+            "trade_match_id": self.trade_match_id,
+            "arb_source_token_addr": self.arb_source_token_addr,
         }
 
     @classmethod
     def from_json(cls, obj: CreateMatchParamsJSON) -> "CreateMatchParams":
         return cls(
-            source_sell_amount=obj["source_sell_amount"],
-            dest_token_mint=obj["dest_token_mint"],
-            dest_buy_amount=obj["dest_buy_amount"],
-            eid=obj["eid"],
-            tristero_oapp_bump=obj["tristero_oapp_bump"],
-            source_token_address_in_arbitrum_chain=obj[
-                "source_token_address_in_arbitrum_chain"
-            ],
-            receiver=obj["receiver"],
+            src_index=obj["src_index"],
+            dst_index=obj["dst_index"],
+            src_quantity=obj["src_quantity"],
+            dst_quantity=obj["dst_quantity"],
+            trade_match_id=obj["trade_match_id"],
+            arb_source_token_addr=obj["arb_source_token_addr"],
         )

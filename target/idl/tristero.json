@@ -222,6 +222,11 @@
           "isSigner": true
         },
         {
+          "name": "oapp",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
           "name": "adminPanel",
           "isMut": true,
           "isSigner": false

@@ -222,6 +222,11 @@ export type Tristero = {
           "isSigner": true
         },
         {
+          "name": "oapp",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
           "name": "adminPanel",
           "isMut": true,
           "isSigner": false
@@ -1369,6 +1374,11 @@ export const IDL: Tristero = {
           "name": "payer",
           "isMut": true,
           "isSigner": true
+        },
+        {
+          "name": "oapp",
+          "isMut": true,
+          "isSigner": false
         },
         {
           "name": "adminPanel",
