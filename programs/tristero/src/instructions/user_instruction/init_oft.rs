@@ -1,5 +1,4 @@
 use crate::*;
-use anchor_spl::token_interface::{Mint, TokenInterface};
 
 /// This instruction should always be in the same transaction as InitializeMint.
 /// Otherwise, it is possible for your settings to be front-run by another transaction.
