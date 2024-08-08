@@ -25,21 +25,21 @@ use endpoint::{
 #[derive(Accounts)]
 #[instruction(params: ChallengeParams)]
 pub struct Challenge<'info> {
-
     #[account(mut)]
     pub authority: Signer<'info>,
 
     #[account(
         mut,
         seeds = [b"admin_panel"],
-        bump,
+        bump = admin_panel.admin_panel_bump,
     )]
     pub admin_panel: Box<Account<'info, AdminPanel>>,
 
     #[account(
         mut,
         seeds = [b"trade_match", &params.trade_match_id.to_be_bytes()],
-        bump,
+        bump = trade_match.bump,
+        constraint = trade_match.authority == authority.key() @ CustomError::InvalidAuthority
     )]
     pub trade_match: Box<Account<'info, TradeMatch>>,
 
@@ -72,19 +72,13 @@ pub fn challenge(ctx: Context<Challenge>, params: &ChallengeParams) -> Result<()
             0, 0, 0, 0,  0, 0,   0,
             0, 0, 0, 0,  0, 7, 161,
             32]; // For lzReceiveOption
-    //let receiver:[u8; 32] = [1u8; 32]; // have to change. This should be receiver
-    // let receiver:[u8; 32] = [
-    //     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 32, 237, 167, 180, 19, 229, 37, 204, 255, 159, 251, 166, 16, 245, 196, 184, 225, 137, 235, 83
-    //   ];
 
-    //let sol_eid: u32 = 30168u32; // mainnet
-    let sol_eid: u32 = 40168u32; // testnet
+    let sol_eid: u32 = 40168u32; // testnet(30168u32 if mainnet)
 
     //message: to send to arbitrum
     let mut message_to_send = Vec::<u8>::new();
     
     // Here is for payload
-
     for _ in 0..32 { // Here is for sender
         message_to_send.push(0u8);
     }
@@ -93,24 +87,12 @@ pub fn challenge(ctx: Context<Challenge>, params: &ChallengeParams) -> Result<()
     }
     sol_eid.to_be_bytes().map(|value: u8| message_to_send.push(value)); // Here is for srcLzc
     
-    // for _ in 0..12 {
-    //     message_to_send.push(0u8);
-    // }
-    // trade_match.dest_token_mint.map(|value| message_to_send.push(value)); // have to be srcToken but now use dstToken for instance
     for _ in 0..12 {
         message_to_send.push(0u8);
     }
     trade_match.dest_token_mint.map(|value| message_to_send.push(value)); // erc20Token
 
-
     trade_match.source_token_mint.to_bytes().map(|value| message_to_send.push(value)); // splToken
-
-    msg!("SourceTokenMint ToBytes() => ");
-    msg!("{:?}", trade_match.source_token_mint.to_bytes());
-    msg!("dest_token_mint ToBytes() => ");
-    msg!("{:?}", trade_match.dest_token_mint);
-
-    
     for _ in 0..24 {
         message_to_send.push(0u8);
     }

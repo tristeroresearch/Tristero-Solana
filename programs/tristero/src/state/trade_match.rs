@@ -3,7 +3,7 @@ use anchor_lang::prelude::*;
 #[account]
 #[derive(Default, Debug)]
 pub struct TradeMatch {
-    pub user_pubkey: Pubkey,
+    pub authority: Pubkey,
     pub user_token_addr: Pubkey,
     pub source_token_mint: Pubkey,
     pub dest_token_mint: [u8; 20],

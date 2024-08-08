@@ -78,7 +78,7 @@ pub fn create_match(ctx: Context<CreateMatch>, params: &CreateMatchParams) -> Re
     require!(params.src_quantity >= order.min_sell_amount, CustomError::MinSellAmountConflict);
     require!(order.source_sell_amount - order.settled >= params.src_quantity, CustomError::InSufficientFundsOfOrder);
 
-    trade_match.user_pubkey = order.user_pubkey;
+    trade_match.authority = order.user_pubkey;
     trade_match.user_token_addr = order.user_token_addr;
     trade_match.source_token_mint = order.source_token_mint;
     trade_match.dest_token_mint = order.dest_token_mint;
