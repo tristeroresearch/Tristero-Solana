@@ -17,6 +17,8 @@ from solana.transaction import Transaction
 from solders.instruction import Instruction, AccountMeta
 from solders.message import Message
 from solders.compute_budget import set_compute_unit_limit
+from solana.rpc.types import TxOpts
+from solana.rpc.commitment import Confirmed
 from tristero.instructions.create_match import create_match, CreateMatchAccounts
 from tristero.instructions.place_order import place_order, PlaceOrderAccounts
 from tristero.instructions.challenge import challenge, ChallengeAccounts
@@ -24,6 +26,7 @@ from tristero.types.create_match_params import CreateMatchParams, CreateMatchPar
 from tristero.types.place_order_params import PlaceOrderParams, PlaceOrderParamsJSON
 from tristero.types.challenge_params import ChallengeParams, ChallengeParamsJSON
 from tristero.accounts.admin_panel import AdminPanel
+import time
 import json
 import struct
 
@@ -108,6 +111,20 @@ def get_sol_panel():
     # Find the program address
     return Pubkey.find_program_address(seeds, tristero_program_id)[0]
 
+def get_nonce_pda(sender_key, eid, receiver):
+    # Convert the eid to a buffer
+    eid_buffer = eid.to_bytes(4, byteorder="big")
+
+    # Create the seeds
+    seeds = [
+        b"Nonce",
+        bytes(sender_key),
+        eid_buffer,
+        bytes(receiver)
+    ]
+    
+    return Pubkey.find_program_address(seeds, endpoint_program_id)[0]
+
 def get_oapp_pda(authority):
     (distributor, bump) = Pubkey.find_program_address(
         [b"OApp", bytes(authority)],
@@ -172,7 +189,7 @@ def get_oapp_registry_pda(pubkey):
     return distributor
 
 def get_send_library_config_pda(pubkey, eid):
-    eid_bytes = struct.pack(">I", eid)
+    eid_bytes = eid.to_bytes(4, byteorder="big")
     (distributor, bump) = Pubkey.find_program_address(
         [b"SendLibraryConfig", bytes(pubkey), eid_bytes],
         endpoint_program_id,
@@ -180,7 +197,7 @@ def get_send_library_config_pda(pubkey, eid):
     return distributor
 
 def get_receive_library_config_pda(pubkey, eid):
-    eid_bytes = struct.pack(">I", eid)
+    eid_bytes = eid.to_bytes(4, byteorder="big")
     (distributor, bump) = Pubkey.find_program_address(
         [b"ReceiveLibraryConfig", bytes(pubkey), eid_bytes],
         endpoint_program_id,
@@ -188,40 +205,31 @@ def get_receive_library_config_pda(pubkey, eid):
     return distributor
 
 def get_default_send_library_config(eid):
-    eid_bytes = struct.pack(">I", eid)
+    eid_bytes = eid.to_bytes(4, byteorder="big")
     (distributor, bump) = Pubkey.find_program_address(
         [b"SendLibraryConfig", eid_bytes],
         endpoint_program_id,
     )
     return distributor
 
-def get_send_library_info_pda(send_library_config, default_send_library_config): #have to fix this part
-    eid_bytes = struct.pack(">I", eid)
-    (distributor, bump) = Pubkey.find_program_address(
-        [b"SendLibraryConfig", eid_bytes],
-        endpoint_program_id,
-    )
-    return distributor
+# def get_send_library_info_pda(send_library_config, default_send_library_config): #have to fix this part
+#     eid_bytes = struct.pack(">I", eid)
+#     (distributor, bump) = Pubkey.find_program_address(
+#         [b"SendLibraryConfig", eid_bytes],
+#         endpoint_program_id,
+#     )
+#     return distributor
 
 def get_endpoint_pda():
-    (distributor, bump) = Pubkey.find_program_address(
+    return Pubkey.find_program_address(
         [b"Endpoint"],
         endpoint_program_id,
-    )
-    return distributor
+    )[0]
 
 def get_price_feed_pda():
     (distributor, bump) = Pubkey.find_program_address(
         [b"PriceFeed"],
         price_fee_program_id,
-    )
-    return distributor
-
-def get_nonce_pda(sender_key, eid, receiver):
-    eid_bytes = struct.pack(">I", eid)
-    (distributor, bump) = Pubkey.find_program_address(
-        [b"Nonce", bytes(sender_key), eid_bytes, bytes(receiver)],
-        endpoint_program_id,
     )
     return distributor
 
@@ -296,133 +304,140 @@ async def main():
         }
         tristero_oapp_pubkey = get_tristero_oapp()
         
+        send_library_config = get_send_library_config_pda(tristero_oapp_pubkey, ARBITRUM_EID)
+        default_send_library_config = get_default_send_library_config(ARBITRUM_EID)
+        #send_library_info = get_send_library_info_pda(send_library_config, default_send_library_config) # should fix
+        #uln_pda_deriver = 
+        #send_config = ulnPdaDeriver.sendConfig(arbitrumEID, tristeroOappPubkey)[0];
+        #default_send_config = ulnPdaDeriver.defaultSendConfig(arbitrumEID)[0]; //until here
+        
         send_instruction_remaining_accounts = [
-            AccountMeta(
+            AccountMeta( #0
                 pubkey = Pubkey.from_string("76y77prsiCMvXMjuoZ5VRrhG5qYBrUMYTE5WgHqgjEn6"),
                 is_signer = False,
                 is_writable =  True
             ),
-            AccountMeta(
-                pubkey = Pubkey.from_string("4qd1mSmxeBFqbsUDnDywj1bZD7UbxPn4nZwNoQWQ77im"),
+            AccountMeta( #1
+                pubkey = get_tristero_oapp(),
                 is_signer = False,
                 is_writable =  True
             ),
-            AccountMeta(
+            AccountMeta( #2
                 pubkey = Pubkey.from_string("7a4WjyR8VZ7yZz5XJAKm39BUGn5iT9CKcv2pmG9tdXVH"),
                 is_signer = False,
                 is_writable =  True
             ),
-            AccountMeta(
+            AccountMeta( #3
                 pubkey = Pubkey.from_string("141X4oNUhGaSKnva8LecEYNgjtFBjvMwZg258hFtQRJP"),
                 is_signer = False,
                 is_writable =  True
             ),
-            AccountMeta(
+            AccountMeta( #4
                 pubkey = Pubkey.from_string("9wgwtfS2NbYariF6kFCV4ifj4fVYQ5bNtQ7pj4jWrE2T"),
                 is_signer = False,
                 is_writable =  True
             ),
-            AccountMeta(
+            AccountMeta( #5
                 pubkey = Pubkey.from_string("526PeNZfw8kSnDU4nmzJFVJzJWNhwmZykEyJr5XWz5Fv"),
                 is_signer = False,
                 is_writable =  True
             ),
-            AccountMeta(
-                pubkey = Pubkey.from_string("2uk9pQh3tB5ErV7LGQJcbWjb4KeJ2UJki5qJZ8QG56G3"),
+            AccountMeta( #6
+                pubkey = get_endpoint_pda(),
                 is_signer = False,
                 is_writable =  True
             ),
-            AccountMeta(
-                pubkey = Pubkey.from_string("5uUTpCkgpz9CofViozMKtRvKfJTez9UfjoFX1DinEhS1"),
+            AccountMeta( #7
+                pubkey = get_nonce_pda(get_tristero_oapp(), ARBITRUM_EID, RECEIVER_PUBKEY),
                 is_signer = False,
                 is_writable =  True
             ),
-            AccountMeta(
+            AccountMeta( #8
                 pubkey = Pubkey.from_string("F8E8QGhKmHEx2esh5LpVizzcP4cHYhzXdXTwg9w3YYY2"),
                 is_signer = False,
                 is_writable =  True
             ),
-            AccountMeta(
+            AccountMeta( #9
                 pubkey = Pubkey.from_string("76y77prsiCMvXMjuoZ5VRrhG5qYBrUMYTE5WgHqgjEn6"),
                 is_signer = False,
                 is_writable =  True
             ),
-            AccountMeta(
+            AccountMeta( #10
                 pubkey = Pubkey.from_string("2XgGZG4oP29U3w5h4nTk1V2LFHL23zKDPJjs3psGzLKQ"),
                 is_signer = False,
                 is_writable =  True
             ),
-            AccountMeta(
+            AccountMeta( #11
                 pubkey = Pubkey.from_string("3ZZXoLURkHz7RuK11xnxDCHkz1sPPDomqaFNAKxaC1fS"),
                 is_signer = False,
                 is_writable =  True
             ),
-            AccountMeta(
+            AccountMeta( #12
                 pubkey = Pubkey.from_string("3y4LwxWFPhMNc4w8P4CfH5WVqwUnAm21PA4Pf7UMoxej"),
                 is_signer = False,
                 is_writable =  True
             ),
-            AccountMeta(
-                pubkey = Pubkey.from_string("8oUck8bkDE1BnmfELXreAe8HS8cFR2FTqoFXA8daRNQ6"),
+            AccountMeta( #13
+                pubkey = user.pubkey(),
                 is_signer = False,
                 is_writable =  True
             ),
-            AccountMeta(
-                pubkey = Pubkey.from_string("8oUck8bkDE1BnmfELXreAe8HS8cFR2FTqoFXA8daRNQ6"),
+            AccountMeta( #14
+                pubkey = user.pubkey(),
                 is_signer = False,
                 is_writable =  True
             ),
-            AccountMeta(
-                pubkey = Pubkey.from_string("11111111111111111111111111111111"),
+            AccountMeta( #15
+                pubkey = SYS_PROGRAM_ID,
                 is_signer = False,
                 is_writable =  True
             ),
-            AccountMeta(
+            AccountMeta( #16
                 pubkey = Pubkey.from_string("7n1YeBMVEUCJ4DscKAcpVQd6KXU7VpcEcc15ZuMcL4U3"),
                 is_signer = False,
                 is_writable =  True
             ),
-            AccountMeta(
+            AccountMeta( #17
                 pubkey = Pubkey.from_string("7a4WjyR8VZ7yZz5XJAKm39BUGn5iT9CKcv2pmG9tdXVH"),
                 is_signer = False,
                 is_writable =  True
             ),
-            AccountMeta(
+            AccountMeta( #18
                 pubkey = Pubkey.from_string("6doghB248px58JSSwG4qejQ46kFMW4AMj7vzJnWZHNZn"),
                 is_signer = False,
                 is_writable =  True
             ),
-            AccountMeta(
+            AccountMeta( #19
                 pubkey = Pubkey.from_string("AwrbHeCyniXaQhiJZkLhgWdUCteeWSGaSN1sTfLiY7xK"),
                 is_signer = False,
                 is_writable =  True
             ),
-            AccountMeta(
+            AccountMeta( #20
                 pubkey = Pubkey.from_string("8ahPGPjEbpgGaZx2NV1iG5Shj7TDwvsjkEDcGWjt94TP"),
                 is_signer = False,
                 is_writable =  True
             ),
-            AccountMeta(
+            AccountMeta( #21
                 pubkey = Pubkey.from_string("CSFsUupvJEQQd1F4SsXGACJaxQX4eropQMkGV2696eeQ"),
                 is_signer = False,
                 is_writable =  True
             ),
-            AccountMeta(
+            AccountMeta( #22
                 pubkey = Pubkey.from_string("HtEYV4xB4wvsj5fgTkcfuChYpvGYzgzwvNhgDZQNh7wW"),
                 is_signer = False,
                 is_writable =  True
             ),
-            AccountMeta(
+            AccountMeta( #23
                 pubkey = Pubkey.from_string("4VDjp6XQaxoZf5RGwiPU9NR1EXSZn2TP4ATMmiSzLfhb"),
                 is_signer = False,
                 is_writable =  True
             ),
-            AccountMeta(
+            AccountMeta( #24
                 pubkey = Pubkey.from_string("8ahPGPjEbpgGaZx2NV1iG5Shj7TDwvsjkEDcGWjt94TP"),
                 is_signer = False,
                 is_writable =  True
             ),
-            AccountMeta(
+            AccountMeta( #25
                 pubkey = Pubkey.from_string("CSFsUupvJEQQd1F4SsXGACJaxQX4eropQMkGV2696eeQ"),
                 is_signer = False,
                 is_writable =  True
@@ -477,7 +492,7 @@ async def main():
         txn.add(set_compute_unit_limit(2000000))
         txn.add(place_order_ix)
         
-        place_order_tx = solana_client.send_transaction(txn, *signers).value
+        place_order_tx = solana_client.send_transaction(txn, *signers, opts=TxOpts(skip_confirmation=False, preflight_commitment=Confirmed)).value
         print(f"place_order_tx: {place_order_tx}")
         
         # calling create_match instruction
@@ -485,12 +500,12 @@ async def main():
         create_match_accounts : CreateMatchAccounts = {
             "authority": user.pubkey(),
             "admin_panel": get_admin_panel(),
-            "order": get_order_pda(order_id-1),
+            "order": get_order_pda(order_id),
             "trade_match": get_trade_match_pda(trade_match_id)
         }
         
         create_match_params_json : CreateMatchParamsJSON = {
-            "src_index": order_id-1,
+            "src_index": order_id,
             "dst_index": 60,
             "src_quantity": 100,
             "dst_quantity": 100,
@@ -515,8 +530,9 @@ async def main():
         txn.add(set_compute_unit_limit(2000000))
         txn.add(create_match_ix)
         
-        create_match_tx = solana_client.send_transaction(txn, *signers).value
+        create_match_tx = solana_client.send_transaction(txn, *signers, opts=TxOpts(skip_confirmation=False, preflight_commitment=Confirmed)).value
         print(f"create_match_tx: {create_match_tx}")
+        
         
         print(f"-------------------------Challenge----------------------------")
         challenge_accounts : ChallengeAccounts = {
@@ -539,7 +555,8 @@ async def main():
                 "params": challenge_params
             },
             challenge_accounts,
-            program_id
+            program_id,
+            send_instruction_remaining_accounts
         )
         latest_blockhash = solana_client.get_latest_blockhash()
         blockhash = latest_blockhash.value.blockhash
@@ -549,7 +566,7 @@ async def main():
         txn.add(set_compute_unit_limit(2000000))
         txn.add(challenge_ix)
         
-        challenge_tx = solana_client.send_transaction(txn, *signers).value
+        challenge_tx = solana_client.send_transaction(txn, *signers, opts=TxOpts(skip_confirmation=False, preflight_commitment=Confirmed)).value
         print(f"challenge_tx: {challenge_tx}")
 
 asyncio.run(main())
