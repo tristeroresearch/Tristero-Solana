@@ -4,13 +4,13 @@ use {anchor_lang::prelude::*, crate::error::*, crate::state::*};
 #[derive(Accounts)]
 pub struct Update<'info> {
     #[account(mut)]
-    pub admin_wallet: Signer<'info>,
+    pub authority: Signer<'info>,
 
     #[account(
         mut,
         seeds = [b"admin_panel"],
         bump = admin_panel.admin_panel_bump,
-        has_one = admin_wallet
+        has_one = authority
     )]
     pub admin_panel: Box<Account<'info, AdminPanel>>,
 }
