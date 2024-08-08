@@ -1,26 +1,11 @@
 use anchor_lang::{
-    prelude::*,
-    solana_program::{
-        program::{invoke, invoke_signed},
-        system_instruction,
-    }, system_program,
+    prelude::*
 };
-use solana_program::native_token::LAMPORTS_PER_SOL;
-use crate::*;
-
 use {crate::error::*, crate::state::*};
-// use crate::instructions::tristero_send;
 use anchor_spl::{
-    associated_token::AssociatedToken,
-    token::{self, Transfer, Mint, Token, TokenAccount},
+    token::{self, Transfer, Mint, TokenAccount},
 };
-use mpl_token_metadata::instructions::*;
 use spl_token::ID as TOKEN_PROGRAM_ID;
-use endpoint::{
-    self, cpi::accounts::{Clear, ClearCompose, Quote, RegisterOApp, Send, SendCompose, SetDelegate}, instructions::{
-        oapp::send::*, ClearComposeParams, ClearParams, QuoteParams, RegisterOAppParams, SendComposeParams, SendParams, SetDelegateParams
-    }, state::{endpoint::*, message_lib::*, messaging_channel::*}, ConstructCPIContext, MessagingFee, MessagingReceipt, COMPOSED_MESSAGE_HASH_SEED, ENDPOINT_SEED, NONCE_SEED, OAPP_SEED, PAYLOAD_HASH_SEED
-};
 
 #[derive(Accounts)]
 #[instruction(params: PlaceOrderParams)]
@@ -118,7 +103,6 @@ pub fn place_order(ctx: Context<PlaceOrder>, params: &PlaceOrderParams) -> Resul
 
     let cpi_context = CpiContext::new(ctx.accounts.token_program.to_account_info(), cpi_accounts);
     
-    msg!("Here is for transfer token");
     token::transfer(cpi_context, params.source_sell_amount)?;
 
     // ---------------------Transfer the sol for fee to the sol staking account----------------------------------
@@ -127,7 +111,6 @@ pub fn place_order(ctx: Context<PlaceOrder>, params: &PlaceOrderParams) -> Resul
         &ctx.accounts.sol_panel.key(), 
         5000000
     );
-    msg!("Here is for transfer sol");
     let _ = anchor_lang::solana_program::program::invoke(
         &ix, 
         &[ctx.accounts.authority.to_account_info(), ctx.accounts.sol_panel.to_account_info()],
