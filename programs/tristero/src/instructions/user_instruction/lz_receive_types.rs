@@ -1,9 +1,5 @@
 use crate::*;
 use anchor_lang::solana_program;
-use anchor_spl::{
-    associated_token::{get_associated_token_address_with_program_id, ID as ASSOCIATED_TOKEN_ID},
-    token_interface::Mint,
-};
 use spl_token::ID as TOKEN_PROGRAM_ID;
 use solana_program::system_program;
 use std::str::FromStr;
@@ -26,29 +22,12 @@ pub struct LzReceiveTypeParams {
     pub extra_data: Vec<u8>,
 }
 
-fn find_pda(program_id: &Pubkey, seeds: &[&[u8]]) -> (Pubkey, u8) {
-    Pubkey::find_program_address(seeds, program_id)
-}
-
-// account structure
-// account 0 - payer (executor)
-// account 1 - admin_panel
-// account 2 - sol_panel
-// account 3 - token mint
-// account 4 - associated token account
-// account 5 - dest wallet address
-// account 6 - staking account
-// account 7 - trade match
-// account 8 - system program
-// account 9 - associated token program
 impl LzReceiveTypes<'_> {
     pub fn apply(
         ctx: &Context<LzReceiveTypes>,
         params: &LzReceiveTypeParams,
     ) -> Result<Vec<LzAccount>> {
-        let oft = &ctx.accounts.oft_config;
         let program_id = ctx.program_id;
-        let executor_program_id = Pubkey::from_str("3HSGGUXKRtmAXpktCajhm4c7RAv8NFGpXmgRW53uUAKx").unwrap();
 
         let (admin_panel, _) = Pubkey::find_program_address(
             &[b"admin_panel"],
