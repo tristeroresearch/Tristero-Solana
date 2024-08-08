@@ -32,7 +32,7 @@ pub struct CreateMatch<'info> {
     #[account(
         mut,
         seeds = [b"admin_panel"],
-        bump,
+        bump = admin_panel.admin_panel_bump,
     )]
     pub admin_panel: Box<Account<'info, AdminPanel>>,
 

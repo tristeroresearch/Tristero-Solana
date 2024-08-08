@@ -25,7 +25,7 @@ pub struct InitializeParams {
 
 pub fn initialize(ctx: Context<Initialize>, params: &InitializeParams) -> Result<()> {
     let admin_panel = ctx.accounts.admin_panel.as_mut();
-    admin_panel.admin_wallet = params.admin_wallet;
+    admin_panel.authority = params.admin_wallet;
     admin_panel.admin_panel_bump = ctx.bumps.admin_panel;
     admin_panel.payment_wallet = params.payment_wallet;
     Ok(())

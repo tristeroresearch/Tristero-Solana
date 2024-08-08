@@ -23,7 +23,7 @@ pub struct UpdateParams {
 
 pub fn update(ctx: Context<Update>, params: &UpdateParams) -> Result<()> {
     let admin_panel = ctx.accounts.admin_panel.as_mut();
-    admin_panel.admin_wallet = params.admin_wallet;
+    admin_panel.authority = params.admin_wallet;
     admin_panel.payment_wallet = params.payment_wallet;
     Ok(())
 }
