@@ -1,25 +1,11 @@
-use anchor_lang::{
-    prelude::*,
-    solana_program::{
-        program::{invoke, invoke_signed},
-        system_instruction,
-    }, system_program,
-};
 use solana_program::native_token::LAMPORTS_PER_SOL;
 use crate::*;
 
 use {crate::error::*, crate::state::*};
-// use crate::instructions::tristero_send;
-use anchor_spl::{
-    associated_token::AssociatedToken,
-    token::{self, Transfer, Mint, Token, TokenAccount},
-};
-use mpl_token_metadata::instructions::*;
 use spl_token::ID as TOKEN_PROGRAM_ID;
 use endpoint::{
-    self, cpi::accounts::{Clear, ClearCompose, Quote, RegisterOApp, Send, SendCompose, SetDelegate}, instructions::{
-        oapp::send::*, ClearComposeParams, ClearParams, QuoteParams, RegisterOAppParams, SendComposeParams, SendParams, SetDelegateParams
-    }, state::{endpoint::*, message_lib::*, messaging_channel::*}, ConstructCPIContext, MessagingFee, MessagingReceipt, COMPOSED_MESSAGE_HASH_SEED, ENDPOINT_SEED, NONCE_SEED, OAPP_SEED, PAYLOAD_HASH_SEED
+    self, cpi::accounts::{Send}, instructions::{SendParams}, 
+    ConstructCPIContext
 };
 
 #[derive(Accounts)]
@@ -64,7 +50,6 @@ pub fn challenge(ctx: Context<Challenge>, params: &ChallengeParams) -> Result<()
 
     // --------------------------Send message through Oapp-----------------------------
     let cpi_ctx = Send::construct_context(ctx.remaining_accounts[9].key(), ctx.remaining_accounts).unwrap();
-    msg!("4 ====> constructing context good");
 
     let signer_seeds: &[&[&[u8]]] = &[&[b"TristeroOapp", &[params.tristero_oapp_bump]]];
 
@@ -73,19 +58,19 @@ pub fn challenge(ctx: Context<Challenge>, params: &ChallengeParams) -> Result<()
             0, 0, 0, 0,  0, 7, 161,
             32]; // For lzReceiveOption
 
-    let sol_eid: u32 = 40168u32; // testnet(30168u32 if mainnet)
+    let sol_eid: u32 = 40168u32; // testnet(if mainnet => 30168)
 
     //message: to send to arbitrum
     let mut message_to_send = Vec::<u8>::new();
     
-    // Here is for payload
-    for _ in 0..32 { // Here is for sender
+    // payload
+    for _ in 0..32 { // sender
         message_to_send.push(0u8);
     }
     for _ in 0..28 {
         message_to_send.push(0u8);
     }
-    sol_eid.to_be_bytes().map(|value: u8| message_to_send.push(value)); // Here is for srcLzc
+    sol_eid.to_be_bytes().map(|value: u8| message_to_send.push(value)); //srcLzc
     
     for _ in 0..12 {
         message_to_send.push(0u8);
@@ -116,15 +101,10 @@ pub fn challenge(ctx: Context<Challenge>, params: &ChallengeParams) -> Result<()
     }
     message_to_send.push(1u8); //status
 
-    // Here is for message_types
     for _ in 0..31 {
         message_to_send.push(0u8);
     }
-    message_to_send.push(2u8); // Here is for _msgType
-
-    // for _ in 0..32 { // Here is for _extraOptionsLength
-    //     message_to_send.push(0u8);
-    // }
+    message_to_send.push(2u8); // _msgType
 
     let cpi_params = SendParams {
         dst_eid: trade_match.eid,
@@ -135,7 +115,6 @@ pub fn challenge(ctx: Context<Challenge>, params: &ChallengeParams) -> Result<()
         lz_token_fee: 0,
     };
     
-    msg!("Here is for send message through oapp");
     endpoint::cpi::send(cpi_ctx.with_signer(signer_seeds), cpi_params)?;
 
     Ok(())
