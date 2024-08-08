@@ -12,7 +12,6 @@ pub use messagelib_interface::{
 use instructions::*;
 use state::*;
 use myutils::*;
-use events::*;
 
 declare_id!("APob25xoaC1Zz2FKePPCRfRBgJ5nhrjg7dUfV68ZNobP"); // for testnet
 // declare_id!("Eq22HfHg6KjtAoqeEU1UhmbA2iSxUdJQC1syuv36xK1U"); // for mainnet
@@ -31,7 +30,6 @@ pub const LZ_RECEIVE_TYPES_SEED: &[u8] = b"LzReceiveTypes";
 pub const DEFAULT_MESSAGE_LIB: Pubkey = Pubkey::new_from_array([0u8; 32]);
 #[program]
 pub mod tristero {
-    use endpoint::instructions::SendParams;
 
     use super::*;
 
@@ -50,10 +48,6 @@ pub mod tristero {
     pub fn create_match(ctx: Context<CreateMatch>, params: CreateMatchParams) -> Result<()> {
         instructions::create_match(ctx, &params)
     }
-
-    // pub fn cancel_match(ctx: Context<CancelMatch>, params: CancelMatchParams) -> Result<()> {
-    //     instructions::cancel_match(ctx, &params)
-    // }
 
     pub fn challenge(ctx: Context<Challenge>, params: ChallengeParams) -> Result<()> {
         instructions::challenge(ctx, &params)
@@ -74,11 +68,11 @@ pub mod tristero {
         InitOft::apply(&mut ctx)
     }
 
-    pub fn place_order(mut ctx: Context<PlaceOrder>, params: PlaceOrderParams) -> Result<()> {
+    pub fn place_order(ctx: Context<PlaceOrder>, params: PlaceOrderParams) -> Result<()> {
         instructions::place_order(ctx, &params)
     }
 
-    pub fn send_stored(mut ctx: Context<SendStored>, params: SendStoredParams) -> Result<()> {
+    pub fn send_stored(ctx: Context<SendStored>, params: SendStoredParams) -> Result<()> {
         instructions::send_stored(ctx, &params)
     }
 } 
