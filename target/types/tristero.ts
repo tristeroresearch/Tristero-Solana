@@ -46,39 +46,6 @@ export type Tristero = {
       ]
     },
     {
-      "name": "tristeroSend",
-      "accounts": [
-        {
-          "name": "sender",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "endpointProgram",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "eventAuthority",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "program",
-          "isMut": false,
-          "isSigner": false
-        }
-      ],
-      "args": [
-        {
-          "name": "params",
-          "type": {
-            "defined": "TristeroSendParams"
-          }
-        }
-      ]
-    },
-    {
       "name": "adminPanelCreate",
       "accounts": [
         {
@@ -110,7 +77,7 @@ export type Tristero = {
       "name": "adminPanelUpdate",
       "accounts": [
         {
-          "name": "adminWallet",
+          "name": "authority",
           "isMut": true,
           "isSigner": true
         },
@@ -477,7 +444,7 @@ export type Tristero = {
         "kind": "struct",
         "fields": [
           {
-            "name": "adminWallet",
+            "name": "authority",
             "type": "publicKey"
           },
           {
@@ -590,7 +557,7 @@ export type Tristero = {
         "kind": "struct",
         "fields": [
           {
-            "name": "userPubkey",
+            "name": "authority",
             "type": "publicKey"
           },
           {
@@ -648,72 +615,6 @@ export type Tristero = {
   ],
   "types": [
     {
-      "name": "InitializeParams",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "adminWallet",
-            "type": "publicKey"
-          },
-          {
-            "name": "paymentWallet",
-            "type": "publicKey"
-          }
-        ]
-      }
-    },
-    {
-      "name": "UpdateParams",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "adminWallet",
-            "type": "publicKey"
-          },
-          {
-            "name": "paymentWallet",
-            "type": "publicKey"
-          }
-        ]
-      }
-    },
-    {
-      "name": "ChallengeParams",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "tradeMatchId",
-            "type": "u64"
-          },
-          {
-            "name": "tristeroOappBump",
-            "type": "u8"
-          },
-          {
-            "name": "sourceTokenAddressInArbitrumChain",
-            "type": {
-              "array": [
-                "u8",
-                20
-              ]
-            }
-          },
-          {
-            "name": "receiver",
-            "type": {
-              "array": [
-                "u8",
-                32
-              ]
-            }
-          }
-        ]
-      }
-    },
-    {
       "name": "CreateMatchParams",
       "type": {
         "kind": "struct",
@@ -746,6 +647,50 @@ export type Tristero = {
                 20
               ]
             }
+          }
+        ]
+      }
+    },
+    {
+      "name": "InitializeParams",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "adminWallet",
+            "type": "publicKey"
+          },
+          {
+            "name": "paymentWallet",
+            "type": "publicKey"
+          }
+        ]
+      }
+    },
+    {
+      "name": "RegisterTristeroOAppParams",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "delegate",
+            "type": "publicKey"
+          }
+        ]
+      }
+    },
+    {
+      "name": "UpdateParams",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "adminWallet",
+            "type": "publicKey"
+          },
+          {
+            "name": "paymentWallet",
+            "type": "publicKey"
           }
         ]
       }
@@ -858,6 +803,40 @@ export type Tristero = {
       }
     },
     {
+      "name": "ChallengeParams",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "tradeMatchId",
+            "type": "u64"
+          },
+          {
+            "name": "tristeroOappBump",
+            "type": "u8"
+          },
+          {
+            "name": "sourceTokenAddressInArbitrumChain",
+            "type": {
+              "array": [
+                "u8",
+                20
+              ]
+            }
+          },
+          {
+            "name": "receiver",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
       "name": "PlaceOrderParams",
       "type": {
         "kind": "struct",
@@ -924,55 +903,6 @@ export type Tristero = {
                 32
               ]
             }
-          }
-        ]
-      }
-    },
-    {
-      "name": "RegisterTristeroOAppParams",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "delegate",
-            "type": "publicKey"
-          }
-        ]
-      }
-    },
-    {
-      "name": "TristeroSendParams",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "dstEid",
-            "type": "u32"
-          },
-          {
-            "name": "receiver",
-            "type": {
-              "array": [
-                "u8",
-                32
-              ]
-            }
-          },
-          {
-            "name": "message",
-            "type": "bytes"
-          },
-          {
-            "name": "options",
-            "type": "bytes"
-          },
-          {
-            "name": "nativeFee",
-            "type": "u64"
-          },
-          {
-            "name": "lzTokenFee",
-            "type": "u64"
           }
         ]
       }
@@ -1200,39 +1130,6 @@ export const IDL: Tristero = {
       ]
     },
     {
-      "name": "tristeroSend",
-      "accounts": [
-        {
-          "name": "sender",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "endpointProgram",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "eventAuthority",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "program",
-          "isMut": false,
-          "isSigner": false
-        }
-      ],
-      "args": [
-        {
-          "name": "params",
-          "type": {
-            "defined": "TristeroSendParams"
-          }
-        }
-      ]
-    },
-    {
       "name": "adminPanelCreate",
       "accounts": [
         {
@@ -1264,7 +1161,7 @@ export const IDL: Tristero = {
       "name": "adminPanelUpdate",
       "accounts": [
         {
-          "name": "adminWallet",
+          "name": "authority",
           "isMut": true,
           "isSigner": true
         },
@@ -1631,7 +1528,7 @@ export const IDL: Tristero = {
         "kind": "struct",
         "fields": [
           {
-            "name": "adminWallet",
+            "name": "authority",
             "type": "publicKey"
           },
           {
@@ -1744,7 +1641,7 @@ export const IDL: Tristero = {
         "kind": "struct",
         "fields": [
           {
-            "name": "userPubkey",
+            "name": "authority",
             "type": "publicKey"
           },
           {
@@ -1802,72 +1699,6 @@ export const IDL: Tristero = {
   ],
   "types": [
     {
-      "name": "InitializeParams",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "adminWallet",
-            "type": "publicKey"
-          },
-          {
-            "name": "paymentWallet",
-            "type": "publicKey"
-          }
-        ]
-      }
-    },
-    {
-      "name": "UpdateParams",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "adminWallet",
-            "type": "publicKey"
-          },
-          {
-            "name": "paymentWallet",
-            "type": "publicKey"
-          }
-        ]
-      }
-    },
-    {
-      "name": "ChallengeParams",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "tradeMatchId",
-            "type": "u64"
-          },
-          {
-            "name": "tristeroOappBump",
-            "type": "u8"
-          },
-          {
-            "name": "sourceTokenAddressInArbitrumChain",
-            "type": {
-              "array": [
-                "u8",
-                20
-              ]
-            }
-          },
-          {
-            "name": "receiver",
-            "type": {
-              "array": [
-                "u8",
-                32
-              ]
-            }
-          }
-        ]
-      }
-    },
-    {
       "name": "CreateMatchParams",
       "type": {
         "kind": "struct",
@@ -1900,6 +1731,50 @@ export const IDL: Tristero = {
                 20
               ]
             }
+          }
+        ]
+      }
+    },
+    {
+      "name": "InitializeParams",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "adminWallet",
+            "type": "publicKey"
+          },
+          {
+            "name": "paymentWallet",
+            "type": "publicKey"
+          }
+        ]
+      }
+    },
+    {
+      "name": "RegisterTristeroOAppParams",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "delegate",
+            "type": "publicKey"
+          }
+        ]
+      }
+    },
+    {
+      "name": "UpdateParams",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "adminWallet",
+            "type": "publicKey"
+          },
+          {
+            "name": "paymentWallet",
+            "type": "publicKey"
           }
         ]
       }
@@ -2012,6 +1887,40 @@ export const IDL: Tristero = {
       }
     },
     {
+      "name": "ChallengeParams",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "tradeMatchId",
+            "type": "u64"
+          },
+          {
+            "name": "tristeroOappBump",
+            "type": "u8"
+          },
+          {
+            "name": "sourceTokenAddressInArbitrumChain",
+            "type": {
+              "array": [
+                "u8",
+                20
+              ]
+            }
+          },
+          {
+            "name": "receiver",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
       "name": "PlaceOrderParams",
       "type": {
         "kind": "struct",
@@ -2078,55 +1987,6 @@ export const IDL: Tristero = {
                 32
               ]
             }
-          }
-        ]
-      }
-    },
-    {
-      "name": "RegisterTristeroOAppParams",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "delegate",
-            "type": "publicKey"
-          }
-        ]
-      }
-    },
-    {
-      "name": "TristeroSendParams",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "dstEid",
-            "type": "u32"
-          },
-          {
-            "name": "receiver",
-            "type": {
-              "array": [
-                "u8",
-                32
-              ]
-            }
-          },
-          {
-            "name": "message",
-            "type": "bytes"
-          },
-          {
-            "name": "options",
-            "type": "bytes"
-          },
-          {
-            "name": "nativeFee",
-            "type": "u64"
-          },
-          {
-            "name": "lzTokenFee",
-            "type": "u64"
           }
         ]
       }

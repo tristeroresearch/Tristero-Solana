@@ -22,6 +22,9 @@ oft = "HRPXLCqspQocTjfcX4rvAPaY9q6Gwb1rrD3xXWrfJWdW"
 [programs.testnet]
 tristero = "APob25xoaC1Zz2FKePPCRfRBgJ5nhrjg7dUfV68ZNobP"
 
+[programs.devnet]
+tristero = "APob25xoaC1Zz2FKePPCRfRBgJ5nhrjg7dUfV68ZNobP"
+
 [programs.mainnet]
 tristero = "Eq22HfHg6KjtAoqeEU1UhmbA2iSxUdJQC1syuv36xK1U"
 
@@ -82,7 +85,7 @@ filename = "./tests/dvn_config.json"
 url = "https://api.apr.dev"
 
 [provider]
-cluster = "testnet"
+cluster = "devnet"
 wallet = "./tests/id.json"
 #wallet = "~/.config/solana/id.json"
 

@@ -88,7 +88,7 @@ impl LzReceive<'_> {
 
         let msg_vec:Vec<[u8; 32]> = split_into_chunks(params.message.clone());
         
-        let msg_type =  vec_to_u64(msg_vec[4]);
+        let msg_type =  vec_to_u64(msg_vec[3]);
 
         if msg_type == 1u64 { // B->A
             // ---------------------Transfer the source token from the staking account----------------------------------

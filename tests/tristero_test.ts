@@ -52,7 +52,8 @@ const anotherUser = anchor.web3.Keypair.fromSecretKey(Uint8Array.from(otherJson)
 const admin = anchor.web3.Keypair.fromSecretKey(Uint8Array.from(adminJson))
 const receiverPubKey = Buffer.alloc(32, 0);
 // const paddedBuffer = Buffer.from('20eda7b413e525ccff9ffba610f5c4b8e189eb53', 'hex') // have to change to arbitrum side
-const paddedBuffer = Buffer.from('644DFf7307Bb76187f559CDC8aC926D827158E4B', 'hex')
+const paddedBuffer = Buffer.from('EbE4c8D56d4e00f1ADcdC8EC7cC50776DFBbFFa3', 'hex')
+const tempStr = Buffer.from('00000000000000000000000000000000000000000000000000000000000000003b442cb3912157f13a933d0134282d032b5ffecd01a2dbf1b7790608df002ea79696aa4b9cbce48d6bc8cfc0b6ca5b5200b28a2226df8190219623e6e13ddc0200000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000009ce8000000000000000000000000748b0dfd0dc7efb34e5be75b3f4d24a0093543530000000000000000000000000000000000000000000000000000000000000001', "hex")
 paddedBuffer.copy(receiverPubKey, 12);
 console.log("receiverPubKey => ", receiverPubKey)
 const arbitrumEID = 40231; // Here is for Arbitrum Sepolia Testnet
@@ -60,6 +61,16 @@ const arbitrumEID = 40231; // Here is for Arbitrum Sepolia Testnet
 
 const options = Options.newOptions().addExecutorLzReceiveOption(500000, 0);
 console.log("options => ", options.toHex(), " => ", options.toBytes());
+
+
+// const turnIntoNumberArray = (str: string) => {
+//     const numberArray: number[] = [];
+//     for (let i = 0; i < str.length; i+=2) {
+//         const hexChar = numberArray[i];
+//         const num = parseInt(hexChar, 16);
+//         numberArray.push(num);
+//     }
+// }
 
 describe("# test scenario - tristero ", () => {
 
@@ -133,7 +144,6 @@ describe("# test scenario - tristero ", () => {
             //         oapp: tristeroOappPubkey,
             //         oappRegistry: getOappPDA(tristeroOappPubkey),
             //         endpointProgram: endpoint,
-            //         // systemProgram: SystemProgram.programId,
             //         eventAuthority: endpointEventPdaDeriver.eventAuthority()[0],
             //     })
             //     .signers([user])
@@ -501,7 +511,7 @@ describe("# test scenario - tristero ", () => {
             //     null,
             //     5 // Decimals
             // )
-            const mint = new PublicKey("96dYLgk5D6rHm2V8Bi3djA3QXrAJrhENWuHC9m4kCmDq")
+            const mint = new PublicKey("4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU")
 
             console.log("Mint Address: ", mint.toBase58());
 
@@ -513,7 +523,7 @@ describe("# test scenario - tristero ", () => {
             //     user.publicKey
             // )).address;
 
-            const tokenAccount = new PublicKey("CqVTHuqiBKuygw5UXiGmyinAaJzgyrcV5wxubK8C8fDQ")
+            const tokenAccount = new PublicKey("6RzJ96TziaKHitum3KW5524D6GbvqqYJAeaNfQyicmEx")
 
             console.log("Token Account Address: ", tokenAccount.toBase58())
 
@@ -583,7 +593,7 @@ describe("# test scenario - tristero ", () => {
             console.log("------------------------Create Match1------------------------------");
             // {
             //     const createMatchTx = await program.methods.createMatch({
-            //             srcIndex: new BN(73),
+            //             srcIndex: new BN(2),
             //             dstIndex: new BN(0),
             //             srcQuantity: new BN(90),
             //             dstQuantity: new BN(90),
@@ -591,14 +601,14 @@ describe("# test scenario - tristero ", () => {
             //             arbSourceTokenAddr: Array.from(arbWalletAddr)
             //         })
             //         .accounts({
-            //             authority: user.publicKey,
+            //             authority: admin.publicKey,
             //             adminPanel: getAdminPanel(),
-            //             order: getOrderPDA(new BN(73)),
+            //             order: getOrderPDA(new BN(2)),
             //             tradeMatch: getTradeMatchPDA(adminPanel.matchCount),
             //             systemProgram: SystemProgram.programId,
             //             tokenProgram: TOKEN_PROGRAM_ID
             //         })
-            //         .signers([user])
+            //         .signers([admin])
             //         .rpc();
             //     console.log("createMatchTx: ", createMatchTx)
             // }
@@ -1255,6 +1265,24 @@ describe("# test scenario - tristero ", () => {
             //     console.log("cancelMatchTx = ", createMatchTx)
             // }*/
 
+            console.log("--------testing lz_receive_types ---------");
+            {
+                let lzReceiveTypesTx = await program.methods.lzReceiveTypes({
+                    srcEid: arbitrumEID,
+                    sender: Array.from(receiverPubKey),
+                    nonce: new BN(1),
+                    guid: Array.from(receiverPubKey),
+                    message: tempStr,
+                    extraData: tempStr
+                })
+                .accounts({
+                    tokenMint: PublicKey.default,
+                    oftConfig: PublicKey.default
+                })
+                .rpc();
+                console.log("lzReceiveTypesTx: ", lzReceiveTypesTx)
+            }
+            
             console.log("======> ", new DVNDeriver(dvnProgramId).config()[0])
             console.log("======> ", PublicKey.findProgramAddressSync(
                 [Buffer.from("DvnConfig")],
