@@ -61,7 +61,10 @@ pub struct LzReceive<'info> {
     )]
     pub staking_account: Box<Account<'info, TokenAccount>>,
 
-    #[account(mut)]
+    #[account(
+        mut,
+        constraint = trade_match.is_valiable == true @ CustomError::NotAgain
+    )]
     pub trade_match: Box<Account<'info, TradeMatch>>,
 
     pub system_program: Program<'info, System>,
