@@ -588,13 +588,14 @@ describe("# test scenario - tristero ", () => {
             //         .signers([user])
             //         .rpc();
             //     console.log("placeOrderTx: ", placeOrderTx)
+            //     console.log("orderId: ", adminPanel.orderCount)
             // }
 
             console.log("------------------------Create Match1------------------------------");
             // {
             //     const createMatchTx = await program.methods.createMatch({
-            //             srcIndex: new BN(2),
-            //             dstIndex: new BN(0),
+            //             srcIndex: new BN(3),
+            //             dstIndex: new BN(1),
             //             srcQuantity: new BN(90),
             //             dstQuantity: new BN(90),
             //             tradeMatchId: adminPanel.matchCount,
@@ -603,7 +604,7 @@ describe("# test scenario - tristero ", () => {
             //         .accounts({
             //             authority: admin.publicKey,
             //             adminPanel: getAdminPanel(),
-            //             order: getOrderPDA(new BN(2)),
+            //             order: getOrderPDA(new BN(3)),
             //             tradeMatch: getTradeMatchPDA(adminPanel.matchCount),
             //             systemProgram: SystemProgram.programId,
             //             tokenProgram: TOKEN_PROGRAM_ID
@@ -642,185 +643,185 @@ describe("# test scenario - tristero ", () => {
             const sendStoredId = adminPanel.matchCount;
 
             console.log("------------------------Challenge------------------------");
-            // {
-            //     const sendLibraryConfig = getSendLibraryConfigPDA(tristeroOappPubkey, arbitrumEID);
-            //     const defaultSendLibraryConfig = getDefaultSendLibraryConfig(arbitrumEID);
-            //     console.log(sendLibraryConfig, " ", defaultSendLibraryConfig);
-            //     const sendLibraryInfo = await getSendLibraryInfoPDA(sendLibraryConfig, defaultSendLibraryConfig);
-            //     const ulnPdaDeriver = new UlnPDADeriver(sendLibraryProgram);
-            //     let sendConfig = ulnPdaDeriver.sendConfig(arbitrumEID, tristeroOappPubkey)[0];
-            //     let defaultSendConfig = ulnPdaDeriver.defaultSendConfig(arbitrumEID)[0]; //until here
-            //     const sendInstructionRemainingAccounts = [
-            //         { //0
-            //             pubkey: endpoint,
-            //             isSigner: false,
-            //             isWritable: true
-            //         },
-            //         { //1
-            //             pubkey: tristeroOappPubkey,
-            //             isSigner: false,
-            //             isWritable: true
-            //         },
-            //         { //2
-            //             pubkey: sendLibraryProgram,
-            //             isSigner: false,
-            //             isWritable: true
-            //         },
-            //         { //3
-            //             pubkey: sendLibraryConfig,
-            //             isSigner: false,
-            //             isWritable: true
-            //         },
-            //         { //4
-            //             pubkey: defaultSendLibraryConfig,
-            //             isSigner: false,
-            //             isWritable: true
-            //         },
-            //         { //5
-            //             pubkey: sendLibraryInfo,
-            //             isSigner: false,
-            //             isWritable: true
-            //         },
-            //         { //6
-            //             pubkey: getEndpointPDA(arbitrumEID),
-            //             isSigner: false,
-            //             isWritable: true
-            //         },
-            //         { //7
-            //             pubkey: getNoncePDA(tristeroOappPubkey, arbitrumEID, receiverPubKey),
-            //             isSigner: false,
-            //             isWritable: true
-            //         },
-            //         { //8
-            //             pubkey: endpointEventPdaDeriver.eventAuthority()[0],
-            //             isSigner: false,
-            //             isWritable: true
-            //         },
-            //         { //9
-            //             pubkey: endpoint,
-            //             isSigner: false,
-            //             isWritable: true
-            //         },
-            //         { //10
-            //             pubkey: getUlnPDA(),
-            //             isSigner: false,
-            //             isWritable: true
-            //         },
-            //         { //11
-            //             pubkey: sendConfig,
-            //             isSigner: false,
-            //             isWritable: true
-            //         },
-            //         { //12
-            //             pubkey: defaultSendConfig,
-            //             isSigner: false,
-            //             isWritable: true
-            //         },
-            //         { //13
-            //             pubkey: user.publicKey,
-            //             isSigner: false,
-            //             isWritable: true
-            //         },
-            //         { //14
-            //             pubkey: user.publicKey,
-            //             isSigner: false,
-            //             isWritable: true
-            //         },
-            //         { //15
-            //             pubkey: SystemProgram.programId,
-            //             isSigner: false,
-            //             isWritable: true
-            //         },
-            //         { //16
-            //             pubkey: ulnEventPdaDeriver.eventAuthority()[0],
-            //             isSigner: false,
-            //             isWritable: true
-            //         },
-            //         { //17
-            //             pubkey: sendLibraryProgram,
-            //             isSigner: false,
-            //             isWritable: true
-            //         },
-            //         { //18
-            //             pubkey: executorProgramId,
-            //             isSigner: false,
-            //             isWritable: true
-            //         },
-            //         { //19
-            //             pubkey: new ExecutorPDADeriver(executorProgramId).config()[0],
-            //             isSigner: false,
-            //             isWritable: true
-            //         },
-            //         { //20
-            //             pubkey: priceFeeProgramId,
-            //             isSigner: false,
-            //             isWritable: true
-            //         },
-            //         { //21
-            //             pubkey: new PriceFeedPDADeriver(priceFeeProgramId).priceFeed()[0],
-            //             isSigner: false,
-            //             isWritable: true
-            //         },
-            //         { //22
-            //             pubkey: dvnProgramId,
-            //             isSigner: false,
-            //             isWritable: true
-            //         },
-            //         { //23
-            //             pubkey: new DVNDeriver(dvnProgramId).config()[0],
-            //             isSigner: false,
-            //             isWritable: true
-            //         },
-            //         { //24
-            //             pubkey: priceFeeProgramId,
-            //             isSigner: false,
-            //             isWritable: true
-            //         },
-            //         { //25
-            //             pubkey: new PriceFeedPDADeriver(priceFeeProgramId).priceFeed()[0],
-            //             isSigner: false,
-            //             isWritable: true
-            //         },
-            //     ]
+            {
+                const sendLibraryConfig = getSendLibraryConfigPDA(tristeroOappPubkey, arbitrumEID);
+                const defaultSendLibraryConfig = getDefaultSendLibraryConfig(arbitrumEID);
+                console.log(sendLibraryConfig, " ", defaultSendLibraryConfig);
+                const sendLibraryInfo = await getSendLibraryInfoPDA(sendLibraryConfig, defaultSendLibraryConfig);
+                const ulnPdaDeriver = new UlnPDADeriver(sendLibraryProgram);
+                let sendConfig = ulnPdaDeriver.sendConfig(arbitrumEID, tristeroOappPubkey)[0];
+                let defaultSendConfig = ulnPdaDeriver.defaultSendConfig(arbitrumEID)[0]; //until here
+                const sendInstructionRemainingAccounts = [
+                    { //0
+                        pubkey: endpoint,
+                        isSigner: false,
+                        isWritable: true
+                    },
+                    { //1
+                        pubkey: tristeroOappPubkey,
+                        isSigner: false,
+                        isWritable: true
+                    },
+                    { //2
+                        pubkey: sendLibraryProgram,
+                        isSigner: false,
+                        isWritable: true
+                    },
+                    { //3
+                        pubkey: sendLibraryConfig,
+                        isSigner: false,
+                        isWritable: true
+                    },
+                    { //4
+                        pubkey: defaultSendLibraryConfig,
+                        isSigner: false,
+                        isWritable: true
+                    },
+                    { //5
+                        pubkey: sendLibraryInfo,
+                        isSigner: false,
+                        isWritable: true
+                    },
+                    { //6
+                        pubkey: getEndpointPDA(arbitrumEID),
+                        isSigner: false,
+                        isWritable: true
+                    },
+                    { //7
+                        pubkey: getNoncePDA(tristeroOappPubkey, arbitrumEID, receiverPubKey),
+                        isSigner: false,
+                        isWritable: true
+                    },
+                    { //8
+                        pubkey: endpointEventPdaDeriver.eventAuthority()[0],
+                        isSigner: false,
+                        isWritable: true
+                    },
+                    { //9
+                        pubkey: endpoint,
+                        isSigner: false,
+                        isWritable: true
+                    },
+                    { //10
+                        pubkey: getUlnPDA(),
+                        isSigner: false,
+                        isWritable: true
+                    },
+                    { //11
+                        pubkey: sendConfig,
+                        isSigner: false,
+                        isWritable: true
+                    },
+                    { //12
+                        pubkey: defaultSendConfig,
+                        isSigner: false,
+                        isWritable: true
+                    },
+                    { //13
+                        pubkey: user.publicKey,
+                        isSigner: false,
+                        isWritable: true
+                    },
+                    { //14
+                        pubkey: user.publicKey,
+                        isSigner: false,
+                        isWritable: true
+                    },
+                    { //15
+                        pubkey: SystemProgram.programId,
+                        isSigner: false,
+                        isWritable: true
+                    },
+                    { //16
+                        pubkey: ulnEventPdaDeriver.eventAuthority()[0],
+                        isSigner: false,
+                        isWritable: true
+                    },
+                    { //17
+                        pubkey: sendLibraryProgram,
+                        isSigner: false,
+                        isWritable: true
+                    },
+                    { //18
+                        pubkey: executorProgramId,
+                        isSigner: false,
+                        isWritable: true
+                    },
+                    { //19
+                        pubkey: new ExecutorPDADeriver(executorProgramId).config()[0],
+                        isSigner: false,
+                        isWritable: true
+                    },
+                    { //20
+                        pubkey: priceFeeProgramId,
+                        isSigner: false,
+                        isWritable: true
+                    },
+                    { //21
+                        pubkey: new PriceFeedPDADeriver(priceFeeProgramId).priceFeed()[0],
+                        isSigner: false,
+                        isWritable: true
+                    },
+                    { //22
+                        pubkey: dvnProgramId,
+                        isSigner: false,
+                        isWritable: true
+                    },
+                    { //23
+                        pubkey: new DVNDeriver(dvnProgramId).config()[0],
+                        isSigner: false,
+                        isWritable: true
+                    },
+                    { //24
+                        pubkey: priceFeeProgramId,
+                        isSigner: false,
+                        isWritable: true
+                    },
+                    { //25
+                        pubkey: new PriceFeedPDADeriver(priceFeeProgramId).priceFeed()[0],
+                        isSigner: false,
+                        isWritable: true
+                    },
+                ]
 
-            //     console.log("sendInstructionRemainingAcc => ", JSON.stringify(sendInstructionRemainingAccounts))
+                console.log("sendInstructionRemainingAcc => ", JSON.stringify(sendInstructionRemainingAccounts))
 
-            //     const sellAmount = new BN(100000)
-            //     const buyAmount = new BN(10000)
-            //     const sourceTokenAddressInArbitrumChain = Array(20).fill(0); //have to input arbitrum wallet address of user
+                const sellAmount = new BN(100000)
+                const buyAmount = new BN(10000)
+                const sourceTokenAddressInArbitrumChain = Array(20).fill(0); //have to input arbitrum wallet address of user
 
-            //     const additionalComputeBudgetInstruction =
-            //         anchor.web3.ComputeBudgetProgram.requestUnits({
-            //             units: 800000,
-            //             additionalFee: 0,
-            //         });
+                const additionalComputeBudgetInstruction =
+                    anchor.web3.ComputeBudgetProgram.requestUnits({
+                        units: 800000,
+                        additionalFee: 0,
+                    });
 
-            //     let tx = new Transaction();
-            //     tx.add(ComputeBudgetProgram.setComputeUnitLimit({ units: 2000000 }))
+                let tx = new Transaction();
+                tx.add(ComputeBudgetProgram.setComputeUnitLimit({ units: 2000000 }))
 
-            //     let instruction = await program.methods.challenge({
-            //         tradeMatchId: challengeId,
-            //         tristeroOappBump: getTristeroOappBump(),
-            //         sourceTokenAddressInArbitrumChain: Array.from(arbWalletAddr),
-            //         receiver: Array.from(receiverPubKey)
-            //     })
-            //         .accounts({
-            //             authority: user.publicKey,
-            //             adminPanel: getAdminPanel(),
-            //             tradeMatch: getTradeMatchPDA(challengeId),
-            //             tokenProgram: TOKEN_PROGRAM_ID,
-            //             systemProgram: SystemProgram.programId
-            //         })
-            //         .remainingAccounts(sendInstructionRemainingAccounts)
-            //         .signers([user])
-            //         .instruction();
+                let instruction = await program.methods.challenge({
+                    tradeMatchId: challengeId,
+                    tristeroOappBump: getTristeroOappBump(),
+                    sourceTokenAddressInArbitrumChain: Array.from(arbWalletAddr),
+                    receiver: Array.from(receiverPubKey)
+                })
+                    .accounts({
+                        authority: user.publicKey,
+                        adminPanel: getAdminPanel(),
+                        tradeMatch: getTradeMatchPDA(challengeId),
+                        tokenProgram: TOKEN_PROGRAM_ID,
+                        systemProgram: SystemProgram.programId
+                    })
+                    .remainingAccounts(sendInstructionRemainingAccounts)
+                    .signers([user])
+                    .instruction();
 
-            //     tx.add(instruction)
-            //     const challengeTx = await sendAndConfirmTransaction(connection, tx, [user])
+                tx.add(instruction)
+                const challengeTx = await sendAndConfirmTransaction(connection, tx, [user])
 
-            //     console.log("trade_match_id = ", challengeId)
-            //     console.log("challengeTx = ", challengeTx)
-            // }
+                console.log("trade_match_id = ", challengeId)
+                console.log("challengeTx = ", challengeTx)
+            }
 
             console.log("------------------------Send Stored------------------------");
             // {
@@ -1266,28 +1267,28 @@ describe("# test scenario - tristero ", () => {
             // }*/
 
             console.log("--------testing lz_receive_types ---------");
-            {
-                let lzReceiveTypesTx = await program.methods.lzReceiveTypes({
-                    srcEid: arbitrumEID,
-                    sender: Array.from(receiverPubKey),
-                    nonce: new BN(1),
-                    guid: Array.from(receiverPubKey),
-                    message: tempStr,
-                    extraData: tempStr
-                })
-                .accounts({
-                    tokenMint: PublicKey.default,
-                    oftConfig: PublicKey.default
-                })
-                .rpc();
-                console.log("lzReceiveTypesTx: ", lzReceiveTypesTx)
-            }
+            // {
+            //     let lzReceiveTypesTx = await program.methods.lzReceiveTypes({
+            //         srcEid: arbitrumEID,
+            //         sender: Array.from(receiverPubKey),
+            //         nonce: new BN(1),
+            //         guid: Array.from(receiverPubKey),
+            //         message: tempStr,
+            //         extraData: tempStr
+            //     })
+            //     .accounts({
+            //         tokenMint: PublicKey.default,
+            //         oftConfig: PublicKey.default
+            //     })
+            //     .rpc();
+            //     console.log("lzReceiveTypesTx: ", lzReceiveTypesTx)
+            // }
             
-            console.log("======> ", new DVNDeriver(dvnProgramId).config()[0])
-            console.log("======> ", PublicKey.findProgramAddressSync(
-                [Buffer.from("DvnConfig")],
-                dvnProgramId
-            )[0])
+            // console.log("======> ", new DVNDeriver(dvnProgramId).config()[0])
+            // console.log("======> ", PublicKey.findProgramAddressSync(
+            //     [Buffer.from("DvnConfig")],
+            //     dvnProgramId
+            // )[0])
         } catch (err) {
             console.log(err)
         }
