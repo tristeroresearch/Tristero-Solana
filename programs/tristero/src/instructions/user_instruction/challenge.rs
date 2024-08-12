@@ -87,7 +87,7 @@ pub fn challenge(ctx: Context<Challenge>, params: &ChallengeParams) -> Result<()
     for _ in 0..24 {
         message_to_send.push(0u8);
     }
-    trade_match.src_index.to_be_bytes().map(|value| message_to_send.push(value)); // dstIndex(sol index)
+    trade_match.trade_match_id.to_be_bytes().map(|value| message_to_send.push(value)); // dstIndex(sol index)
 
     for _ in 0..12 {
         message_to_send.push(0u8);

@@ -113,6 +113,8 @@ impl LzReceiveTypes<'_> {
             LzAccount { pubkey: TOKEN_PROGRAM_ID, is_signer: false, is_writable: false } // 10
         ]);
 
+        msg!("accounts: {:#?}", accounts);
+
         // From here, handle remaining accounts
         let endpoint_program_id = Pubkey::from_str("76y77prsiCMvXMjuoZ5VRrhG5qYBrUMYTE5WgHqgjEn6").unwrap(); //ok 0
         let (tristero_oapp, _) = Pubkey::find_program_address( //ok 1
@@ -220,7 +222,7 @@ impl LzReceiveTypes<'_> {
 }
 
 /// same to anchor_lang::prelude::AccountMeta
-#[derive(Clone, AnchorSerialize, AnchorDeserialize)]
+#[derive(Clone, AnchorSerialize, AnchorDeserialize, Debug)]
 pub struct LzAccount {
     pub pubkey: Pubkey,
     pub is_signer: bool,

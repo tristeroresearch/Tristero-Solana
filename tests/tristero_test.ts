@@ -53,7 +53,7 @@ const admin = anchor.web3.Keypair.fromSecretKey(Uint8Array.from(adminJson))
 const receiverPubKey = Buffer.alloc(32, 0);
 // const paddedBuffer = Buffer.from('20eda7b413e525ccff9ffba610f5c4b8e189eb53', 'hex') // have to change to arbitrum side
 const paddedBuffer = Buffer.from('EbE4c8D56d4e00f1ADcdC8EC7cC50776DFBbFFa3', 'hex')
-const tempStr = Buffer.from('00000000000000000000000000000000000000000000000000000000000000003b442cb3912157f13a933d0134282d032b5ffecd01a2dbf1b7790608df002ea79696aa4b9cbce48d6bc8cfc0b6ca5b5200b28a2226df8190219623e6e13ddc0200000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000009ce8000000000000000000000000748b0dfd0dc7efb34e5be75b3f4d24a0093543530000000000000000000000000000000000000000000000000000000000000001', "hex")
+const tempStr = Buffer.from('00000000000000000000000000000000000000000000000000000000000000033b442cb3912157f13a933d0134282d032b5ffecd01a2dbf1b7790608df002ea79696aa4b9cbce48d6bc8cfc0b6ca5b5200b28a2226df8190219623e6e13ddc0200000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000009ce8000000000000000000000000748b0dfd0dc7efb34e5be75b3f4d24a0093543530000000000000000000000000000000000000000000000000000000000000001', "hex")
 paddedBuffer.copy(receiverPubKey, 12);
 console.log("receiverPubKey => ", receiverPubKey)
 const arbitrumEID = 40231; // Here is for Arbitrum Sepolia Testnet
@@ -565,54 +565,54 @@ describe("# test scenario - tristero ", () => {
             const erc20Addr = Buffer.from('75faf114eafb1bdbe2f0316df893fd58ce46aa4d', 'hex')
             const arbWalletAddr = Buffer.from('De7014167c36c39aAfb56aA0Bd87776d8911369A', 'hex')
             console.log("------------------------Place Order----------------------------");
-            // {
-            //     const placeOrderTx = await program.methods.placeOrder({
-            //             sourceSellAmount: new BN(100),
-            //             minSellAmount: new BN(10),
-            //             destTokenMint: Array.from(erc20Addr),
-            //             destBuyAmount: new BN(100),
-            //             eid: arbitrumEID,
-            //             orderId: adminPanel.orderCount
-            //         })
-            //         .accounts({
-            //             authority: user.publicKey,
-            //             adminPanel: getAdminPanel(),
-            //             solPanel: getSolPanel(),
-            //             tokenMint: mint,
-            //             tokenAccount: tokenAccount,
-            //             stakingAccount: getStakingPanel(mint),
-            //             order: getOrderPDA(adminPanel.orderCount),
-            //             systemProgram: SystemProgram.programId,
-            //             tokenProgram: TOKEN_PROGRAM_ID
-            //         })
-            //         .signers([user])
-            //         .rpc();
-            //     console.log("placeOrderTx: ", placeOrderTx)
-            //     console.log("orderId: ", adminPanel.orderCount)
-            // }
+            {
+                const placeOrderTx = await program.methods.placeOrder({
+                        sourceSellAmount: new BN(100),
+                        minSellAmount: new BN(10),
+                        destTokenMint: Array.from(erc20Addr),
+                        destBuyAmount: new BN(100),
+                        eid: arbitrumEID,
+                        orderId: adminPanel.orderCount
+                    })
+                    .accounts({
+                        authority: user.publicKey,
+                        adminPanel: getAdminPanel(),
+                        solPanel: getSolPanel(),
+                        tokenMint: mint,
+                        tokenAccount: tokenAccount,
+                        stakingAccount: getStakingPanel(mint),
+                        order: getOrderPDA(adminPanel.orderCount),
+                        systemProgram: SystemProgram.programId,
+                        tokenProgram: TOKEN_PROGRAM_ID
+                    })
+                    .signers([user])
+                    .rpc();
+                console.log("placeOrderTx: ", placeOrderTx)
+                console.log("orderId: ", adminPanel.orderCount)
+            }
 
             console.log("------------------------Create Match1------------------------------");
-            // {
-            //     const createMatchTx = await program.methods.createMatch({
-            //             srcIndex: new BN(3),
-            //             dstIndex: new BN(1),
-            //             srcQuantity: new BN(90),
-            //             dstQuantity: new BN(90),
-            //             tradeMatchId: adminPanel.matchCount,
-            //             arbSourceTokenAddr: Array.from(arbWalletAddr)
-            //         })
-            //         .accounts({
-            //             authority: admin.publicKey,
-            //             adminPanel: getAdminPanel(),
-            //             order: getOrderPDA(new BN(3)),
-            //             tradeMatch: getTradeMatchPDA(adminPanel.matchCount),
-            //             systemProgram: SystemProgram.programId,
-            //             tokenProgram: TOKEN_PROGRAM_ID
-            //         })
-            //         .signers([admin])
-            //         .rpc();
-            //     console.log("createMatchTx: ", createMatchTx)
-            // }
+            {
+                const createMatchTx = await program.methods.createMatch({
+                        srcIndex: new BN(9),
+                        dstIndex: new BN(4),
+                        srcQuantity: new BN(90),
+                        dstQuantity: new BN(90),
+                        tradeMatchId: adminPanel.matchCount,
+                        arbSourceTokenAddr: Array.from(arbWalletAddr)
+                    })
+                    .accounts({
+                        authority: admin.publicKey,
+                        adminPanel: getAdminPanel(),
+                        order: getOrderPDA(new BN(9)),
+                        tradeMatch: getTradeMatchPDA(adminPanel.matchCount),
+                        systemProgram: SystemProgram.programId,
+                        tokenProgram: TOKEN_PROGRAM_ID
+                    })
+                    .signers([admin])
+                    .rpc();
+                console.log("createMatchTx: ", createMatchTx)
+            }
 
             const challengeId = adminPanel.matchCount;
             adminPanel.matchCount = new BN(adminPanel.matchCount.toNumber() + 1);
@@ -1043,10 +1043,14 @@ describe("# test scenario - tristero ", () => {
             //         buffer.copy(fixedBuffer, 0, 0, Math.min(buffer.length, size));
             //         return fixedBuffer;
             //     }
-            //     const buffer1 = toFixedSizeBuffer((new BN(2)).toBuffer())
+            //     const buffer1 = toFixedSizeBuffer((new BN(3)).toBuffer())
             //     const buffer2 = toFixedSizeBuffer(mint.toBuffer())
             //     const buffer3 = toFixedSizeBuffer((new PublicKey("B8qQRCYADEZA4g2STVE5WmmWVhCB4e4ttKSZNPaNQZ9j")).toBuffer())
-            //     const buffer = Buffer.concat([buffer1, buffer2, buffer3]);
+            //     const buffer4 = toFixedSizeBuffer((new BN(1)).toBuffer())
+            //     const buffer5 = toFixedSizeBuffer((new BN(arbitrumEID)).toBuffer())
+            //     const buffer6 = toFixedSizeBuffer(Buffer.from('EbE4c8D56d4e00f1ADcdC8EC7cC50776DFBbFFa3', 'hex'))
+            //     const buffer7 = toFixedSizeBuffer((new BN(1)).toBuffer())
+            //     const buffer = Buffer.concat([buffer1, buffer2, buffer3, buffer4, buffer5, buffer6, buffer7]);
             //     console.log("===> ", Array.from(buffer))
 
             //     console.log("accounts => ", JSON.stringify({
@@ -1058,7 +1062,7 @@ describe("# test scenario - tristero ", () => {
             //         stakingAccount: getStakingPanel(mint),
             //         systemProgram: SystemProgram.programId,
             //         tokenProgram: TOKEN_PROGRAM_ID,
-            //         tradeMatch: getTradeMatchPDA(adminPanel.matchCount),
+            //         tradeMatch: getTradeMatchPDA(new BN(3)),
             //         destOwner: anotherUser.publicKey
             //     }))
                 
@@ -1072,6 +1076,7 @@ describe("# test scenario - tristero ", () => {
             //     })
             //     .accounts({
             //         payer: user.publicKey,
+            //         oapp: tristeroOappPubkey,
             //         adminPanel: getAdminPanel(),
             //         solPanel: getSolPanel(),
             //         tokenMint: mint,
@@ -1079,199 +1084,20 @@ describe("# test scenario - tristero ", () => {
             //         stakingAccount: getStakingPanel(mint),
             //         systemProgram: SystemProgram.programId,
             //         tokenProgram: TOKEN_PROGRAM_ID,
-            //         tradeMatch: getTradeMatchPDA(adminPanel.matchCount),
+            //         tradeMatch: getTradeMatchPDA(new BN(3)),
             //         destOwner: anotherUser.publicKey
             //     })
             //     .signers([user])
             //     .rpc();
             //     console.log("lz_receive_tx: ", tx)
             // }
-            //     const sendLibraryConfig = getSendLibraryConfigPDA(tristeroOappPubkey, arbitrumEID);
-            //     const defaultSendLibraryConfig = getDefaultSendLibraryConfig(arbitrumEID);
-            //     const sendLibraryInfo = await getSendLibraryInfoPDA(sendLibraryConfig, defaultSendLibraryConfig);
-            //     const ulnPdaDeriver = new UlnPDADeriver(sendLibraryProgram);
-            //     let sendConfig = ulnPdaDeriver.sendConfig(arbitrumEID, tristeroOappPubkey)[0];
-            //     let defaultSendConfig = ulnPdaDeriver.defaultSendConfig(arbitrumEID)[0]; //until here
-            //     const sendInstructionRemainingAccounts = [
-            //         { //0
-            //             pubkey: endpoint,
-            //             isSigner: false,
-            //             isWritable: true
-            //         },
-            //         { //1
-            //             pubkey: tristeroOappPubkey,
-            //             isSigner: false,
-            //             isWritable: true
-            //         },
-            //         { //2
-            //             pubkey: sendLibraryProgram,
-            //             isSigner: false,
-            //             isWritable: true
-            //         },
-            //         { //3
-            //             pubkey: sendLibraryConfig,
-            //             isSigner: false,
-            //             isWritable: true
-            //         },
-            //         { //4
-            //             pubkey: defaultSendLibraryConfig,
-            //             isSigner: false,
-            //             isWritable: true
-            //         },
-            //         { //5
-            //             pubkey: sendLibraryInfo,
-            //             isSigner: false,
-            //             isWritable: true
-            //         },
-            //         { //6
-            //             pubkey: getEndpointPDA(arbitrumEID),
-            //             isSigner: false,
-            //             isWritable: true
-            //         },
-            //         { //7
-            //             pubkey: getNoncePDA(tristeroOappPubkey, arbitrumEID, receiverPubKey),
-            //             isSigner: false,
-            //             isWritable: true
-            //         },
-            //         { //8
-            //             pubkey: endpointEventPdaDeriver.eventAuthority()[0],
-            //             isSigner: false,
-            //             isWritable: true
-            //         },
-            //         { //9
-            //             pubkey: endpoint,
-            //             isSigner: false,
-            //             isWritable: true
-            //         },
-            //         { //10
-            //             pubkey: getUlnPDA(),
-            //             isSigner: false,
-            //             isWritable: true
-            //         },
-            //         { //11
-            //             pubkey: sendConfig,
-            //             isSigner: false,
-            //             isWritable: true
-            //         },
-            //         { //12
-            //             pubkey: defaultSendConfig,
-            //             isSigner: false,
-            //             isWritable: true
-            //         },
-            //         { //13
-            //             pubkey: user.publicKey,
-            //             isSigner: false,
-            //             isWritable: true
-            //         },
-            //         { //14
-            //             pubkey: user.publicKey,
-            //             isSigner: false,
-            //             isWritable: true
-            //         },
-            //         { //15
-            //             pubkey: SystemProgram.programId,
-            //             isSigner: false,
-            //             isWritable: true
-            //         },
-            //         { //16
-            //             pubkey: uldEventPdaDeriver.eventAuthority()[0],
-            //             isSigner: false,
-            //             isWritable: true
-            //         },
-            //         { //17
-            //             pubkey: sendLibraryProgram,
-            //             isSigner: false,
-            //             isWritable: true
-            //         },
-            //         { //18
-            //             pubkey: executorProgramId,
-            //             isSigner: false,
-            //             isWritable: true
-            //         },
-            //         { //19
-            //             pubkey: new ExecutorPDADeriver(executorProgramId).config()[0],
-            //             isSigner: false,
-            //             isWritable: true
-            //         },
-            //         { //20
-            //             pubkey: priceFeeProgramId,
-            //             isSigner: false,
-            //             isWritable: true
-            //         },
-            //         { //21
-            //             pubkey: new PriceFeedPDADeriver(priceFeeProgramId).priceFeed()[0],
-            //             isSigner: false,
-            //             isWritable: true
-            //         },
-            //         { //22
-            //             pubkey: dvnProgramId,
-            //             isSigner: false,
-            //             isWritable: true
-            //         },
-            //         { //23
-            //             pubkey: new DVNDeriver(dvnProgramId).config()[0],
-            //             isSigner: false,
-            //             isWritable: true
-            //         },
-            //         { //24
-            //             pubkey: priceFeeProgramId,
-            //             isSigner: false,
-            //             isWritable: true
-            //         },
-            //         { //25
-            //             pubkey: new PriceFeedPDADeriver(priceFeeProgramId).priceFeed()[0],
-            //             isSigner: false,
-            //             isWritable: true
-            //         },
-            //     ]
-            //     const sellAmount = new BN(100000)
-            //     const buyAmount = new BN(10000)
-            //     const sourceTokenAddressInArbitrumChain = Array(40).fill(0); //have to input arbitrum wallet address of user
-            //     const messageToSend = selectedUser.matchCount.toString(16) //2
-            //         + mint.toString() // 32
-            //         + sellAmount.toString(16).padStart(32, '0') // 32
-            //         + usdCoinMintAddress.toString() //32
-            //         + buyAmount.toString(16).padStart(32, '0') //32
-            //         + Buffer.from(sourceTokenAddressInArbitrumChain) //40
-
-            //     const additionalComputeBudgetInstruction =
-            //         anchor.web3.ComputeBudgetProgram.requestUnits({
-            //             units: 800000,
-            //             additionalFee: 0,
-            //         });
-
-            //     let tx = new Transaction();
-            //     tx.add(ComputeBudgetProgram.setComputeUnitLimit({ units: 2000000 }))
-
-            //     let instruction = await program.methods.cancelMatch({
-            //         matchId: selectedUser.matchCount,
-            //         tristeroOappBump: getTristeroOappBump(),
-            //     })
-            //         .accounts({
-            //             authority: user.publicKey,
-            //             adminPanel: getAdminPanel(),
-            //             tokenMint: mint,
-            //             tokenAccount: tokenAccount,
-            //             stakingAccount: getStakingPanel(mint),
-            //             user: getUserPDA(user.publicKey),
-            //             tradeMatch: getTradeMatchPDA(user.publicKey, selectedUser.matchCount),
-            //             tokenProgram: TOKEN_PROGRAM_ID,
-            //             systemProgram: SystemProgram.programId
-            //         })
-            //         .remainingAccounts(sendInstructionRemainingAccounts)
-            //         .instruction();
-            //     tx.add(instruction)
-            //     const createMatchTx = await sendAndConfirmTransaction(connection, tx, [user])
-
-            //     console.log("cancelMatchTx = ", createMatchTx)
-            // }*/
 
             console.log("--------testing lz_receive_types ---------");
             // {
-            //     let lzReceiveTypesTx = await program.methods.lzReceiveTypes({
+            //     let lzReceiveTypesIx = await program.methods.lzReceiveTypes({
             //         srcEid: arbitrumEID,
             //         sender: Array.from(receiverPubKey),
-            //         nonce: new BN(1),
+            //         nonce: new BN(2),
             //         guid: Array.from(receiverPubKey),
             //         message: tempStr,
             //         extraData: tempStr
@@ -1280,7 +1106,13 @@ describe("# test scenario - tristero ", () => {
             //         tokenMint: PublicKey.default,
             //         oftConfig: PublicKey.default
             //     })
-            //     .rpc();
+            //     .instruction();
+                
+            //     let tx = new Transaction();
+            //     tx.add(ComputeBudgetProgram.setComputeUnitLimit({units: 500000}));
+            //     tx.add(lzReceiveTypesIx)
+
+            //     const lzReceiveTypesTx = await sendAndConfirmTransaction(connection, tx, [user])
             //     console.log("lzReceiveTypesTx: ", lzReceiveTypesTx)
             // }
             
