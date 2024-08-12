@@ -57,6 +57,7 @@ pub struct SendStored<'info> {
         bump,
         constraint = trade_match.source_token_mint == token_mint.key() @ CustomError::InvalidTokenMintAddress,
         constraint = token_account.amount > trade_match.source_sell_amount @ CustomError::InvalidAmount, 
+        constraint = trade_match.is_valiable == true @ CustomError::NotAgain
     )]
     pub trade_match: Box<Account<'info, TradeMatch>>,
 
