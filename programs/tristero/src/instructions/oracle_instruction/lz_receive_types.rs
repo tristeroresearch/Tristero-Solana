@@ -51,10 +51,11 @@ impl LzReceiveTypes<'_> {
 
         // account 0..1
         let mut accounts = vec![
-            LzAccount { pubkey: Pubkey::default(), is_signer: true, is_writable: true }, // 0
+            // LzAccount { pubkey: Pubkey::default(), is_signer: true, is_writable: true }, // 0
+            LzAccount { pubkey: sol_panel, is_signer: false, is_writable: true },      // 0
             LzAccount { pubkey: oapp, is_signer: false, is_writable: true }, //1
             LzAccount { pubkey: admin_panel, is_signer: false, is_writable: true },      // 2
-            LzAccount { pubkey: sol_panel, is_signer: false, is_writable: true },      // 3
+            
         ];
 
         // analyze msg from arb, msg consists of trade_match_id, dest_token_mint, to_address

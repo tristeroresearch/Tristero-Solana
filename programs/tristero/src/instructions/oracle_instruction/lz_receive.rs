@@ -17,7 +17,11 @@ use solana_program::native_token::LAMPORTS_PER_SOL;
 #[derive(Accounts)]
 #[instruction(params: LzReceiveParams)]
 pub struct LzReceive<'info> {
-    #[account(mut)]
+    #[account(
+        mut,
+        seeds = [b"sol_panel"],
+        bump
+    )]
     pub payer: Signer<'info>,
 
     /// CHECK: The PDA of the OApp
@@ -35,13 +39,13 @@ pub struct LzReceive<'info> {
     )]
     pub admin_panel: Box<Account<'info, AdminPanel>>,
 
-    /// CHECK:
-    #[account(
-        mut,
-        seeds = [b"sol_panel"],
-        bump,
-    )]
-    pub sol_panel: AccountInfo<'info>,
+    // /// CHECK:
+    // #[account(
+    //     mut,
+    //     seeds = [b"sol_panel"],
+    //     bump,
+    // )]
+    // pub sol_panel: AccountInfo<'info>,
 
     /// token mint address
     pub token_mint: Box<Account<'info, Mint>>,
@@ -115,17 +119,17 @@ impl LzReceive<'_> {
 
             
             // ------------------------Transfer fee to executor-----------------------------------
-            let ix = anchor_lang::solana_program::system_instruction::transfer(
-                &ctx.accounts.sol_panel.key(), 
-                &ctx.accounts.payer.key(), 
-                5000000
-            );
-            let sol_seeds: &[&[&[u8]]] = &[&[b"sol_panel", &[ctx.bumps.sol_panel]]];
-            let _ = anchor_lang::solana_program::program::invoke_signed(
-                &ix, 
-                &[ctx.accounts.sol_panel.to_account_info(), ctx.accounts.payer.to_account_info()],
-                sol_seeds
-            );
+            // let ix = anchor_lang::solana_program::system_instruction::transfer(
+            //     &ctx.accounts.sol_panel.key(), 
+            //     &ctx.accounts.payer.key(), 
+            //     5000000
+            // );
+            // let sol_seeds: &[&[&[u8]]] = &[&[b"sol_panel", &[ctx.bumps.sol_panel]]];
+            // let _ = anchor_lang::solana_program::program::invoke_signed(
+            //     &ix, 
+            //     &[ctx.accounts.sol_panel.to_account_info(), ctx.accounts.payer.to_account_info()],
+            //     sol_seeds
+            // );
         } else { // B->A->B
             let arb_receive_addr = msg_vec[5];
             
