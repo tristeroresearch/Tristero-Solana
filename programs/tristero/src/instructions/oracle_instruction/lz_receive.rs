@@ -3,7 +3,14 @@ use {crate::error::*, crate::state::*};
 use anchor_spl::{token::{self, Transfer, Mint, TokenAccount}};
 use spl_token::ID as TOKEN_PROGRAM_ID;
 use endpoint::{
-    self, cpi::accounts::{Send}, instructions::{SendParams}, ConstructCPIContext
+    self, cpi::accounts::Send, instructions::SendParams, ConstructCPIContext,
+};
+use oapp::{
+    endpoint::{
+        cpi::accounts::Clear,
+        instructions::{ClearParams, SendComposeParams},
+        ID as ENDPOINT_ID,
+    }
 };
 use solana_program::native_token::LAMPORTS_PER_SOL;
 
@@ -204,6 +211,24 @@ impl LzReceive<'_> {
             endpoint::cpi::send(cpi_ctx.with_signer(signer_seeds), cpi_params)?;
         }
 
+        // the first 9 accounts are for clear()
+        let seeds: &[&[u8]] =
+            &[b"TristeroOapp", &[ctx.bumps.oapp]];
+        let accounts_for_clear = &ctx.remaining_accounts[0..2];
+        let _ = oapp::endpoint_cpi::clear(
+            ENDPOINT_ID,
+            ctx.accounts.oapp.key(),
+            accounts_for_clear,
+            seeds,
+            ClearParams {
+                receiver: ctx.accounts.oapp.key(),
+                src_eid: params.src_eid,
+                sender: params.sender,
+                nonce: params.nonce,
+                guid: params.guid,
+                message: params.message.clone(),
+            },
+        )?;
         Ok(())
     }
 }

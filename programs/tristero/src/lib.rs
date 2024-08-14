@@ -12,6 +12,7 @@ pub use messagelib_interface::{
 use instructions::*;
 use state::*;
 use myutils::*;
+use events::*;
 
 declare_id!("APob25xoaC1Zz2FKePPCRfRBgJ5nhrjg7dUfV68ZNobP"); // for testnet
 // declare_id!("Eq22HfHg6KjtAoqeEU1UhmbA2iSxUdJQC1syuv36xK1U"); // for mainnet

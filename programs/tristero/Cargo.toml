@@ -26,4 +26,4 @@ endpoint = { path = "../../programs/endpoint", features = ["cpi"]}
 anchor-spl = "0.29.0"
 mpl-token-metadata = "4.1.2"
 spl-token = "4.0.1"
-oapp = { path = "../../libs/oapp" }
+oapp = { git = "https://github.com/LayerZero-Labs/LayerZero-v2.git", branch = "main" }

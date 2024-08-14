@@ -487,7 +487,7 @@ version = "0.1.0"
 dependencies = [
  "anchor-lang",
  "messagelib-helper",
- "solana-helper",
+ "solana-helper 0.1.0",
 ]
 
 [[package]]
@@ -708,6 +708,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "cpi-helper"
+version = "0.1.0"
+source = "git+https://github.com/LayerZero-Labs/LayerZero-v2.git?branch=main#7aebbd7c79b2dc818f7bb054aed2405ca076b9d6"
+dependencies = [
+ "bs58 0.5.1",
+ "proc-macro2",
+ "quote",
+ "syn 1.0.109",
+]
+
+[[package]]
 name = "cpufeatures"
 version = "0.2.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -884,9 +895,9 @@ dependencies = [
  "messagelib-helper",
  "pricefeed",
  "secp256k1",
- "solana-helper",
+ "solana-helper 0.1.0",
  "uln",
- "utils",
+ "utils 0.1.0",
  "worker-interface",
 ]
 
@@ -936,11 +947,24 @@ name = "endpoint"
 version = "0.1.0"
 dependencies = [
  "anchor-lang",
- "cpi-helper",
- "messagelib-interface",
- "solana-helper",
+ "cpi-helper 0.1.0",
+ "messagelib-interface 0.1.0",
+ "solana-helper 0.1.0",
  "solana-program",
- "utils",
+ "utils 0.1.0",
+]
+
+[[package]]
+name = "endpoint"
+version = "0.1.0"
+source = "git+https://github.com/LayerZero-Labs/LayerZero-v2.git?branch=main#7aebbd7c79b2dc818f7bb054aed2405ca076b9d6"
+dependencies = [
+ "anchor-lang",
+ "cpi-helper 0.1.0 (git+https://github.com/LayerZero-Labs/LayerZero-v2.git?branch=main)",
+ "messagelib-interface 0.1.0 (git+https://github.com/LayerZero-Labs/LayerZero-v2.git?branch=main)",
+ "solana-helper 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "solana-program",
+ "utils 0.1.0 (git+https://github.com/LayerZero-Labs/LayerZero-v2.git?branch=main)",
 ]
 
 [[package]]
@@ -961,10 +985,10 @@ name = "executor"
 version = "0.1.0"
 dependencies = [
  "anchor-lang",
- "oapp",
+ "oapp 0.1.0",
  "pricefeed",
- "solana-helper",
- "utils",
+ "solana-helper 0.1.0",
+ "utils 0.1.0",
  "worker-interface",
 ]
 
@@ -1328,14 +1352,22 @@ name = "messagelib-helper"
 version = "0.1.0"
 dependencies = [
  "anchor-lang",
- "endpoint",
- "messagelib-interface",
- "utils",
+ "endpoint 0.1.0",
+ "messagelib-interface 0.1.0",
+ "utils 0.1.0",
 ]
 
 [[package]]
 name = "messagelib-interface"
 version = "0.1.0"
+dependencies = [
+ "anchor-lang",
+]
+
+[[package]]
+name = "messagelib-interface"
+version = "0.1.0"
+source = "git+https://github.com/LayerZero-Labs/LayerZero-v2.git?branch=main#7aebbd7c79b2dc818f7bb054aed2405ca076b9d6"
 dependencies = [
  "anchor-lang",
 ]
@@ -1460,7 +1492,16 @@ name = "oapp"
 version = "0.1.0"
 dependencies = [
  "anchor-lang",
- "endpoint",
+ "endpoint 0.1.0",
+]
+
+[[package]]
+name = "oapp"
+version = "0.1.0"
+source = "git+https://github.com/LayerZero-Labs/LayerZero-v2.git?branch=main#7aebbd7c79b2dc818f7bb054aed2405ca076b9d6"
+dependencies = [
+ "anchor-lang",
+ "endpoint 0.1.0 (git+https://github.com/LayerZero-Labs/LayerZero-v2.git?branch=main)",
 ]
 
 [[package]]
@@ -1469,9 +1510,9 @@ version = "0.1.0"
 dependencies = [
  "anchor-lang",
  "anchor-spl",
- "oapp",
- "solana-helper",
- "utils",
+ "oapp 0.1.0",
+ "solana-helper 0.1.0",
+ "utils 0.1.0",
 ]
 
 [[package]]
@@ -1562,8 +1603,8 @@ name = "pricefeed"
 version = "0.1.0"
 dependencies = [
  "anchor-lang",
- "solana-helper",
- "utils",
+ "solana-helper 0.1.0",
+ "utils 0.1.0",
 ]
 
 [[package]]
@@ -1952,8 +1993,8 @@ dependencies = [
  "anchor-lang",
  "anchor-spl",
  "messagelib-helper",
- "solana-helper",
- "utils",
+ "solana-helper 0.1.0",
+ "utils 0.1.0",
 ]
 
 [[package]]
@@ -2019,6 +2060,18 @@ name = "solana-helper"
 version = "0.1.0"
 dependencies = [
  "anchor-lang",
+ "bs58 0.5.1",
+ "proc-macro2",
+ "quote",
+ "syn 1.0.109",
+]
+
+[[package]]
+name = "solana-helper"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "09c6deff8c48efb84b5828db064ad9873ef3445f129f888b4b6a664bd5220e35"
+dependencies = [
  "bs58 0.5.1",
  "proc-macro2",
  "quote",
@@ -2598,15 +2651,15 @@ version = "0.1.0"
 dependencies = [
  "anchor-lang",
  "anchor-spl",
- "cpi-helper",
- "endpoint",
- "messagelib-interface",
+ "cpi-helper 0.1.0",
+ "endpoint 0.1.0",
+ "messagelib-interface 0.1.0",
  "mpl-token-metadata",
- "oapp",
- "solana-helper",
+ "oapp 0.1.0 (git+https://github.com/LayerZero-Labs/LayerZero-v2.git?branch=main)",
+ "solana-helper 0.1.0",
  "solana-program",
  "spl-token",
- "utils",
+ "utils 0.1.0",
 ]
 
 [[package]]
@@ -2635,8 +2688,8 @@ dependencies = [
  "anchor-spl",
  "messagelib-helper",
  "primitive-types",
- "solana-helper",
- "utils",
+ "solana-helper 0.1.0",
+ "utils 0.1.0",
  "worker-interface",
 ]
 
@@ -2690,6 +2743,14 @@ dependencies = [
 [[package]]
 name = "utils"
 version = "0.1.0"
+dependencies = [
+ "anchor-lang",
+]
+
+[[package]]
+name = "utils"
+version = "0.1.0"
+source = "git+https://github.com/LayerZero-Labs/LayerZero-v2.git?branch=main#7aebbd7c79b2dc818f7bb054aed2405ca076b9d6"
 dependencies = [
  "anchor-lang",
 ]
