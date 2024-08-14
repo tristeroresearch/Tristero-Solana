@@ -147,9 +147,12 @@ impl LzReceiveTypes<'_> {
             &endpoint_program_id
         );
         //endpoint_program_id // ok 9
-        let uln_program_id = send_library_program; // ok 10
+        let (uln_program_pda, _) = Pubkey::find_program_address( // ok 10
+            &[b"MessageLib"], 
+            &send_library_program
+        );
         let (send_config, _) = Pubkey::find_program_address( // ok 11
-            &[b"SendConfig", &sender_eid.to_be_bytes(), sender_addr.as_ref()], 
+            &[b"SendConfig", &sender_eid.to_be_bytes(), tristero_oapp.key().as_ref()], 
             &send_library_program
         );
         let (default_send_config, _) = Pubkey::find_program_address( // ok 12
@@ -199,7 +202,7 @@ impl LzReceiveTypes<'_> {
         //     LzAccount { pubkey: nonce_pda, is_signer: false, is_writable: true },
         //     LzAccount { pubkey: event_authority, is_signer: false, is_writable: true },
         //     LzAccount { pubkey: endpoint_program_id, is_signer: false, is_writable: true },
-        //     LzAccount { pubkey: uln_program_id, is_signer: false, is_writable: true },
+        //     LzAccount { pubkey: uln_program_pda, is_signer: false, is_writable: true },
         //     LzAccount { pubkey: send_config, is_signer: false, is_writable: true },
         //     LzAccount { pubkey: default_send_config, is_signer: false, is_writable: true },
         //     LzAccount { pubkey: signer1, is_signer: false, is_writable: true },
