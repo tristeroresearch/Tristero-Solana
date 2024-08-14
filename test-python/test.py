@@ -19,6 +19,9 @@ from solders.message import Message
 from solders.compute_budget import set_compute_unit_limit
 from solana.rpc.types import TxOpts
 from solana.rpc.commitment import Confirmed
+from anchorpy.borsh_extension import BorshPubkey
+import borsh_construct as borsh
+import typing
 from tristero.instructions.create_match import create_match, CreateMatchAccounts
 from tristero.instructions.place_order import place_order, PlaceOrderAccounts
 from tristero.instructions.challenge import challenge, ChallengeAccounts
@@ -26,6 +29,7 @@ from tristero.types.create_match_params import CreateMatchParams, CreateMatchPar
 from tristero.types.place_order_params import PlaceOrderParams, PlaceOrderParamsJSON
 from tristero.types.challenge_params import ChallengeParams, ChallengeParamsJSON
 from tristero.accounts.admin_panel import AdminPanel
+from endpoint.accounts.send_library_config import SendLibraryConfig
 import time
 import json
 import struct
@@ -80,50 +84,25 @@ RECEIVER_PUBKEY[12:12 + len(padded_buffer)] = padded_buffer
 print("receiverPubKey =>", RECEIVER_PUBKEY)
 
 def get_order_pda(order_id):
-    # Convert the order ID to a buffer
     order_id_buffer = order_id.to_bytes(8, byteorder="big")
-
-    # Create the seeds
     seeds = [
         b"order",
         order_id_buffer
     ]
-
-    # Find the program address
     return Pubkey.find_program_address(seeds, tristero_program_id)[0]
 
 def get_refund_token_account_pda(pubkey):
-    # Create the seeds
     seeds = [
         b"refund_account",
         bytes(pubkey)
     ]
-
-    # Find the program address
     return Pubkey.find_program_address(seeds, tristero_program_id)[0]
 
 def get_sol_panel():
-    # Create the seeds
     seeds = [
         b"sol_panel"
     ]
-
-    # Find the program address
     return Pubkey.find_program_address(seeds, tristero_program_id)[0]
-
-def get_nonce_pda(sender_key, eid, receiver):
-    # Convert the eid to a buffer
-    eid_buffer = eid.to_bytes(4, byteorder="big")
-
-    # Create the seeds
-    seeds = [
-        b"Nonce",
-        bytes(sender_key),
-        eid_buffer,
-        bytes(receiver)
-    ]
-    
-    return Pubkey.find_program_address(seeds, endpoint_program_id)[0]
 
 def get_oapp_pda(authority):
     (distributor, bump) = Pubkey.find_program_address(
@@ -132,21 +111,7 @@ def get_oapp_pda(authority):
     )
     return distributor
 
-def get_executor_pda():
-    (distributor, bump) = Pubkey.find_program_address(
-        [b"ExecutorConfig"],
-        executor_program_id,
-    )
-    return distributor
-
 def get_uln_pda():
-    (distributor, bump) = Pubkey.find_program_address(
-        [b"MessageLib"],
-        uln_program_id,
-    )
-    return distributor
-
-def get_send_config_pda():
     (distributor, bump) = Pubkey.find_program_address(
         [b"MessageLib"],
         uln_program_id,
@@ -188,14 +153,6 @@ def get_oapp_registry_pda(pubkey):
     )
     return distributor
 
-def get_send_library_config_pda(pubkey, eid):
-    eid_bytes = eid.to_bytes(4, byteorder="big")
-    (distributor, bump) = Pubkey.find_program_address(
-        [b"SendLibraryConfig", bytes(pubkey), eid_bytes],
-        endpoint_program_id,
-    )
-    return distributor
-
 def get_receive_library_config_pda(pubkey, eid):
     eid_bytes = eid.to_bytes(4, byteorder="big")
     (distributor, bump) = Pubkey.find_program_address(
@@ -212,20 +169,6 @@ def get_default_send_library_config(eid):
     )
     return distributor
 
-# def get_send_library_info_pda(send_library_config, default_send_library_config): #have to fix this part
-#     eid_bytes = struct.pack(">I", eid)
-#     (distributor, bump) = Pubkey.find_program_address(
-#         [b"SendLibraryConfig", eid_bytes],
-#         endpoint_program_id,
-#     )
-#     return distributor
-
-def get_endpoint_pda():
-    return Pubkey.find_program_address(
-        [b"Endpoint"],
-        endpoint_program_id,
-    )[0]
-
 def get_price_feed_pda():
     (distributor, bump) = Pubkey.find_program_address(
         [b"PriceFeed"],
@@ -233,13 +176,6 @@ def get_price_feed_pda():
     )
     return distributor
 
-def get_pending_inbound_nonce_pda(sender_key, eid, receiver):
-    eid_bytes = struct.pack(">I", eid)
-    (distributor, bump) = Pubkey.find_program_address(
-        [b"PendingNonce", bytes(sender_key), eid_bytes, bytes(receiver)],
-        endpoint_program_id,
-    )
-    return distributor
 
 def get_admin_panel():
     (distributor, bump) = Pubkey.find_program_address(
@@ -270,26 +206,115 @@ def get_trade_match_pda(match_count):
     )
     return distributor
 
-def get_payload_hash_pda(receiver, src_eid, sender, nonce):
-    src_eid_bytes = struct.pack(">I", src_eid)  # ">I" for big-endian, unsigned int (4 bytes)
-    nonce_bytes = struct.pack(">Q", nonce)
+def get_send_library_config_pda(tristero_oapp, eid):
+    eid_bytes = eid.to_bytes(4, byteorder="big")
     (distributor, bump) = Pubkey.find_program_address(
-        [b"PayloadHash", bytes(receiver), src_eid_bytes, bytes(nonce), nonce_bytes],
-        tristero_program_id,
+        [b"SendLibraryConfig", bytes(tristero_oapp), eid_bytes],
+        endpoint_program_id,
     )
     return distributor
 
+def get_default_send_library_config_pda(eid):
+    eid_bytes = eid.to_bytes(4, byteorder="big")
+    (distributor, bump) = Pubkey.find_program_address(
+        [b"SendLibraryConfig", eid_bytes],
+        endpoint_program_id,
+    )
+    return distributor
+
+def get_send_library_info_pda(send_library_info_pubkey):
+    (distributor, bump) = Pubkey.find_program_address(
+        [b"MessageLib", bytes(send_library_info_pubkey)],
+        endpoint_program_id,
+    )
+    return distributor
+
+def get_endpoint_pda():
+    return Pubkey.find_program_address(
+        [b"Endpoint"],
+        endpoint_program_id,
+    )[0]
+    
+def get_nonce_pda(sender_key, eid, receiver):
+    eid_buffer = eid.to_bytes(4, byteorder="big")
+    seeds = [
+        b"Nonce",
+        bytes(sender_key),
+        eid_buffer,
+        bytes(receiver)
+    ]
+    
+    return Pubkey.find_program_address(seeds, endpoint_program_id)[0]
+
+def get_event_authority_pda():
+    (distributor, bump) = Pubkey.find_program_address(
+        [b"__event_authority"],
+        endpoint_program_id,
+    )
+    return distributor
+
+def get_uln_program_pda():
+    (distributor, bump) = Pubkey.find_program_address(
+        [b"MessageLib"],
+        uln_program_id,
+    )
+    return distributor
+
+def get_send_config_pda(eid, sender_addr):
+    eid_buffer = eid.to_bytes(4, byteorder="big")
+    (distributor, bump) = Pubkey.find_program_address(
+        [b"SendConfig", eid_buffer, bytes(sender_addr)],
+        uln_program_id,
+    )
+    return distributor
+
+def get_default_send_config_pda(eid):
+    eid_buffer = eid.to_bytes(4, byteorder="big")
+    (distributor, bump) = Pubkey.find_program_address(
+        [b"SendConfig", eid_buffer],
+        uln_program_id,
+    )
+    return distributor
+
+def get_uln_event_authority_pda():
+    (distributor, bump) = Pubkey.find_program_address(
+        [b"__event_authority"],
+        uln_program_id,
+    )
+    return distributor
+
+def get_executor_pda_deriver():
+    (distributor, bump) = Pubkey.find_program_address(
+        [b"ExecutorConfig"],
+        executor_program_id,
+    )
+    return distributor
+
+def get_price_fee_program_pda():
+    (distributor, bump) = Pubkey.find_program_address(
+        [b"PriceFeed"],
+        price_fee_program_id,
+    )
+    return distributor
+
+def get_dvn_derive_config_pda():
+    (distributor, bump) = Pubkey.find_program_address(
+        [b"DvnConfig"],
+        dvn_program_id,
+    )
+    return distributor
 
 async def main():
     # Connect to the Solana testnet
-    solana_client = Client("https://api.testnet.solana.com")
+    solana_client = Client("https://api.devnet.solana.com")
     ##context = await start_anchor(Path("../"))
     
     # Read the generated IDL.
     with Path("./target/idl/tristero.json").open() as f:
         raw_idl = f.read()
     idl = Idl.from_json(raw_idl)
-    client = AsyncClient("https://api.testnet.solana.com")
+    
+    client = AsyncClient("https://api.devnet.solana.com")
     provider = Provider(client, Wallet.local())
     # Address of the deployed program.
     program_id = Pubkey.from_string("APob25xoaC1Zz2FKePPCRfRBgJ5nhrjg7dUfV68ZNobP")
@@ -298,18 +323,15 @@ async def main():
         print(f"program: ", program)
         admin_panel_account = await program.account["AdminPanel"].fetch(get_admin_panel())
         print(f"admin_panel_account: {admin_panel_account}")
-    
-        register_tristero_oapp_params = {
-            "delegate": user.pubkey()
-        }
+
         tristero_oapp_pubkey = get_tristero_oapp()
         
         send_library_config = get_send_library_config_pda(tristero_oapp_pubkey, ARBITRUM_EID)
         default_send_library_config = get_default_send_library_config(ARBITRUM_EID)
-        #send_library_info = get_send_library_info_pda(send_library_config, default_send_library_config) # should fix
-        #uln_pda_deriver = 
-        #send_config = ulnPdaDeriver.sendConfig(arbitrumEID, tristeroOappPubkey)[0];
-        #default_send_config = ulnPdaDeriver.defaultSendConfig(arbitrumEID)[0]; //until here
+        
+        send_library_info_account = await SendLibraryConfig.fetch(client, default_send_library_config, program_id = endpoint_program_id)
+        
+        send_library_info_pubkey = send_library_info_account.message_lib
         
         send_instruction_remaining_accounts = [
             AccountMeta( #0
@@ -318,7 +340,7 @@ async def main():
                 is_writable =  True
             ),
             AccountMeta( #1
-                pubkey = get_tristero_oapp(),
+                pubkey = tristero_oapp_pubkey,
                 is_signer = False,
                 is_writable =  True
             ),
@@ -328,17 +350,17 @@ async def main():
                 is_writable =  True
             ),
             AccountMeta( #3
-                pubkey = Pubkey.from_string("141X4oNUhGaSKnva8LecEYNgjtFBjvMwZg258hFtQRJP"),
+                pubkey = send_library_config,
                 is_signer = False,
                 is_writable =  True
             ),
             AccountMeta( #4
-                pubkey = Pubkey.from_string("9wgwtfS2NbYariF6kFCV4ifj4fVYQ5bNtQ7pj4jWrE2T"),
+                pubkey = default_send_library_config,
                 is_signer = False,
                 is_writable =  True
             ),
             AccountMeta( #5
-                pubkey = Pubkey.from_string("526PeNZfw8kSnDU4nmzJFVJzJWNhwmZykEyJr5XWz5Fv"),
+                pubkey = get_send_library_info_pda(send_library_info_pubkey),
                 is_signer = False,
                 is_writable =  True
             ),
@@ -348,32 +370,32 @@ async def main():
                 is_writable =  True
             ),
             AccountMeta( #7
-                pubkey = get_nonce_pda(get_tristero_oapp(), ARBITRUM_EID, RECEIVER_PUBKEY),
+                pubkey = get_nonce_pda(tristero_oapp_pubkey, ARBITRUM_EID, RECEIVER_PUBKEY),
                 is_signer = False,
                 is_writable =  True
             ),
             AccountMeta( #8
-                pubkey = Pubkey.from_string("F8E8QGhKmHEx2esh5LpVizzcP4cHYhzXdXTwg9w3YYY2"),
+                pubkey = get_event_authority_pda(),
                 is_signer = False,
                 is_writable =  True
             ),
             AccountMeta( #9
-                pubkey = Pubkey.from_string("76y77prsiCMvXMjuoZ5VRrhG5qYBrUMYTE5WgHqgjEn6"),
+                pubkey = endpoint_program_id,
                 is_signer = False,
                 is_writable =  True
             ),
             AccountMeta( #10
-                pubkey = Pubkey.from_string("2XgGZG4oP29U3w5h4nTk1V2LFHL23zKDPJjs3psGzLKQ"),
+                pubkey = get_uln_program_pda(),
                 is_signer = False,
                 is_writable =  True
             ),
             AccountMeta( #11
-                pubkey = Pubkey.from_string("3ZZXoLURkHz7RuK11xnxDCHkz1sPPDomqaFNAKxaC1fS"),
+                pubkey = get_send_config_pda(ARBITRUM_EID, tristero_oapp_pubkey),
                 is_signer = False,
                 is_writable =  True
             ),
             AccountMeta( #12
-                pubkey = Pubkey.from_string("3y4LwxWFPhMNc4w8P4CfH5WVqwUnAm21PA4Pf7UMoxej"),
+                pubkey = get_default_send_config_pda(ARBITRUM_EID),
                 is_signer = False,
                 is_writable =  True
             ),
@@ -393,58 +415,58 @@ async def main():
                 is_writable =  True
             ),
             AccountMeta( #16
-                pubkey = Pubkey.from_string("7n1YeBMVEUCJ4DscKAcpVQd6KXU7VpcEcc15ZuMcL4U3"),
+                pubkey = get_uln_event_authority_pda(),
                 is_signer = False,
                 is_writable =  True
             ),
             AccountMeta( #17
-                pubkey = Pubkey.from_string("7a4WjyR8VZ7yZz5XJAKm39BUGn5iT9CKcv2pmG9tdXVH"),
+                pubkey = uln_program_id,
                 is_signer = False,
                 is_writable =  True
             ),
             AccountMeta( #18
-                pubkey = Pubkey.from_string("6doghB248px58JSSwG4qejQ46kFMW4AMj7vzJnWZHNZn"),
+                pubkey = executor_program_id,
                 is_signer = False,
                 is_writable =  True
             ),
             AccountMeta( #19
-                pubkey = Pubkey.from_string("AwrbHeCyniXaQhiJZkLhgWdUCteeWSGaSN1sTfLiY7xK"),
+                pubkey = get_executor_pda_deriver(),
                 is_signer = False,
                 is_writable =  True
             ),
             AccountMeta( #20
-                pubkey = Pubkey.from_string("8ahPGPjEbpgGaZx2NV1iG5Shj7TDwvsjkEDcGWjt94TP"),
+                pubkey = price_fee_program_id,
                 is_signer = False,
                 is_writable =  True
             ),
             AccountMeta( #21
-                pubkey = Pubkey.from_string("CSFsUupvJEQQd1F4SsXGACJaxQX4eropQMkGV2696eeQ"),
+                pubkey = get_price_fee_program_pda(),
                 is_signer = False,
                 is_writable =  True
             ),
             AccountMeta( #22
-                pubkey = Pubkey.from_string("HtEYV4xB4wvsj5fgTkcfuChYpvGYzgzwvNhgDZQNh7wW"),
+                pubkey = dvn_program_id,
                 is_signer = False,
                 is_writable =  True
             ),
             AccountMeta( #23
-                pubkey = Pubkey.from_string("4VDjp6XQaxoZf5RGwiPU9NR1EXSZn2TP4ATMmiSzLfhb"),
+                pubkey = get_dvn_derive_config_pda(),
                 is_signer = False,
                 is_writable =  True
             ),
             AccountMeta( #24
-                pubkey = Pubkey.from_string("8ahPGPjEbpgGaZx2NV1iG5Shj7TDwvsjkEDcGWjt94TP"),
+                pubkey = price_fee_program_id,
                 is_signer = False,
                 is_writable =  True
             ),
             AccountMeta( #25
-                pubkey = Pubkey.from_string("CSFsUupvJEQQd1F4SsXGACJaxQX4eropQMkGV2696eeQ"),
+                pubkey = get_price_fee_program_pda(),
                 is_signer = False,
                 is_writable =  True
             )
         ]
         
-        mint_addr = Pubkey.from_string("96dYLgk5D6rHm2V8Bi3djA3QXrAJrhENWuHC9m4kCmDq")
+        mint_addr = Pubkey.from_string("4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU")
         
         admin_panel_pda = get_admin_panel()
         
@@ -460,7 +482,7 @@ async def main():
             "admin_panel": admin_panel_pda,
             "sol_panel": get_sol_panel(),
             "token_mint": mint_addr,
-            "token_account": Pubkey.from_string("CqVTHuqiBKuygw5UXiGmyinAaJzgyrcV5wxubK8C8fDQ"),
+            "token_account": Pubkey.from_string("6RzJ96TziaKHitum3KW5524D6GbvqqYJAeaNfQyicmEx"),
             "staking_account": get_staking_panel(mint_addr),
             "order": get_order_pda(order_id)
         }
@@ -498,7 +520,7 @@ async def main():
         # calling create_match instruction
         print(f"-----------------------Create Match--------------------------")
         create_match_accounts : CreateMatchAccounts = {
-            "authority": user.pubkey(),
+            "authority": admin.pubkey(),
             "admin_panel": get_admin_panel(),
             "order": get_order_pda(order_id),
             "trade_match": get_trade_match_pda(trade_match_id)
@@ -524,9 +546,9 @@ async def main():
         )
         latest_blockhash = solana_client.get_latest_blockhash()
         blockhash = latest_blockhash.value.blockhash
-        signers = [user]
+        signers = [admin]
         
-        txn = Transaction(recent_blockhash=blockhash, fee_payer=user.pubkey())
+        txn = Transaction(recent_blockhash=blockhash, fee_payer=admin.pubkey())
         txn.add(set_compute_unit_limit(2000000))
         txn.add(create_match_ix)
         
