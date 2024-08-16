@@ -70,7 +70,7 @@ impl LzReceive<'_> {
 
         let msg_vec:Vec<[u8; 32]> = split_into_chunks(params.message.clone());
         
-        let msg_type =  vec_to_u64(msg_vec[3]);
+        let msg_type =  vec_to_u64(msg_vec[0]);
 
         let signer_seeds: &[&[&[u8]]] = &[&[b"TristeroOapp", &[admin_panel.bump]]];
 
@@ -100,7 +100,7 @@ impl LzReceive<'_> {
             //     sol_seeds
             // );
         } else { // B->A->B
-            let arb_receive_addr = msg_vec[5];
+            let arb_receive_addr = msg_vec[4];
             
             // ---------------------Transfer from staking account to Arb user's token account----------------------------------
             let cpi_accounts = Transfer {

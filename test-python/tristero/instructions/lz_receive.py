@@ -1,7 +1,6 @@
 from __future__ import annotations
 import typing
 from solders.pubkey import Pubkey
-from solders.system_program import ID as SYS_PROGRAM_ID
 from spl.token.constants import TOKEN_PROGRAM_ID
 from solders.instruction import Instruction, AccountMeta
 import borsh_construct as borsh
@@ -19,10 +18,7 @@ layout = borsh.CStruct("params" / types.lz_receive_params.LzReceiveParams.layout
 class LzReceiveAccounts(typing.TypedDict):
     payer: Pubkey
     oapp: Pubkey
-    admin_panel: Pubkey
-    token_mint: Pubkey
     token_account: Pubkey
-    dest_owner: Pubkey
     staking_account: Pubkey
     trade_match: Pubkey
 
@@ -36,17 +32,13 @@ def lz_receive(
     keys: list[AccountMeta] = [
         AccountMeta(pubkey=accounts["payer"], is_signer=True, is_writable=True),
         AccountMeta(pubkey=accounts["oapp"], is_signer=False, is_writable=True),
-        AccountMeta(pubkey=accounts["admin_panel"], is_signer=False, is_writable=True),
-        AccountMeta(pubkey=accounts["token_mint"], is_signer=False, is_writable=False),
         AccountMeta(
             pubkey=accounts["token_account"], is_signer=False, is_writable=True
         ),
-        AccountMeta(pubkey=accounts["dest_owner"], is_signer=False, is_writable=True),
         AccountMeta(
             pubkey=accounts["staking_account"], is_signer=False, is_writable=True
         ),
         AccountMeta(pubkey=accounts["trade_match"], is_signer=False, is_writable=True),
-        AccountMeta(pubkey=SYS_PROGRAM_ID, is_signer=False, is_writable=False),
         AccountMeta(pubkey=TOKEN_PROGRAM_ID, is_signer=False, is_writable=False),
     ]
     if remaining_accounts is not None:

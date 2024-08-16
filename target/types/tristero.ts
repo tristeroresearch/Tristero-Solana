@@ -46,34 +46,6 @@ export type Tristero = {
       ]
     },
     {
-      "name": "adminPanelCreate",
-      "accounts": [
-        {
-          "name": "adminWallet",
-          "isMut": true,
-          "isSigner": true
-        },
-        {
-          "name": "adminPanel",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "systemProgram",
-          "isMut": false,
-          "isSigner": false
-        }
-      ],
-      "args": [
-        {
-          "name": "params",
-          "type": {
-            "defined": "InitializeParams"
-          }
-        }
-      ]
-    },
-    {
       "name": "adminPanelUpdate",
       "accounts": [
         {
@@ -194,30 +166,12 @@ export type Tristero = {
           "isSigner": false
         },
         {
-          "name": "adminPanel",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "tokenMint",
-          "isMut": false,
-          "isSigner": false,
-          "docs": [
-            "token mint address"
-          ]
-        },
-        {
           "name": "tokenAccount",
           "isMut": true,
           "isSigner": false,
           "docs": [
             "token account address"
           ]
-        },
-        {
-          "name": "destOwner",
-          "isMut": true,
-          "isSigner": false
         },
         {
           "name": "stakingAccount",
@@ -227,11 +181,6 @@ export type Tristero = {
         {
           "name": "tradeMatch",
           "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "systemProgram",
-          "isMut": false,
           "isSigner": false
         },
         {
@@ -651,28 +600,20 @@ export type Tristero = {
       }
     },
     {
-      "name": "InitializeParams",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "adminWallet",
-            "type": "publicKey"
-          },
-          {
-            "name": "paymentWallet",
-            "type": "publicKey"
-          }
-        ]
-      }
-    },
-    {
       "name": "RegisterTristeroOAppParams",
       "type": {
         "kind": "struct",
         "fields": [
           {
             "name": "delegate",
+            "type": "publicKey"
+          },
+          {
+            "name": "adminWallet",
+            "type": "publicKey"
+          },
+          {
+            "name": "paymentWallet",
             "type": "publicKey"
           }
         ]
@@ -1129,34 +1070,6 @@ export const IDL: Tristero = {
       ]
     },
     {
-      "name": "adminPanelCreate",
-      "accounts": [
-        {
-          "name": "adminWallet",
-          "isMut": true,
-          "isSigner": true
-        },
-        {
-          "name": "adminPanel",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "systemProgram",
-          "isMut": false,
-          "isSigner": false
-        }
-      ],
-      "args": [
-        {
-          "name": "params",
-          "type": {
-            "defined": "InitializeParams"
-          }
-        }
-      ]
-    },
-    {
       "name": "adminPanelUpdate",
       "accounts": [
         {
@@ -1277,30 +1190,12 @@ export const IDL: Tristero = {
           "isSigner": false
         },
         {
-          "name": "adminPanel",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "tokenMint",
-          "isMut": false,
-          "isSigner": false,
-          "docs": [
-            "token mint address"
-          ]
-        },
-        {
           "name": "tokenAccount",
           "isMut": true,
           "isSigner": false,
           "docs": [
             "token account address"
           ]
-        },
-        {
-          "name": "destOwner",
-          "isMut": true,
-          "isSigner": false
         },
         {
           "name": "stakingAccount",
@@ -1310,11 +1205,6 @@ export const IDL: Tristero = {
         {
           "name": "tradeMatch",
           "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "systemProgram",
-          "isMut": false,
           "isSigner": false
         },
         {
@@ -1734,28 +1624,20 @@ export const IDL: Tristero = {
       }
     },
     {
-      "name": "InitializeParams",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "adminWallet",
-            "type": "publicKey"
-          },
-          {
-            "name": "paymentWallet",
-            "type": "publicKey"
-          }
-        ]
-      }
-    },
-    {
       "name": "RegisterTristeroOAppParams",
       "type": {
         "kind": "struct",
         "fields": [
           {
             "name": "delegate",
+            "type": "publicKey"
+          },
+          {
+            "name": "adminWallet",
+            "type": "publicKey"
+          },
+          {
+            "name": "paymentWallet",
             "type": "publicKey"
           }
         ]

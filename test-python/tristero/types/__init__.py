@@ -1,8 +1,6 @@
 import typing
 from . import create_match_params
 from .create_match_params import CreateMatchParams, CreateMatchParamsJSON
-from . import initialize_params
-from .initialize_params import InitializeParams, InitializeParamsJSON
 from . import register_tristero_o_app_params
 from .register_tristero_o_app_params import (
     RegisterTristeroOAppParams,

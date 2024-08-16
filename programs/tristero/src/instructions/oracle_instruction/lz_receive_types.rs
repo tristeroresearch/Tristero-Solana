@@ -63,10 +63,10 @@ impl LzReceiveTypes<'_> {
         5: 
         */
         let msg_vec:Vec<[u8; 32]> = split_into_chunks(params.message.clone());
-        let trade_match_id =  vec_to_u64(msg_vec[0]);
-        let mut to_token_addr = Pubkey::new_from_array(msg_vec[1]);
-        let sender_eid = vec_to_u32(msg_vec[4]);
-        let sender_addr = msg_vec[5];
+        let trade_match_id =  vec_to_u64(msg_vec[1]);
+        let to_token_addr = Pubkey::new_from_array(msg_vec[2]);
+        let sender_eid = vec_to_u32(msg_vec[3]);
+        let sender_addr = msg_vec[4];
 
         msg!("trade_match_id => {:#?}, to_token_address => {:#?}", trade_match_id, to_token_addr);
 
