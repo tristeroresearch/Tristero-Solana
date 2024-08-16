@@ -88,7 +88,7 @@ pub fn send_stored(ctx: Context<SendStored>, params: &SendStoredParams) -> Resul
     };
 
     let cpi_context = CpiContext::new(ctx.accounts.token_program.to_account_info(), cpi_accounts);
-    let admin_signer_seeds: &[&[&[u8]]] = &[&[b"admin_panel", &[admin_panel.admin_panel_bump]]];
+    let admin_signer_seeds: &[&[&[u8]]] = &[&[b"admin_panel", &[admin_panel.bump]]];
     token::transfer(cpi_context.with_signer(admin_signer_seeds), trade_match.source_sell_amount)?;
 
     // --------------------------Send message through Oapp-----------------------------

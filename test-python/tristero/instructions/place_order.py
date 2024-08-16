@@ -19,7 +19,7 @@ layout = borsh.CStruct("params" / types.place_order_params.PlaceOrderParams.layo
 class PlaceOrderAccounts(typing.TypedDict):
     authority: Pubkey
     admin_panel: Pubkey
-    sol_panel: Pubkey
+    sol_treasury: Pubkey
     token_mint: Pubkey
     token_account: Pubkey
     staking_account: Pubkey
@@ -35,7 +35,7 @@ def place_order(
     keys: list[AccountMeta] = [
         AccountMeta(pubkey=accounts["authority"], is_signer=True, is_writable=True),
         AccountMeta(pubkey=accounts["admin_panel"], is_signer=False, is_writable=True),
-        AccountMeta(pubkey=accounts["sol_panel"], is_signer=False, is_writable=True),
+        AccountMeta(pubkey=accounts["sol_treasury"], is_signer=False, is_writable=True),
         AccountMeta(pubkey=accounts["token_mint"], is_signer=False, is_writable=False),
         AccountMeta(
             pubkey=accounts["token_account"], is_signer=False, is_writable=True

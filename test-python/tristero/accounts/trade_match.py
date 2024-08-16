@@ -12,7 +12,7 @@ from ..program_id import PROGRAM_ID
 
 
 class TradeMatchJSON(typing.TypedDict):
-    user_pubkey: str
+    authority: str
     user_token_addr: str
     source_token_mint: str
     dest_token_mint: list[int]
@@ -30,7 +30,7 @@ class TradeMatchJSON(typing.TypedDict):
 class TradeMatch:
     discriminator: typing.ClassVar = b"\x00\xa3a\t\x9a\xee\x01\xb1"
     layout: typing.ClassVar = borsh.CStruct(
-        "user_pubkey" / BorshPubkey,
+        "authority" / BorshPubkey,
         "user_token_addr" / BorshPubkey,
         "source_token_mint" / BorshPubkey,
         "dest_token_mint" / borsh.U8[20],
@@ -43,7 +43,7 @@ class TradeMatch:
         "trade_match_id" / borsh.U64,
         "is_valiable" / borsh.Bool,
     )
-    user_pubkey: Pubkey
+    authority: Pubkey
     user_token_addr: Pubkey
     source_token_mint: Pubkey
     dest_token_mint: list[int]
@@ -100,7 +100,7 @@ class TradeMatch:
             )
         dec = TradeMatch.layout.parse(data[ACCOUNT_DISCRIMINATOR_SIZE:])
         return cls(
-            user_pubkey=dec.user_pubkey,
+            authority=dec.authority,
             user_token_addr=dec.user_token_addr,
             source_token_mint=dec.source_token_mint,
             dest_token_mint=dec.dest_token_mint,
@@ -116,7 +116,7 @@ class TradeMatch:
 
     def to_json(self) -> TradeMatchJSON:
         return {
-            "user_pubkey": str(self.user_pubkey),
+            "authority": str(self.authority),
             "user_token_addr": str(self.user_token_addr),
             "source_token_mint": str(self.source_token_mint),
             "dest_token_mint": self.dest_token_mint,
@@ -133,7 +133,7 @@ class TradeMatch:
     @classmethod
     def from_json(cls, obj: TradeMatchJSON) -> "TradeMatch":
         return cls(
-            user_pubkey=Pubkey.from_string(obj["user_pubkey"]),
+            authority=Pubkey.from_string(obj["authority"]),
             user_token_addr=Pubkey.from_string(obj["user_token_addr"]),
             source_token_mint=Pubkey.from_string(obj["source_token_mint"]),
             dest_token_mint=obj["dest_token_mint"],

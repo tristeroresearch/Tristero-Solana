@@ -17,11 +17,7 @@ use solana_program::native_token::LAMPORTS_PER_SOL;
 #[derive(Accounts)]
 #[instruction(params: LzReceiveParams)]
 pub struct LzReceive<'info> {
-    #[account(
-        mut,
-        seeds = [b"sol_panel"],
-        bump
-    )]
+    #[account(mut)]
     pub payer: Signer<'info>,
 
     /// CHECK: The PDA of the OApp
@@ -35,17 +31,17 @@ pub struct LzReceive<'info> {
     #[account(
         mut,
         seeds = [b"admin_panel"],
-        bump = admin_panel.admin_panel_bump,
+        bump = admin_panel.bump,
     )]
     pub admin_panel: Box<Account<'info, AdminPanel>>,
 
     // /// CHECK:
     // #[account(
     //     mut,
-    //     seeds = [b"sol_panel"],
+    //     seeds = [b"sol_treasury"],
     //     bump,
     // )]
-    // pub sol_panel: AccountInfo<'info>,
+    // pub sol_treasury: AccountInfo<'info>,
 
     /// token mint address
     pub token_mint: Box<Account<'info, Mint>>,
@@ -113,21 +109,21 @@ impl LzReceive<'_> {
             };
 
             let cpi_context = CpiContext::new(ctx.accounts.token_program.to_account_info(), cpi_accounts);
-            let signer_seeds: &[&[&[u8]]] = &[&[b"admin_panel", &[admin_panel.admin_panel_bump]]];
+            let signer_seeds: &[&[&[u8]]] = &[&[b"admin_panel", &[admin_panel.bump]]];
             token::transfer(cpi_context.with_signer(signer_seeds), trade_match.source_sell_amount)?;
             trade_match.is_valiable = false;
 
             
             // ------------------------Transfer fee to executor-----------------------------------
             // let ix = anchor_lang::solana_program::system_instruction::transfer(
-            //     &ctx.accounts.sol_panel.key(), 
+            //     &ctx.accounts.sol_treasury.key(), 
             //     &ctx.accounts.payer.key(), 
             //     5000000
             // );
-            // let sol_seeds: &[&[&[u8]]] = &[&[b"sol_panel", &[ctx.bumps.sol_panel]]];
+            // let sol_seeds: &[&[&[u8]]] = &[&[b"sol_treasury", &[ctx.bumps.sol_treasury]]];
             // let _ = anchor_lang::solana_program::program::invoke_signed(
             //     &ix, 
-            //     &[ctx.accounts.sol_panel.to_account_info(), ctx.accounts.payer.to_account_info()],
+            //     &[ctx.accounts.sol_treasury.to_account_info(), ctx.accounts.payer.to_account_info()],
             //     sol_seeds
             // );
         } else { // B->A->B
@@ -142,7 +138,7 @@ impl LzReceive<'_> {
 
             let cpi_context = CpiContext::new(ctx.accounts.token_program.to_account_info(), cpi_accounts);
 
-            let admin_signer_seeds: &[&[&[u8]]] = &[&[b"admin_panel", &[admin_panel.admin_panel_bump]]];
+            let admin_signer_seeds: &[&[&[u8]]] = &[&[b"admin_panel", &[admin_panel.bump]]];
 
             token::transfer(cpi_context.with_signer(admin_signer_seeds), trade_match.source_sell_amount)?;
 

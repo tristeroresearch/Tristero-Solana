@@ -23,10 +23,10 @@ pub struct PlaceOrder<'info> {
     /// CHECK:
     #[account(
         mut,
-        seeds = [b"sol_panel"],
+        seeds = [b"sol_treasury"],
         bump,
     )]
-    pub sol_panel: AccountInfo<'info>,
+    pub sol_treasury: AccountInfo<'info>,
 
     /// token mint address
     pub token_mint: Box<Account<'info, Mint>>,
@@ -108,12 +108,12 @@ pub fn place_order(ctx: Context<PlaceOrder>, params: &PlaceOrderParams) -> Resul
     // ---------------------Transfer the sol for fee to the sol staking account----------------------------------
     let ix = anchor_lang::solana_program::system_instruction::transfer(
         &ctx.accounts.authority.key(), 
-        &ctx.accounts.sol_panel.key(), 
+        &ctx.accounts.sol_treasury.key(), 
         5000000
     );
     let _ = anchor_lang::solana_program::program::invoke(
         &ix, 
-        &[ctx.accounts.authority.to_account_info(), ctx.accounts.sol_panel.to_account_info()],
+        &[ctx.accounts.authority.to_account_info(), ctx.accounts.sol_treasury.to_account_info()],
     );
 
     Ok(())

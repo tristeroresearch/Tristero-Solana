@@ -12,10 +12,11 @@ from ..program_id import PROGRAM_ID
 
 
 class AdminPanelJSON(typing.TypedDict):
-    admin_wallet: str
+    authority: str
     payment_wallet: str
-    admin_panel_bump: int
-    freeze_fee: int
+    backend_wallet: str
+    bump: int
+    trade_fee: int
     match_count: int
     order_count: int
 
@@ -24,17 +25,19 @@ class AdminPanelJSON(typing.TypedDict):
 class AdminPanel:
     discriminator: typing.ClassVar = b"\x90\xad\x0b\xfd\x16O\x06$"
     layout: typing.ClassVar = borsh.CStruct(
-        "admin_wallet" / BorshPubkey,
+        "authority" / BorshPubkey,
         "payment_wallet" / BorshPubkey,
-        "admin_panel_bump" / borsh.U8,
-        "freeze_fee" / borsh.U64,
+        "backend_wallet" / BorshPubkey,
+        "bump" / borsh.U8,
+        "trade_fee" / borsh.U64,
         "match_count" / borsh.U64,
         "order_count" / borsh.U64,
     )
-    admin_wallet: Pubkey
+    authority: Pubkey
     payment_wallet: Pubkey
-    admin_panel_bump: int
-    freeze_fee: int
+    backend_wallet: Pubkey
+    bump: int
+    trade_fee: int
     match_count: int
     order_count: int
 
@@ -82,20 +85,22 @@ class AdminPanel:
             )
         dec = AdminPanel.layout.parse(data[ACCOUNT_DISCRIMINATOR_SIZE:])
         return cls(
-            admin_wallet=dec.admin_wallet,
+            authority=dec.authority,
             payment_wallet=dec.payment_wallet,
-            admin_panel_bump=dec.admin_panel_bump,
-            freeze_fee=dec.freeze_fee,
+            backend_wallet=dec.backend_wallet,
+            bump=dec.bump,
+            trade_fee=dec.trade_fee,
             match_count=dec.match_count,
             order_count=dec.order_count,
         )
 
     def to_json(self) -> AdminPanelJSON:
         return {
-            "admin_wallet": str(self.admin_wallet),
+            "authority": str(self.authority),
             "payment_wallet": str(self.payment_wallet),
-            "admin_panel_bump": self.admin_panel_bump,
-            "freeze_fee": self.freeze_fee,
+            "backend_wallet": str(self.backend_wallet),
+            "bump": self.bump,
+            "trade_fee": self.trade_fee,
             "match_count": self.match_count,
             "order_count": self.order_count,
         }
@@ -103,10 +108,11 @@ class AdminPanel:
     @classmethod
     def from_json(cls, obj: AdminPanelJSON) -> "AdminPanel":
         return cls(
-            admin_wallet=Pubkey.from_string(obj["admin_wallet"]),
+            authority=Pubkey.from_string(obj["authority"]),
             payment_wallet=Pubkey.from_string(obj["payment_wallet"]),
-            admin_panel_bump=obj["admin_panel_bump"],
-            freeze_fee=obj["freeze_fee"],
+            backend_wallet=Pubkey.from_string(obj["backend_wallet"]),
+            bump=obj["bump"],
+            trade_fee=obj["trade_fee"],
             match_count=obj["match_count"],
             order_count=obj["order_count"],
         )

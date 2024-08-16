@@ -4,9 +4,10 @@ use anchor_lang::prelude::*;
 #[derive(Default, Debug)]
 pub struct AdminPanel {
     pub authority: Pubkey,
-    pub payment_wallet: Pubkey,
-    pub admin_panel_bump: u8,
-    pub freeze_fee: u64,
+    pub payment_wallet: Pubkey, // fee wallet
+    pub backend_wallet: Pubkey, // authority
+    pub bump: u8,
+    pub trade_fee: u64, // trading fee
     pub match_count: u64,
     pub order_count: u64,
 }

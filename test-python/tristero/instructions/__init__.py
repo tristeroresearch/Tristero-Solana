@@ -3,7 +3,6 @@ from .register_tristero_oapp import (
     RegisterTristeroOappArgs,
     RegisterTristeroOappAccounts,
 )
-from .tristero_send import tristero_send, TristeroSendArgs, TristeroSendAccounts
 from .admin_panel_create import (
     admin_panel_create,
     AdminPanelCreateArgs,

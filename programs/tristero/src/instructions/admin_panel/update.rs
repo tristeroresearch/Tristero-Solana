@@ -9,7 +9,7 @@ pub struct Update<'info> {
     #[account(
         mut,
         seeds = [b"admin_panel"],
-        bump = admin_panel.admin_panel_bump,
+        bump = admin_panel.bump,
         has_one = authority
     )]
     pub admin_panel: Box<Account<'info, AdminPanel>>,

@@ -20,7 +20,6 @@ class LzReceiveAccounts(typing.TypedDict):
     payer: Pubkey
     oapp: Pubkey
     admin_panel: Pubkey
-    sol_panel: Pubkey
     token_mint: Pubkey
     token_account: Pubkey
     dest_owner: Pubkey
@@ -38,7 +37,6 @@ def lz_receive(
         AccountMeta(pubkey=accounts["payer"], is_signer=True, is_writable=True),
         AccountMeta(pubkey=accounts["oapp"], is_signer=False, is_writable=True),
         AccountMeta(pubkey=accounts["admin_panel"], is_signer=False, is_writable=True),
-        AccountMeta(pubkey=accounts["sol_panel"], is_signer=False, is_writable=True),
         AccountMeta(pubkey=accounts["token_mint"], is_signer=False, is_writable=False),
         AccountMeta(
             pubkey=accounts["token_account"], is_signer=False, is_writable=True

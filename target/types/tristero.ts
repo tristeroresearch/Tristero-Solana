@@ -199,11 +199,6 @@ export type Tristero = {
           "isSigner": false
         },
         {
-          "name": "solPanel",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
           "name": "tokenMint",
           "isMut": false,
           "isSigner": false,
@@ -322,7 +317,7 @@ export type Tristero = {
           "isSigner": false
         },
         {
-          "name": "solPanel",
+          "name": "solTreasury",
           "isMut": true,
           "isSigner": false
         },
@@ -452,11 +447,15 @@ export type Tristero = {
             "type": "publicKey"
           },
           {
-            "name": "adminPanelBump",
+            "name": "backendWallet",
+            "type": "publicKey"
+          },
+          {
+            "name": "bump",
             "type": "u8"
           },
           {
-            "name": "freezeFee",
+            "name": "tradeFee",
             "type": "u64"
           },
           {
@@ -1283,11 +1282,6 @@ export const IDL: Tristero = {
           "isSigner": false
         },
         {
-          "name": "solPanel",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
           "name": "tokenMint",
           "isMut": false,
           "isSigner": false,
@@ -1406,7 +1400,7 @@ export const IDL: Tristero = {
           "isSigner": false
         },
         {
-          "name": "solPanel",
+          "name": "solTreasury",
           "isMut": true,
           "isSigner": false
         },
@@ -1536,11 +1530,15 @@ export const IDL: Tristero = {
             "type": "publicKey"
           },
           {
-            "name": "adminPanelBump",
+            "name": "backendWallet",
+            "type": "publicKey"
+          },
+          {
+            "name": "bump",
             "type": "u8"
           },
           {
-            "name": "freezeFee",
+            "name": "tradeFee",
             "type": "u64"
           },
           {

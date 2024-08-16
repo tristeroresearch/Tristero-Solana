@@ -7,3 +7,4 @@ target/tmp/
 test-ledger
 
 tests/main_id.json
+tests/lz_receive_test.ts
