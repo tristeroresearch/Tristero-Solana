@@ -28,18 +28,26 @@ from tristero.instructions.place_order import place_order, PlaceOrderAccounts
 from tristero.instructions.challenge import challenge, ChallengeAccounts
 from tristero.instructions.admin_panel_create import admin_panel_create, AdminPanelCreateAccounts
 from tristero.instructions.register_tristero_oapp import register_tristero_oapp, RegisterTristeroOappAccounts
+from endpoint.instructions.init_nonce import init_nonce, InitNonceAccounts
+from endpoint.instructions.init_send_library import init_send_library, InitSendLibraryAccounts
+from endpoint.instructions.init_receive_library import init_receive_library, InitReceiveLibraryAccounts
+
+from tristero.instructions.register_config import register_config, RegisterConfigAccounts
 
 from tristero.types.create_match_params import CreateMatchParams, CreateMatchParamsJSON
 from tristero.types.place_order_params import PlaceOrderParams, PlaceOrderParamsJSON
 from tristero.types.challenge_params import ChallengeParams, ChallengeParamsJSON
 from tristero.types.initialize_params import InitializeParams, InitializeParamsJSON
 from tristero.types.register_tristero_o_app_params import RegisterTristeroOAppParams, RegisterTristeroOAppParamsJSON
+from endpoint.types.init_nonce_params import InitNonceParams, InitNonceParamsJSON
+from endpoint.types.init_send_library_params import InitSendLibraryParams, InitSendLibraryParamsJSON
+from endpoint.types.init_receive_library_params import InitReceiveLibraryParams, InitReceiveLibraryParamsJSON
 
 from tristero.accounts.admin_panel import AdminPanel
 from endpoint.accounts.send_library_config import SendLibraryConfig
-from endpoint.instructions.init_nonce import init_nonce, InitNonceAccounts
-from endpoint.types.init_nonce_params import InitNonceParams, InitNonceParamsJSON
-from tristero.instructions.register_config import register_config, RegisterConfigAccounts
+
+
+
 import time
 import json
 import struct
@@ -536,22 +544,24 @@ async def main():
         print(f"create_admin_panel_tx: {create_admin_panel_tx}")
         
         print(f"--------------------------Register New Oapp------------------------------")
-        create_admin_accounts: AdminPanelCreateAccounts = {
-            "admin_panel": admin.pubkey(),
-            "admin_panel_account": admin_panel_pda
+        register_oapp_accounts: RegisterTristeroOappAccounts = {
+            "payer": admin.pubkey(),
+            "oapp": tristero_oapp_pubkey,
+            "oapp_registry": get_tristero_oapp(tristero_oapp_pubkey),
+            "event_authority": get_event_authority_pda(),
+            "endpoint_program": endpoint_program_id
         }
         
-        create_admin_params_json : InitializeParamsJSON = {
-            "admin_panel": admin.pubkey(),
-            "payment_wallet": admin.pubkey()
+        register_tristero_oapp_params_json : RegisterTristeroOAppParamsJSON = {
+            "delegate": admin.pubkey()
         }
         
-        create_admin_panel_params = InitializeParams.from_json(create_admin_params_json)
-        create_admin_panel_ix = admin_panel_create(
+        register_tristero_oapp_params = RegisterTristeroOAppParams.from_json(register_tristero_oapp_params_json)
+        register_tristero_oapp_ix = register_tristero_oapp(
             {
-                "params": create_admin_panel_params
+                "params": register_tristero_oapp_params
             },
-            create_admin_accounts,
+            register_oapp_accounts,
             tristero_program_id
         )
         
@@ -559,12 +569,46 @@ async def main():
         blockhash = latest_blockhash.value.blockhash
         signers = [admin]
         
+        txn = Transaction(recent_blockhash=blockhash, fee_payer=admin.pubkey())
+        txn.add(set_compute_unit_limit(2000000))
+        txn.add(register_tristero_oapp_ix)
+        
+        register_tristero_oapp_tx = solana_client.send_transaction(txn, *signers, opts=TxOpts(skip_confirmation=False, preflight_commitment=Confirmed)).value
+        print(f"register_tristero_oapp_tx: {register_tristero_oapp_tx}")
+        
+        print(f"-----------------------Init Send Library---------------------------")
+        init_send_library_accounts: InitSendLibraryAccounts = {
+            "delegate": user.pubkey(),
+            "oapp_registry": get_oapp_registry_pda(tristero_oapp_pubkey),
+            "send_library_config": get_send_library_config_pda(tristero_program_id),
+        }
+        
+        init_nonce_params_json : InitNonceParamsJSON = {
+            "local_oapp": str(tristero_oapp_pubkey),
+            "remote_eid": ARBITRUM_EID,
+            "remote_oapp": RECEIVER_PUBKEY
+        }
+        
+        init_nonce_params = InitNonceParams.from_json(init_nonce_params_json)
+        
+        init_nonce_ix = init_nonce(
+            {
+                "params": init_nonce_params
+            },
+            init_nonce_accounts,
+            endpoint_program_id
+        )
+        
+        latest_blockhash = solana_client.get_latest_blockhash()
+        blockhash = latest_blockhash.value.blockhash
+        signers = [user]
+        
         txn = Transaction(recent_blockhash=blockhash, fee_payer=user.pubkey())
         txn.add(set_compute_unit_limit(2000000))
-        txn.add(create_admin_panel_ix)
+        txn.add(init_nonce_ix)
         
-        create_admin_panel_tx = solana_client.send_transaction(txn, *signers, opts=TxOpts(skip_confirmation=False, preflight_commitment=Confirmed)).value
-        print(f"create_admin_panel_tx: {create_admin_panel_tx}")
+        init_nonce_tx = solana_client.send_transaction(txn, *signers, opts=TxOpts(skip_confirmation=False, preflight_commitment=Confirmed)).value
+        print(f"init_nonce_tx: {init_nonce_tx}")
         
         # print(f"-----------------------Init Nonce---------------------------")
         # init_nonce_accounts: InitNonceAccounts = {
