@@ -24,46 +24,20 @@ pub struct LzReceive<'info> {
     #[account(
         mut,
         seeds = [b"TristeroOapp"],
-        bump
+        bump = oapp.bump
     )]
-    pub oapp: AccountInfo<'info>,
-
-    #[account(
-        mut,
-        seeds = [b"admin_panel"],
-        bump = admin_panel.bump,
-    )]
-    pub admin_panel: Box<Account<'info, AdminPanel>>,
-
-    // /// CHECK:
-    // #[account(
-    //     mut,
-    //     seeds = [b"sol_treasury"],
-    //     bump,
-    // )]
-    // pub sol_treasury: AccountInfo<'info>,
-
-    /// token mint address
-    pub token_mint: Box<Account<'info, Mint>>,
+    pub oapp: Box<Account<'info, AdminPanel>>,
 
     /// token account address
     #[account(
-        init_if_needed,
-        payer = payer,
-        token::mint = token_mint,
-        token::authority = dest_owner,
-        seeds = [b"refund_account", dest_owner.key().as_ref()],
-        bump,
+        mut,
+        constraint = token_account.mint.key() == trade_match.source_token_mint @ CustomError::InvalidTokenMintAddress,
     )]
     pub token_account: Box<Account<'info, TokenAccount>>,
 
-    /// CHECK: arb user's sol wallet addr
-    #[account(mut)]
-    pub dest_owner: AccountInfo<'info>,
-
     #[account(
         mut,
-        seeds = [b"staking_account", token_mint.key().as_ref()],
+        seeds = [b"staking_account", token_account.mint.key().as_ref()],
         bump,
     )]
     pub staking_account: Box<Account<'info, TokenAccount>>,
@@ -73,9 +47,7 @@ pub struct LzReceive<'info> {
         constraint = trade_match.is_valiable == true @ CustomError::NotAgain
     )]
     pub trade_match: Box<Account<'info, TradeMatch>>,
-
-    pub system_program: Program<'info, System>,
-
+    
     /// CHECK: This is not dangerous because we don't read or write from this account
     #[account(constraint = token_program.key() == TOKEN_PROGRAM_ID @ CustomError::InvalidTokenStandard)]
     pub token_program: AccountInfo<'info>,
@@ -93,12 +65,14 @@ pub struct LzReceiveParams {
 
 impl LzReceive<'_> {
     pub fn apply(ctx: &mut Context<LzReceive>, params: &LzReceiveParams) -> Result<()> {
-        let admin_panel = ctx.accounts.admin_panel.as_mut();
+        let admin_panel = ctx.accounts.oapp.as_mut();
         let trade_match = ctx.accounts.trade_match.as_mut();
 
         let msg_vec:Vec<[u8; 32]> = split_into_chunks(params.message.clone());
         
         let msg_type =  vec_to_u64(msg_vec[3]);
+
+        let signer_seeds: &[&[&[u8]]] = &[&[b"TristeroOapp", &[admin_panel.bump]]];
 
         if msg_type == 1u64 { // B->A
             // ---------------------Transfer the source token from the staking account----------------------------------
@@ -109,7 +83,6 @@ impl LzReceive<'_> {
             };
 
             let cpi_context = CpiContext::new(ctx.accounts.token_program.to_account_info(), cpi_accounts);
-            let signer_seeds: &[&[&[u8]]] = &[&[b"admin_panel", &[admin_panel.bump]]];
             token::transfer(cpi_context.with_signer(signer_seeds), trade_match.source_sell_amount)?;
             trade_match.is_valiable = false;
 
@@ -138,14 +111,12 @@ impl LzReceive<'_> {
 
             let cpi_context = CpiContext::new(ctx.accounts.token_program.to_account_info(), cpi_accounts);
 
-            let admin_signer_seeds: &[&[&[u8]]] = &[&[b"admin_panel", &[admin_panel.bump]]];
+            
 
-            token::transfer(cpi_context.with_signer(admin_signer_seeds), trade_match.source_sell_amount)?;
+            token::transfer(cpi_context.with_signer(signer_seeds), trade_match.source_sell_amount)?;
 
             // --------------------------Send message through Oapp-----------------------------
             let cpi_ctx = Send::construct_context(ctx.remaining_accounts[9].key(), ctx.remaining_accounts).unwrap();
-
-            let signer_seeds: &[&[&[u8]]] = &[&[b"TristeroOapp", &[ctx.bumps.oapp]]];
 
             let receive_options= [0, 3, 1, 0, 17, 1, 0,
                     0, 0, 0, 0,  0, 0,   0,
@@ -212,16 +183,14 @@ impl LzReceive<'_> {
         }
 
         // the first 9 accounts are for clear()
-        let seeds: &[&[u8]] =
-            &[b"TristeroOapp", &[ctx.bumps.oapp]];
         let accounts_for_clear = &ctx.remaining_accounts[0..2];
         let _ = oapp::endpoint_cpi::clear(
             ENDPOINT_ID,
-            ctx.accounts.oapp.key(),
+            admin_panel.key(),
             accounts_for_clear,
-            seeds,
+            &[b"TristeroOapp", &[admin_panel.bump]],
             ClearParams {
-                receiver: ctx.accounts.oapp.key(),
+                receiver: admin_panel.key(),
                 src_eid: params.src_eid,
                 sender: params.sender,
                 nonce: params.nonce,

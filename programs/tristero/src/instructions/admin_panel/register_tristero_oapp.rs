@@ -13,16 +13,16 @@ pub struct RegisterTristeroOApp<'info> {
     /// CHECK: The PDA of the OApp
     #[account(
         init,
-        space = 8 + 165,
+        space = AdminPanel::LEN,
         payer = payer,
         seeds = [b"TristeroOapp"],
         bump
     )]
-    pub oapp: AccountInfo<'info>,
+    pub oapp: Box<Account<'info, AdminPanel>>,
     /// CHECK: oapp registry
     #[account(
         mut,
-        seeds = [OAPP_SEED, oapp.key.as_ref()],
+        seeds = [OAPP_SEED, oapp.key().as_ref()],
         bump,
         seeds::program = endpoint_program.key()
     )]
