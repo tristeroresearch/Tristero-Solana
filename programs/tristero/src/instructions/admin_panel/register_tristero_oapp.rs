@@ -38,9 +38,18 @@ pub struct RegisterTristeroOApp<'info> {
 #[derive(Clone, AnchorSerialize, AnchorDeserialize)]
 pub struct RegisterTristeroOAppParams{
     pub delegate: Pubkey,
+    pub admin_wallet: Pubkey,
+    pub payment_wallet: Pubkey,
 }
 
 pub fn register_tristero_oapp(ctx: Context<RegisterTristeroOApp>, params: &RegisterTristeroOAppParams) -> Result<()> {
+    let admin_panel = ctx.accounts.oapp.as_mut();
+
+    admin_panel.authority = params.admin_wallet;
+    admin_panel.bump = ctx.bumps.oapp;
+    admin_panel.payment_wallet = params.payment_wallet;
+
+
     let cpi_param = RegisterOAppParams {
         delegate: params.delegate
     };
