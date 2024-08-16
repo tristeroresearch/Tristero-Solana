@@ -22,12 +22,19 @@ from solana.rpc.commitment import Confirmed
 from anchorpy.borsh_extension import BorshPubkey
 import borsh_construct as borsh
 import typing
+
 from tristero.instructions.create_match import create_match, CreateMatchAccounts
 from tristero.instructions.place_order import place_order, PlaceOrderAccounts
 from tristero.instructions.challenge import challenge, ChallengeAccounts
+from tristero.instructions.admin_panel_create import admin_panel_create, AdminPanelCreateAccounts
+from tristero.instructions.register_tristero_oapp import register_tristero_oapp, RegisterTristeroOappAccounts
+
 from tristero.types.create_match_params import CreateMatchParams, CreateMatchParamsJSON
 from tristero.types.place_order_params import PlaceOrderParams, PlaceOrderParamsJSON
 from tristero.types.challenge_params import ChallengeParams, ChallengeParamsJSON
+from tristero.types.initialize_params import InitializeParams, InitializeParamsJSON
+from tristero.types.register_tristero_o_app_params import RegisterTristeroOAppParams, RegisterTristeroOAppParamsJSON
+
 from tristero.accounts.admin_panel import AdminPanel
 from endpoint.accounts.send_library_config import SendLibraryConfig
 from endpoint.instructions.init_nonce import init_nonce, InitNonceAccounts
@@ -37,7 +44,7 @@ import time
 import json
 import struct
 
-tristero_program_id = Pubkey.from_string("APob25xoaC1Zz2FKePPCRfRBgJ5nhrjg7dUfV68ZNobP")
+tristero_program_id = Pubkey.from_string("GtSPrihVcUSTcHG3DEFViBz8N4w2qDX2VbYFCPzAK7U")
 endpoint_program_id = Pubkey.from_string("76y77prsiCMvXMjuoZ5VRrhG5qYBrUMYTE5WgHqgjEn6")
 executor_program_id = Pubkey.from_string("6doghB248px58JSSwG4qejQ46kFMW4AMj7vzJnWZHNZn")
 send_library_program_id = Pubkey.from_string("7a4WjyR8VZ7yZz5XJAKm39BUGn5iT9CKcv2pmG9tdXVH")
@@ -338,7 +345,7 @@ async def main():
     client = AsyncClient("https://api.devnet.solana.com")
     provider = Provider(client, Wallet.local())
     # Address of the deployed program.
-    program_id = Pubkey.from_string("APob25xoaC1Zz2FKePPCRfRBgJ5nhrjg7dUfV68ZNobP")
+    program_id = Pubkey.from_string("GtSPrihVcUSTcHG3DEFViBz8N4w2qDX2VbYFCPzAK7U")
     
     async with Program(idl, program_id, provider) as program:
         print(f"program: ", program)
@@ -496,6 +503,68 @@ async def main():
         
         erc20_addr = binascii.unhexlify('75faf114eafb1bdbe2f0316df893fd58ce46aa4d')
         arb_wallet_addr = binascii.unhexlify('De7014167c36c39aAfb56aA0Bd87776d8911369A')
+        
+        print(f"--------------------------Create admin panel------------------------------")
+        create_admin_accounts: AdminPanelCreateAccounts = {
+            "admin_panel": admin.pubkey(),
+            "admin_panel_account": admin_panel_pda
+        }
+        
+        create_admin_params_json : InitializeParamsJSON = {
+            "admin_panel": admin.pubkey(),
+            "payment_wallet": admin.pubkey()
+        }
+        
+        create_admin_panel_params = InitializeParams.from_json(create_admin_params_json)
+        create_admin_panel_ix = admin_panel_create(
+            {
+                "params": create_admin_panel_params
+            },
+            create_admin_accounts,
+            tristero_program_id
+        )
+        
+        latest_blockhash = solana_client.get_latest_blockhash()
+        blockhash = latest_blockhash.value.blockhash
+        signers = [admin]
+        
+        txn = Transaction(recent_blockhash=blockhash, fee_payer=user.pubkey())
+        txn.add(set_compute_unit_limit(2000000))
+        txn.add(create_admin_panel_ix)
+        
+        create_admin_panel_tx = solana_client.send_transaction(txn, *signers, opts=TxOpts(skip_confirmation=False, preflight_commitment=Confirmed)).value
+        print(f"create_admin_panel_tx: {create_admin_panel_tx}")
+        
+        print(f"--------------------------Register New Oapp------------------------------")
+        create_admin_accounts: AdminPanelCreateAccounts = {
+            "admin_panel": admin.pubkey(),
+            "admin_panel_account": admin_panel_pda
+        }
+        
+        create_admin_params_json : InitializeParamsJSON = {
+            "admin_panel": admin.pubkey(),
+            "payment_wallet": admin.pubkey()
+        }
+        
+        create_admin_panel_params = InitializeParams.from_json(create_admin_params_json)
+        create_admin_panel_ix = admin_panel_create(
+            {
+                "params": create_admin_panel_params
+            },
+            create_admin_accounts,
+            tristero_program_id
+        )
+        
+        latest_blockhash = solana_client.get_latest_blockhash()
+        blockhash = latest_blockhash.value.blockhash
+        signers = [admin]
+        
+        txn = Transaction(recent_blockhash=blockhash, fee_payer=user.pubkey())
+        txn.add(set_compute_unit_limit(2000000))
+        txn.add(create_admin_panel_ix)
+        
+        create_admin_panel_tx = solana_client.send_transaction(txn, *signers, opts=TxOpts(skip_confirmation=False, preflight_commitment=Confirmed)).value
+        print(f"create_admin_panel_tx: {create_admin_panel_tx}")
         
         # print(f"-----------------------Init Nonce---------------------------")
         # init_nonce_accounts: InitNonceAccounts = {
