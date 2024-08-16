@@ -8,7 +8,7 @@ pub struct Update<'info> {
 
     #[account(
         mut,
-        seeds = [b"admin_panel"],
+        seeds = [b"TristeroOapp"],
         bump = admin_panel.bump,
         has_one = authority
     )]

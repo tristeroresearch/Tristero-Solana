@@ -38,10 +38,6 @@ pub mod tristero {
         instructions::register_tristero_oapp(ctx, &params)
     }
 
-    pub fn admin_panel_create(ctx: Context<Initialize>, params: InitializeParams) -> Result<()> {
-        instructions::initialize(ctx, &params)
-    }
-
     pub fn admin_panel_update(ctx: Context<Update>, params: UpdateParams) -> Result<()> {
         instructions::update(ctx, &params)
     }
