@@ -7,7 +7,7 @@ seeds = false
 skip-lint = false
 
 [programs.localnet]
-tristero = "GtSPrihVcUSTcHG3DEFViBz8N4w2qDX2VbYFCPzAK7U"
+tristero = "GAa8J7hrF7BpGezmU8oXJ5cjdUxiPdGgze8wLZn8Jt8u"
 blocked_messagelib = "2XrYqmhBMPJgDsb4SVbjV1PnJBprurd5bzRCkHwiFCJB"
 dvn = "HtEYV4xB4wvsj5fgTkcfuChYpvGYzgzwvNhgDZQNh7wW"
 endpoint = "76y77prsiCMvXMjuoZ5VRrhG5qYBrUMYTE5WgHqgjEn6"
@@ -20,10 +20,10 @@ uln = "7a4WjyR8VZ7yZz5XJAKm39BUGn5iT9CKcv2pmG9tdXVH"
 oft = "HRPXLCqspQocTjfcX4rvAPaY9q6Gwb1rrD3xXWrfJWdW"
 
 [programs.testnet]
-tristero = "GtSPrihVcUSTcHG3DEFViBz8N4w2qDX2VbYFCPzAK7U"
+tristero = "GAa8J7hrF7BpGezmU8oXJ5cjdUxiPdGgze8wLZn8Jt8u"
 
 [programs.devnet]
-tristero = "GtSPrihVcUSTcHG3DEFViBz8N4w2qDX2VbYFCPzAK7U"
+tristero = "GAa8J7hrF7BpGezmU8oXJ5cjdUxiPdGgze8wLZn8Jt8u"
 
 [programs.mainnet]
 tristero = "Eq22HfHg6KjtAoqeEU1UhmbA2iSxUdJQC1syuv36xK1U"

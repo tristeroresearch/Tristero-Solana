@@ -50,7 +50,7 @@ import time
 import json
 import struct
 
-tristero_program_id = Pubkey.from_string("GtSPrihVcUSTcHG3DEFViBz8N4w2qDX2VbYFCPzAK7U")
+tristero_program_id = Pubkey.from_string("GAa8J7hrF7BpGezmU8oXJ5cjdUxiPdGgze8wLZn8Jt8u")
 endpoint_program_id = Pubkey.from_string("76y77prsiCMvXMjuoZ5VRrhG5qYBrUMYTE5WgHqgjEn6")
 executor_program_id = Pubkey.from_string("6doghB248px58JSSwG4qejQ46kFMW4AMj7vzJnWZHNZn")
 send_library_program_id = Pubkey.from_string("7a4WjyR8VZ7yZz5XJAKm39BUGn5iT9CKcv2pmG9tdXVH")
@@ -58,7 +58,7 @@ price_fee_program_id = Pubkey.from_string("8ahPGPjEbpgGaZx2NV1iG5Shj7TDwvsjkEDcG
 dvn_program_id = Pubkey.from_string("HtEYV4xB4wvsj5fgTkcfuChYpvGYzgzwvNhgDZQNh7wW")
 uln_program_id = Pubkey.from_string("7a4WjyR8VZ7yZz5XJAKm39BUGn5iT9CKcv2pmG9tdXVH")
 
-rpc_url = "https://api.testnet.solana.com"
+rpc_url = "https://api.devnet.solana.com"
 
 # Load JSON files
 with open(Path("./tests/user.json"), "r") as user_file:
@@ -343,48 +343,46 @@ async def main():
     
     client = AsyncClient("https://api.devnet.solana.com")
     provider = Provider(client, Wallet.local())
-    # Address of the deployed program.
-    program_id = Pubkey.from_string("GtSPrihVcUSTcHG3DEFViBz8N4w2qDX2VbYFCPzAK7U")
     
-    async with Program(idl, program_id, provider) as program:
+    async with Program(idl, tristero_program_id, provider) as program:
         print(f"program: ", program)
         tristero_oapp_pubkey = get_tristero_oapp()
         
-        print(f"--------------------------Register New Oapp------------------------------")
-        register_oapp_accounts: RegisterTristeroOappAccounts = {
-            "payer": admin.pubkey(),
-            "oapp": tristero_oapp_pubkey,
-            "oapp_registry": get_tristero_oapp(tristero_oapp_pubkey),
-            "event_authority": get_event_authority_pda(),
-            "endpoint_program": endpoint_program_id
-        }
+        # print(f"--------------------------Register New Oapp------------------------------")
+        # register_oapp_accounts: RegisterTristeroOappAccounts = {
+        #     "payer": admin.pubkey(),
+        #     "oapp": tristero_oapp_pubkey,
+        #     "oapp_registry": get_oapp_registry_pda(tristero_oapp_pubkey),
+        #     "event_authority": get_event_authority_pda(),
+        #     "endpoint_program": endpoint_program_id
+        # }
         
-        register_tristero_oapp_params_json : RegisterTristeroOAppParamsJSON = {
-            "delegate": admin.pubkey(),
-            "admin_panel": admin.pubkey(),
-            "payment_wallet": admin.pubkey()
-        }
+        # register_tristero_oapp_params_json : RegisterTristeroOAppParamsJSON = {
+        #     "delegate": str(admin.pubkey()),
+        #     "admin_wallet": str(admin.pubkey()),
+        #     "payment_wallet": str(admin.pubkey())
+        # }
         
-        register_tristero_oapp_params = RegisterTristeroOAppParams.from_json(register_tristero_oapp_params_json)
-        register_tristero_oapp_ix = register_tristero_oapp(
-            {
-                "params": register_tristero_oapp_params
-            },
-            register_oapp_accounts,
-            tristero_program_id
-        )
+        # register_tristero_oapp_params = RegisterTristeroOAppParams.from_json(register_tristero_oapp_params_json)
+        # register_tristero_oapp_ix = register_tristero_oapp(
+        #     {
+        #         "params": register_tristero_oapp_params
+        #     },
+        #     register_oapp_accounts,
+        #     tristero_program_id
+        # )
         
-        latest_blockhash = solana_client.get_latest_blockhash()
-        blockhash = latest_blockhash.value.blockhash
-        signers = [admin]
+        # latest_blockhash = solana_client.get_latest_blockhash()
+        # blockhash = latest_blockhash.value.blockhash
+        # signers = [admin]
         
-        txn = Transaction(recent_blockhash=blockhash, fee_payer=admin.pubkey())
-        txn.add(set_compute_unit_limit(2000000))
-        txn.add(register_tristero_oapp_ix)
+        # txn = Transaction(recent_blockhash=blockhash, fee_payer=admin.pubkey())
+        # txn.add(set_compute_unit_limit(2000000))
+        # txn.add(register_tristero_oapp_ix)
         
-        register_tristero_oapp_tx = solana_client.send_transaction(txn, *signers, opts=TxOpts(skip_confirmation=False, preflight_commitment=Confirmed)).value
-        print(f"register_tristero_oapp_tx: {register_tristero_oapp_tx}")
-        print(f"tristero_oapp: ", tristero_oapp_pubkey)
+        # register_tristero_oapp_tx = solana_client.send_transaction(txn, *signers, opts=TxOpts(skip_confirmation=False, preflight_commitment=Confirmed)).value
+        # print(f"register_tristero_oapp_tx: {register_tristero_oapp_tx}")
+        # print(f"tristero_oapp: ", tristero_oapp_pubkey)
         
         
         
@@ -540,125 +538,124 @@ async def main():
         erc20_addr = binascii.unhexlify('75faf114eafb1bdbe2f0316df893fd58ce46aa4d')
         arb_wallet_addr = binascii.unhexlify('De7014167c36c39aAfb56aA0Bd87776d8911369A')
         
-        print(f"-----------------------Init Send Library---------------------------")
-        init_send_library_accounts: InitSendLibraryAccounts = {
-            "delegate": user.pubkey(),
-            "oapp_registry": get_oapp_registry_pda(tristero_oapp_pubkey),
-            "send_library_config": get_send_library_config_pda(tristero_oapp_pubkey, ARBITRUM_EID),
-        }
+        # print(f"-----------------------Init Send Library---------------------------")
+        # init_send_library_accounts: InitSendLibraryAccounts = {
+        #     "delegate": admin.pubkey(),
+        #     "oapp_registry": get_oapp_registry_pda(tristero_oapp_pubkey),
+        #     "send_library_config": get_send_library_config_pda(tristero_oapp_pubkey, ARBITRUM_EID),
+        # }
         
-        init_send_library_params_json : InitSendLibraryParamsJSON = {
-            "oapp": str(tristero_oapp_pubkey),
-            "sender":  RECEIVER_PUBKEY,
-            "eid": ARBITRUM_EID,
-        }
+        # init_send_library_params_json : InitSendLibraryParamsJSON = {
+        #     "sender":  str(tristero_oapp_pubkey),
+        #     "eid": ARBITRUM_EID,
+        # }
         
-        init_send_library_params = InitSendLibraryParams.from_json(init_send_library_params_json)
+        # init_send_library_params = InitSendLibraryParams.from_json(init_send_library_params_json)
         
-        init_send_library_ix = init_send_library(
-            {
-                "params": init_send_library_params
-            },
-            init_send_library_accounts,
-            endpoint_program_id
-        )
+        # init_send_library_ix = init_send_library(
+        #     {
+        #         "params": init_send_library_params
+        #     },
+        #     init_send_library_accounts,
+        #     endpoint_program_id
+        # )
         
-        latest_blockhash = solana_client.get_latest_blockhash()
-        blockhash = latest_blockhash.value.blockhash
-        signers = [user]
+        # latest_blockhash = solana_client.get_latest_blockhash()
+        # blockhash = latest_blockhash.value.blockhash
+        # signers = [admin]
         
-        txn = Transaction(recent_blockhash=blockhash, fee_payer=user.pubkey())
-        txn.add(set_compute_unit_limit(2000000))
-        txn.add(init_send_library_ix)
+        # txn = Transaction(recent_blockhash=blockhash, fee_payer=admin.pubkey())
+        # txn.add(set_compute_unit_limit(2000000))
+        # txn.add(init_send_library_ix)
         
-        init_send_library_tx = solana_client.send_transaction(txn, *signers, opts=TxOpts(skip_confirmation=False, preflight_commitment=Confirmed)).value
-        print(f"init_send_library_tx: {init_send_library_tx}")
+        # init_send_library_tx = solana_client.send_transaction(txn, *signers, opts=TxOpts(skip_confirmation=False, preflight_commitment=Confirmed)).value
+        # print(f"init_send_library_tx: {init_send_library_tx}")
         
-        print(f"-----------------------Init Receive Library---------------------------")
-        init_receive_library_accounts: InitReceiveLibraryAccounts = {
-            "delegate": user.pubkey(),
-            "oapp_registry": get_oapp_registry_pda(tristero_oapp_pubkey),
-            "receive_library_config": get_receive_library_config_pda(tristero_oapp_pubkey, ARBITRUM_EID),
-        }
+        # print(f"-----------------------Init Receive Library---------------------------")
+        # init_receive_library_accounts: InitReceiveLibraryAccounts = {
+        #     "delegate": admin.pubkey(),
+        #     "oapp_registry": get_oapp_registry_pda(tristero_oapp_pubkey),
+        #     "receive_library_config": get_receive_library_config_pda(tristero_oapp_pubkey, ARBITRUM_EID),
+        # }
         
-        init_receive_library_params_json : InitReceiveLibraryParamsJSON = {
-            "receiver": tristero_oapp_pubkey,
-            "eid": ARBITRUM_EID,
-        }
+        # init_receive_library_params_json : InitReceiveLibraryParamsJSON = {
+        #     "receiver": str(tristero_oapp_pubkey),
+        #     "eid": ARBITRUM_EID,
+        # }
         
-        init_receive_library_params = InitReceiveLibraryParams.from_json(init_receive_library_params_json)
+        # init_receive_library_params = InitReceiveLibraryParams.from_json(init_receive_library_params_json)
         
-        init_receive_library_ix = init_receive_library(
-            {
-                "params": init_receive_library_params
-            },
-            init_receive_library_accounts,
-            endpoint_program_id
-        )
+        # init_receive_library_ix = init_receive_library(
+        #     {
+        #         "params": init_receive_library_params
+        #     },
+        #     init_receive_library_accounts,
+        #     endpoint_program_id
+        # )
         
-        latest_blockhash = solana_client.get_latest_blockhash()
-        blockhash = latest_blockhash.value.blockhash
-        signers = [user]
+        # latest_blockhash = solana_client.get_latest_blockhash()
+        # blockhash = latest_blockhash.value.blockhash
+        # signers = [admin]
         
-        txn = Transaction(recent_blockhash=blockhash, fee_payer=user.pubkey())
-        txn.add(set_compute_unit_limit(2000000))
-        txn.add(init_receive_library_ix)
+        # txn = Transaction(recent_blockhash=blockhash, fee_payer=admin.pubkey())
+        # txn.add(set_compute_unit_limit(2000000))
+        # txn.add(init_receive_library_ix)
         
-        init_receive_library_tx = solana_client.send_transaction(txn, *signers, opts=TxOpts(skip_confirmation=False, preflight_commitment=Confirmed)).value
-        print(f"init_receive_library_tx: {init_receive_library_tx}")
+        # init_receive_library_tx = solana_client.send_transaction(txn, *signers, opts=TxOpts(skip_confirmation=False, preflight_commitment=Confirmed)).value
+        # print(f"init_receive_library_tx: {init_receive_library_tx}")
         
-        print(f"-----------------------Init Nonce---------------------------")
-        init_nonce_accounts: InitNonceAccounts = {
-            "delegate": user.pubkey(),
-            "oapp_registry": get_oapp_registry_pda(tristero_oapp_pubkey),
-            "nonce": get_nonce_pda(tristero_oapp_pubkey, ARBITRUM_EID, RECEIVER_PUBKEY),
-            "pending_inbound_nonce": get_pending_inbound_nonce_pda(tristero_oapp_pubkey, ARBITRUM_EID, RECEIVER_PUBKEY)
-        }
+        # print(f"-----------------------Init Nonce---------------------------")
+        # init_nonce_accounts: InitNonceAccounts = {
+        #     "delegate": admin.pubkey(),
+        #     "oapp_registry": get_oapp_registry_pda(tristero_oapp_pubkey),
+        #     "nonce": get_nonce_pda(tristero_oapp_pubkey, ARBITRUM_EID, RECEIVER_PUBKEY),
+        #     "pending_inbound_nonce": get_pending_inbound_nonce_pda(tristero_oapp_pubkey, ARBITRUM_EID, RECEIVER_PUBKEY)
+        # }
         
-        init_nonce_params_json : InitNonceParamsJSON = {
-            "local_oapp": str(tristero_oapp_pubkey),
-            "remote_eid": ARBITRUM_EID,
-            "remote_oapp": RECEIVER_PUBKEY
-        }
+        # init_nonce_params_json : InitNonceParamsJSON = {
+        #     "local_oapp": str(tristero_oapp_pubkey),
+        #     "remote_eid": ARBITRUM_EID,
+        #     "remote_oapp": RECEIVER_PUBKEY
+        # }
         
-        init_nonce_params = InitNonceParams.from_json(init_nonce_params_json)
+        # init_nonce_params = InitNonceParams.from_json(init_nonce_params_json)
         
-        init_nonce_ix = init_nonce(
-            {
-                "params": init_nonce_params
-            },
-            init_nonce_accounts,
-            endpoint_program_id
-        )
+        # init_nonce_ix = init_nonce(
+        #     {
+        #         "params": init_nonce_params
+        #     },
+        #     init_nonce_accounts,
+        #     endpoint_program_id
+        # )
         
-        latest_blockhash = solana_client.get_latest_blockhash()
-        blockhash = latest_blockhash.value.blockhash
-        signers = [user]
+        # latest_blockhash = solana_client.get_latest_blockhash()
+        # blockhash = latest_blockhash.value.blockhash
+        # signers = [admin]
         
-        txn = Transaction(recent_blockhash=blockhash, fee_payer=user.pubkey())
-        txn.add(set_compute_unit_limit(2000000))
-        txn.add(init_nonce_ix)
+        # txn = Transaction(recent_blockhash=blockhash, fee_payer=admin.pubkey())
+        # txn.add(set_compute_unit_limit(2000000))
+        # txn.add(init_nonce_ix)
         
-        init_nonce_tx = solana_client.send_transaction(txn, *signers, opts=TxOpts(skip_confirmation=False, preflight_commitment=Confirmed)).value
-        print(f"init_nonce_tx: {init_nonce_tx}")
+        # init_nonce_tx = solana_client.send_transaction(txn, *signers, opts=TxOpts(skip_confirmation=False, preflight_commitment=Confirmed)).value
+        # print(f"init_nonce_tx: {init_nonce_tx}")
         
         print(f"---------------------Init Oft-Config------------------------")
         register_config_accounts: RegisterConfigAccounts = {
-            "payer": user.pubkey(),
+            "payer": admin.pubkey(),
             "oapp_config": tristero_oapp_pubkey,
             "lz_receive_types_accounts": get_lz_receive_types_pda(tristero_oapp_pubkey)
         }
         
         register_config_ix = register_config(
             register_config_accounts,
-            program_id
+            tristero_program_id
         )
         
         latest_blockhash = solana_client.get_latest_blockhash()
         blockhash = latest_blockhash.value.blockhash
-        signers = [user]
+        signers = [admin]
         
-        txn = Transaction(recent_blockhash=blockhash, fee_payer=user.pubkey())
+        txn = Transaction(recent_blockhash=blockhash, fee_payer=admin.pubkey())
         txn.add(set_compute_unit_limit(2000000))
         txn.add(register_config_ix)
         
@@ -668,7 +665,7 @@ async def main():
         print(f"-----------------------Place Order--------------------------")
         place_order_accounts: PlaceOrderAccounts = {
             "authority": user.pubkey(),
-            "admin_panel": admin_panel_pda,
+            "admin_panel": tristero_oapp_pubkey,
             "sol_treasury": get_sol_treasury(),
             "token_mint": mint_addr,
             "token_account": Pubkey.from_string("6RzJ96TziaKHitum3KW5524D6GbvqqYJAeaNfQyicmEx"),
@@ -692,7 +689,7 @@ async def main():
                 "params": place_order_params
             },
             place_order_accounts,
-            program_id
+            tristero_program_id
         )
         
         latest_blockhash = solana_client.get_latest_blockhash()
@@ -711,7 +708,7 @@ async def main():
         print(f"-----------------------Create Match--------------------------")
         create_match_accounts : CreateMatchAccounts = {
             "authority": admin.pubkey(),
-            "admin_panel": get_admin_panel(),
+            "admin_panel": tristero_oapp_pubkey,
             "order": get_order_pda(order_id),
             "trade_match": get_trade_match_pda(trade_match_id)
         }
@@ -732,7 +729,7 @@ async def main():
                 "params": create_match_params
             },
             create_match_accounts,
-            program_id
+            tristero_program_id
         )
         latest_blockhash = solana_client.get_latest_blockhash()
         blockhash = latest_blockhash.value.blockhash
