@@ -63,8 +63,9 @@ impl LzReceiveTypes<'_> {
         5: 
         */
         let msg_vec:Vec<[u8; 32]> = split_into_chunks(params.message.clone());
-        let trade_match_id =  vec_to_u64(msg_vec[1]);
-        let to_token_addr = Pubkey::new_from_array(msg_vec[2]);
+        msg!("==> {:#?}", msg_vec.len());
+        let trade_match_id =  vec_to_u64(msg_vec[2]);
+        let to_token_addr = Pubkey::new_from_array(msg_vec[1]);
         let sender_eid = vec_to_u32(msg_vec[3]);
         let sender_addr = msg_vec[4];
 
@@ -74,30 +75,32 @@ impl LzReceiveTypes<'_> {
             LzAccount { pubkey: to_token_addr, is_signer: false, is_writable: true }, // 2
         ]);
         let token_account: TokenAccount = TokenAccount::try_deserialize(&mut to_token_addr.as_ref())?;
+        msg!("=> {:#?}", token_account);
         let token_mint = token_account.mint;
         // account 5
         let (staking_account, _) = Pubkey::find_program_address(
             &[b"staking_account", &token_account.mint.to_bytes()],
             &program_id
         );
+        msg!("3 ok");
         accounts.extend_from_slice(&[
             LzAccount { pubkey: staking_account, is_signer: false, is_writable: true }, // 3
         ]);
 
-        // account 6
         let (trade_match, _) = Pubkey::find_program_address(
             &[b"trade_match", &trade_match_id.to_be_bytes()],
             &program_id
         );
+        msg!("4 ok");
 
         accounts.extend_from_slice(&[
             LzAccount { pubkey: trade_match, is_signer: false, is_writable: true }, // 4
         ]);
 
-        // account 9, 10
         accounts.extend_from_slice(&[
             LzAccount { pubkey: TOKEN_PROGRAM_ID, is_signer: false, is_writable: false } // 5
         ]);
+        msg!("5 ok");
 
         // msg!("accounts: {:#?}", accounts);
 
@@ -107,44 +110,54 @@ impl LzReceiveTypes<'_> {
             &[b"TristeroOapp", &token_mint.to_bytes()],
             &program_id
         );
+        msg!("6 ok");
         let send_library_program = Pubkey::from_str("7a4WjyR8VZ7yZz5XJAKm39BUGn5iT9CKcv2pmG9tdXVH").unwrap(); //ok 2
         let (send_library_config, _) = Pubkey::find_program_address( //ok 3
             &[b"SendLibraryConfig", tristero_oapp.key().as_ref(), &sender_eid.to_be_bytes()],
             &endpoint_program_id
         );
+        msg!("7 ok");
         let (default_send_library_config, _) = Pubkey::find_program_address( //ok 4
             &[b"SendLibraryConfig", &sender_eid.to_be_bytes()],
             &endpoint_program_id
         );
+        msg!("8 ok");
         let (send_library_info, _) = Pubkey::find_program_address( // ok 5
             &[b"MessageLib", &default_send_library_config.key().to_bytes()],
             &endpoint_program_id
         );
+        msg!("9 ok");
         let (endpoint_pda, _) = Pubkey::find_program_address( // ok 6
             &[b"Endpoint", &sender_eid.to_be_bytes()],
             &endpoint_program_id
         );
+        msg!("10 ok");
         let (nonce_pda, _) = Pubkey::find_program_address( // ok 7
             &[b"Nonce", tristero_oapp.key().as_ref(), &sender_eid.to_be_bytes(), sender_addr.as_ref()],
             &endpoint_program_id
         );
+        msg!("11 ok");
         let (event_authority, _) = Pubkey::find_program_address( // ok 8
             &[b"__event_authority"],
             &endpoint_program_id
         );
+        msg!("12 ok");
         //endpoint_program_id // ok 9
         let (uln_program_pda, _) = Pubkey::find_program_address( // ok 10
             &[b"MessageLib"], 
             &send_library_program
         );
+        msg!("13 ok");
         let (send_config, _) = Pubkey::find_program_address( // ok 11
             &[b"SendConfig", &sender_eid.to_be_bytes(), tristero_oapp.key().as_ref()], 
             &send_library_program
         );
+        msg!("14 ok");
         let (default_send_config, _) = Pubkey::find_program_address( // ok 12
             &[b"SendConfig", &sender_eid.to_be_bytes()], 
             &send_library_program
         );
+        msg!("15 ok");
         let signer1 = Pubkey::default(); // ok 13
         let signer2 = Pubkey::default(); // ok 14
         let system_program_id = SYSTEM_ID; // ok 15
@@ -152,27 +165,32 @@ impl LzReceiveTypes<'_> {
             &[b"__event_authority"],
             &send_library_program
         );
+        msg!("16 ok");
         // let send_library_program ok 17
         let executor_program_id = Pubkey::from_str("6doghB248px58JSSwG4qejQ46kFMW4AMj7vzJnWZHNZn").unwrap(); // ok 18
         let (executor_pda_deriver, _) = Pubkey::find_program_address( // ok 19
             &[b"ExecutorConfig"],
             &executor_program_id
         );
+        msg!("17 ok");
         let price_fee_program_id = Pubkey::from_str("8ahPGPjEbpgGaZx2NV1iG5Shj7TDwvsjkEDcGWjt94TP").unwrap(); // ok 20
         let (price_fee_program_pda, _) = Pubkey::find_program_address( // ok 21
             &[b"PriceFeed"],
             &price_fee_program_id
         );
+        msg!("18 ok");
         let dvn_program_id = Pubkey::from_str("HtEYV4xB4wvsj5fgTkcfuChYpvGYzgzwvNhgDZQNh7wW").unwrap(); // ok 22
         let (dvn_derive_config, _) = Pubkey::find_program_address( // ok 23
             &[b"DvnConfig"],
             &dvn_program_id
         );
+        msg!("19 ok");
         let price_fee_program_id = Pubkey::from_str("8ahPGPjEbpgGaZx2NV1iG5Shj7TDwvsjkEDcGWjt94TP").unwrap(); // ok 24
         let (price_fee_program_pda, _) = Pubkey::find_program_address( // ok 25
             &[b"PriceFeed"],
             &price_fee_program_id
         );
+        msg!("20 ok");
 
 
 

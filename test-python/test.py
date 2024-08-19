@@ -27,6 +27,7 @@ from tristero.instructions.create_match import create_match, CreateMatchAccounts
 from tristero.instructions.place_order import place_order, PlaceOrderAccounts
 from tristero.instructions.challenge import challenge, ChallengeAccounts
 from tristero.instructions.register_tristero_oapp import register_tristero_oapp, RegisterTristeroOappAccounts
+from tristero.instructions.lz_receive_types import lz_receive_types, LzReceiveTypesAccounts
 from endpoint.instructions.init_nonce import init_nonce, InitNonceAccounts
 from endpoint.instructions.init_send_library import init_send_library, InitSendLibraryAccounts
 from endpoint.instructions.init_receive_library import init_receive_library, InitReceiveLibraryAccounts
@@ -37,6 +38,7 @@ from tristero.types.create_match_params import CreateMatchParams, CreateMatchPar
 from tristero.types.place_order_params import PlaceOrderParams, PlaceOrderParamsJSON
 from tristero.types.challenge_params import ChallengeParams, ChallengeParamsJSON
 from tristero.types.register_tristero_o_app_params import RegisterTristeroOAppParams, RegisterTristeroOAppParamsJSON
+from tristero.types.lz_receive_type_params import LzReceiveTypeParams, LzReceiveTypeParamsJSON
 from endpoint.types.init_nonce_params import InitNonceParams, InitNonceParamsJSON
 from endpoint.types.init_send_library_params import InitSendLibraryParams, InitSendLibraryParamsJSON
 from endpoint.types.init_receive_library_params import InitReceiveLibraryParams, InitReceiveLibraryParamsJSON
@@ -88,13 +90,16 @@ ARBITRUM_EID = 40231
 RECEIVER_PUBKEY = bytearray(32)
 
 # Hexadecimal string to be converted to bytes
-hex_string = '5f9b227b179bc5D04FCddDF92132b19F11413708'
+hex_string = '5E1fBD3335B934333B420ec1120c82c20D381001'
 
 # Convert the hexadecimal string to bytes
 padded_buffer = binascii.unhexlify(hex_string)
 
 # Copy the bytes to the RECEIVER_PUBKEY bytearray starting at position 12
 RECEIVER_PUBKEY[12:12 + len(padded_buffer)] = padded_buffer
+
+payload_string = '000000000000000000000000000000000000000000000000000000000000000483247218e466e48b0ea8b8a7b99e7a53cc8153766c6ac5c88076290adee38d5100000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000009ce8000000000000000000000000748b0dfd0dc7efb34e5be75b3f4d24a0093543530000000000000000000000000000000000000000000000000000000000000001'
+payload_buffer = binascii.unhexlify(payload_string)
 
 # Print the result
 print("receiverPubKey =>", RECEIVER_PUBKEY)
@@ -743,30 +748,66 @@ async def main():
         # print(f"create_match_tx: {create_match_tx}")
         # print(f"match_id: {trade_match_id}")
         
+        # trade_match_id = 4
         
-        print(f"-------------------------Challenge----------------------------")
-        challenge_accounts : ChallengeAccounts = {
-            "authority": user.pubkey(),
-            "admin_panel": tristero_oapp_pubkey,
-            "trade_match": get_trade_match_pda(trade_match_id)
+        # print(f"-------------------------Challenge----------------------------")
+        # challenge_accounts : ChallengeAccounts = {
+        #     "authority": user.pubkey(),
+        #     "admin_panel": tristero_oapp_pubkey,
+        #     "trade_match": get_trade_match_pda(trade_match_id)
+        # }
+        
+        # challenge_params_json : ChallengeParamsJSON = {
+        #     "trade_match_id": trade_match_id,
+        #     "tristero_oapp_bump": get_tristero_oapp_bump(),
+        #     "source_token_address_in_arbitrum_chain": arb_wallet_addr,
+        #     "receiver": RECEIVER_PUBKEY
+        # }
+        
+        # challenge_params = ChallengeParams.from_json(challenge_params_json)
+        
+        # challenge_ix = challenge(
+        #     {
+        #         "params": challenge_params
+        #     },
+        #     challenge_accounts,
+        #     tristero_program_id,
+        #     send_instruction_remaining_accounts
+        # )
+        # latest_blockhash = solana_client.get_latest_blockhash()
+        # blockhash = latest_blockhash.value.blockhash
+        # signers = [user]
+        
+        # txn = Transaction(recent_blockhash=blockhash, fee_payer=user.pubkey())
+        # txn.add(set_compute_unit_limit(2000000))
+        # txn.add(challenge_ix)
+        
+        # challenge_tx = solana_client.send_transaction(txn, *signers, opts=TxOpts(skip_confirmation=False, preflight_commitment=Confirmed)).value
+        # print(f"challenge_tx: {challenge_tx}")
+        
+        print(f"-------------------------Testing lz_receive_types----------------------------")
+        lz_receive_types_accounts : LzReceiveTypeParams = {
+            "oft_config": tristero_oapp_pubkey,
+            "token_mint": tristero_oapp_pubkey
         }
         
-        challenge_params_json : ChallengeParamsJSON = {
-            "trade_match_id": trade_match_id,
-            "tristero_oapp_bump": get_tristero_oapp_bump(),
-            "source_token_address_in_arbitrum_chain": arb_wallet_addr,
-            "receiver": RECEIVER_PUBKEY
+        lz_receive_types_params_json : LzReceiveTypeParamsJSON = {
+            "src_eid": ARBITRUM_EID,
+            "sender": RECEIVER_PUBKEY,
+            "nonce": 1,
+            "guid": RECEIVER_PUBKEY,
+            "message": payload_buffer,
+            "extra_data": [],
         }
         
-        challenge_params = ChallengeParams.from_json(challenge_params_json)
+        lz_receive_type_params = LzReceiveTypeParams.from_json(lz_receive_types_params_json)
         
-        challenge_ix = challenge(
+        lz_receive_types_ix = lz_receive_types(
             {
-                "params": challenge_params
+                "params": lz_receive_type_params
             },
-            challenge_accounts,
-            program_id,
-            send_instruction_remaining_accounts
+            lz_receive_types_accounts,
+            tristero_program_id
         )
         latest_blockhash = solana_client.get_latest_blockhash()
         blockhash = latest_blockhash.value.blockhash
@@ -774,9 +815,10 @@ async def main():
         
         txn = Transaction(recent_blockhash=blockhash, fee_payer=user.pubkey())
         txn.add(set_compute_unit_limit(2000000))
-        txn.add(challenge_ix)
+        txn.add(lz_receive_types_ix)
         
-        challenge_tx = solana_client.send_transaction(txn, *signers, opts=TxOpts(skip_confirmation=False, preflight_commitment=Confirmed)).value
-        print(f"challenge_tx: {challenge_tx}")
+        lz_receive_types_tx = solana_client.send_transaction(txn, *signers, opts=TxOpts(skip_confirmation=False, preflight_commitment=Confirmed)).value
+        print(f"lz_receive_types_tx: {lz_receive_types_tx}")
+        
 
 asyncio.run(main())
