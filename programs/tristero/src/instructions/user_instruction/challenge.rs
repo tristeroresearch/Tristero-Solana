@@ -16,7 +16,7 @@ pub struct Challenge<'info> {
 
     #[account(
         mut,
-        seeds = [b"admin_panel"],
+        seeds = [b"TristeroOapp"],
         bump = admin_panel.bump,
     )]
     pub admin_panel: Box<Account<'info, AdminPanel>>,
