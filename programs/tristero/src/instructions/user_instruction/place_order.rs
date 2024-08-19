@@ -15,7 +15,7 @@ pub struct PlaceOrder<'info> {
 
     #[account(
         mut,
-        seeds = [b"admin_panel"],
+        seeds = [b"TristeroOapp"],
         bump,
     )]
     pub admin_panel: Box<Account<'info, AdminPanel>>,
