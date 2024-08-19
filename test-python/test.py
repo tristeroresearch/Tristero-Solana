@@ -77,20 +77,12 @@ user = Keypair.from_bytes(bytes(user_json))
 other_user = Keypair.from_bytes(bytes(other_json))
 admin = Keypair.from_bytes(bytes(admin_json))
 
-# # Set up the provider for AnchorPy
-# provider = Provider(client, user.secret())
-
-# # Initialize the program
-# program = Program("./target/idl/tristero.json", tristero_program_id, provider)
-
 LAMPORTS_PER_SOL = 1_000_000_000
 ARBITRUM_EID = 40231
-
-# RECEIVER_PUBKEY = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 32, 237, 167, 180, 19, 229, 37, 204, 255, 159, 251, 166, 16, 245, 196, 184, 225, 137, 235, 83]
 RECEIVER_PUBKEY = bytearray(32)
 
 # Hexadecimal string to be converted to bytes
-hex_string = '5E1fBD3335B934333B420ec1120c82c20D381001'
+hex_string = '0Bc5f1Acd592A9B0cB5A6bA4D19C84c82C2405b8'
 
 # Convert the hexadecimal string to bytes
 padded_buffer = binascii.unhexlify(hex_string)
@@ -98,7 +90,7 @@ padded_buffer = binascii.unhexlify(hex_string)
 # Copy the bytes to the RECEIVER_PUBKEY bytearray starting at position 12
 RECEIVER_PUBKEY[12:12 + len(padded_buffer)] = padded_buffer
 
-payload_string = '000000000000000000000000000000000000000000000000000000000000000483247218e466e48b0ea8b8a7b99e7a53cc8153766c6ac5c88076290adee38d5100000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000009ce8000000000000000000000000748b0dfd0dc7efb34e5be75b3f4d24a0093543530000000000000000000000000000000000000000000000000000000000000001'
+payload_string = '0000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000583247218e466e48b0ea8b8a7b99e7a53cc8153766c6ac5c88076290adee38d513b442cb3912157f13a933d0134282d032b5ffecd01a2dbf1b7790608df002ea70000000000000000000000000000000000000000000000000000000000009ce8000000000000000000000000748b0dfd0dc7efb34e5be75b3f4d24a0093543530000000000000000000000000000000000000000000000000000000000000001'
 payload_buffer = binascii.unhexlify(payload_string)
 
 # Print the result
@@ -709,7 +701,7 @@ async def main():
         # print(f"place_order_tx: {place_order_tx}")
         # print(f"order_id: :{order_id}")
         
-        # # calling create_match instruction
+        # calling create_match instruction
         # print(f"-----------------------Create Match--------------------------")
         # create_match_accounts : CreateMatchAccounts = {
         #     "authority": admin.pubkey(),
@@ -748,7 +740,7 @@ async def main():
         # print(f"create_match_tx: {create_match_tx}")
         # print(f"match_id: {trade_match_id}")
         
-        # trade_match_id = 4
+        # trade_match_id = 5
         
         # print(f"-------------------------Challenge----------------------------")
         # challenge_accounts : ChallengeAccounts = {

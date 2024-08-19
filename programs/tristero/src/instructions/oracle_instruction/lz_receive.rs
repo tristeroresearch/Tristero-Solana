@@ -1,3 +1,5 @@
+use std::borrow::{Borrow, BorrowMut};
+
 use crate::*;
 use {crate::error::*, crate::state::*};
 use anchor_spl::{token::{self, Transfer, Mint, TokenAccount}};
@@ -29,16 +31,14 @@ pub struct LzReceive<'info> {
     pub oapp: Box<Account<'info, AdminPanel>>,
 
     /// token account address
-    #[account(
-        mut,
-        constraint = token_account.mint.key() == trade_match.source_token_mint @ CustomError::InvalidTokenMintAddress,
-    )]
+    #[account(mut)]
     pub token_account: Box<Account<'info, TokenAccount>>,
 
     #[account(
         mut,
         seeds = [b"staking_account", token_account.mint.key().as_ref()],
         bump,
+        
     )]
     pub staking_account: Box<Account<'info, TokenAccount>>,
 
@@ -49,7 +49,10 @@ pub struct LzReceive<'info> {
     pub trade_match: Box<Account<'info, TradeMatch>>,
     
     /// CHECK: This is not dangerous because we don't read or write from this account
-    #[account(constraint = token_program.key() == TOKEN_PROGRAM_ID @ CustomError::InvalidTokenStandard)]
+    #[account(
+        constraint = token_program.key() == TOKEN_PROGRAM_ID @ CustomError::InvalidTokenStandard,
+        constraint = token_account.mint.key() == trade_match.source_token_mint @ CustomError::InvalidTokenMintAddress
+    )]
     pub token_program: AccountInfo<'info>,
 }
 
@@ -65,55 +68,39 @@ pub struct LzReceiveParams {
 
 impl LzReceive<'_> {
     pub fn apply(ctx: &mut Context<LzReceive>, params: &LzReceiveParams) -> Result<()> {
-        let admin_panel = ctx.accounts.oapp.as_mut();
+        let admin_panel = ctx.accounts.oapp.as_mut().clone();
+        
         let trade_match = ctx.accounts.trade_match.as_mut();
-
         let msg_vec:Vec<[u8; 32]> = split_into_chunks(params.message.clone());
         
         let msg_type =  vec_to_u64(msg_vec[0]);
+        
+        let stake_acc = ctx.accounts.staking_account.to_account_info();
+        let token_acc = ctx.accounts.token_account.to_account_info();
+        let authority = admin_panel.clone().to_account_info();
 
         let signer_seeds: &[&[&[u8]]] = &[&[b"TristeroOapp", &[admin_panel.bump]]];
 
-        if msg_type == 1u64 { // B->A
-            // ---------------------Transfer the source token from the staking account----------------------------------
-            let cpi_accounts = Transfer {
-                from: ctx.accounts.staking_account.to_account_info(),
-                to: ctx.accounts.token_account.to_account_info(),
-                authority: admin_panel.to_account_info(),
-            };
+        // ---------------------Transfer the source token from the staking account----------------------------------
+        let cpi_accounts = Transfer {
+            from: stake_acc,
+            to: token_acc,
+            authority: authority
+        };
 
-            let cpi_context = CpiContext::new(ctx.accounts.token_program.to_account_info(), cpi_accounts);
-            token::transfer(cpi_context.with_signer(signer_seeds), trade_match.source_sell_amount)?;
+        let cpi_context = CpiContext::new(ctx.accounts.token_program.to_account_info(), cpi_accounts);
+        token::transfer(cpi_context.with_signer(signer_seeds), trade_match.source_sell_amount)?;
+
+        let mut accounts = ctx.remaining_accounts.to_vec();
+
+        // accounts.insert(1, admin_panel.clone().to_account_info());
+
+        if msg_type == 1u64 { // B->A
             trade_match.is_valiable = false;
 
-            
-            // ------------------------Transfer fee to executor-----------------------------------
-            // let ix = anchor_lang::solana_program::system_instruction::transfer(
-            //     &ctx.accounts.sol_treasury.key(), 
-            //     &ctx.accounts.payer.key(), 
-            //     5000000
-            // );
-            // let sol_seeds: &[&[&[u8]]] = &[&[b"sol_treasury", &[ctx.bumps.sol_treasury]]];
-            // let _ = anchor_lang::solana_program::program::invoke_signed(
-            //     &ix, 
-            //     &[ctx.accounts.sol_treasury.to_account_info(), ctx.accounts.payer.to_account_info()],
-            //     sol_seeds
-            // );
         } else { // B->A->B
             let arb_receive_addr = msg_vec[4];
-            
-            // ---------------------Transfer from staking account to Arb user's token account----------------------------------
-            let cpi_accounts = Transfer {
-                from: ctx.accounts.staking_account.to_account_info(),
-                to: ctx.accounts.token_account.to_account_info(),
-                authority: admin_panel.to_account_info(),
-            };
 
-            let cpi_context = CpiContext::new(ctx.accounts.token_program.to_account_info(), cpi_accounts);
-
-            
-
-            token::transfer(cpi_context.with_signer(signer_seeds), trade_match.source_sell_amount)?;
 
             // --------------------------Send message through Oapp-----------------------------
             let cpi_ctx = Send::construct_context(ctx.remaining_accounts[9].key(), ctx.remaining_accounts).unwrap();
@@ -186,11 +173,11 @@ impl LzReceive<'_> {
         let accounts_for_clear = &ctx.remaining_accounts[0..2];
         let _ = oapp::endpoint_cpi::clear(
             ENDPOINT_ID,
-            admin_panel.key(),
+            ctx.remaining_accounts[1].key(),
             accounts_for_clear,
             &[b"TristeroOapp", &[admin_panel.bump]],
             ClearParams {
-                receiver: admin_panel.key(),
+                receiver: ctx.remaining_accounts[1].key(),
                 src_eid: params.src_eid,
                 sender: params.sender,
                 nonce: params.nonce,
