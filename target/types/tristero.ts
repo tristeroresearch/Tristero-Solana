@@ -202,7 +202,7 @@ export type Tristero = {
           "isSigner": false
         },
         {
-          "name": "tokenMint",
+          "name": "messageLib",
           "isMut": false,
           "isSigner": false
         }
@@ -1123,7 +1123,7 @@ export const IDL: Tristero = {
           "isSigner": false
         },
         {
-          "name": "tokenMint",
+          "name": "messageLib",
           "isMut": false,
           "isSigner": false
         }

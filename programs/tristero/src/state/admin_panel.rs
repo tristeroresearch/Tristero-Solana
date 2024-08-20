@@ -28,5 +28,5 @@ impl AdminPanel {
 #[derive(InitSpace)]
 pub struct LzReceiveTypesAccounts {
     pub oft_config: Pubkey,
-    pub token_mint: Pubkey,
+    pub message_lib: Pubkey,
 }

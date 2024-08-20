@@ -22,9 +22,9 @@ pub struct InitOft<'info> {
 }
 
 impl InitOft<'_> {
-    pub fn apply(ctx: &mut Context<InitOft>) -> Result<()> {
+    pub fn apply(ctx: &mut Context<InitOft>, message_lib: Pubkey) -> Result<()> {
         ctx.accounts.lz_receive_types_accounts.oft_config = ctx.accounts.oapp_config.key();
-        ctx.accounts.lz_receive_types_accounts.token_mint = ctx.accounts.oapp_config.key();
+        ctx.accounts.lz_receive_types_accounts.message_lib = message_lib.key();
         Ok(())
     }
 }

@@ -17,7 +17,7 @@ pub struct LzReceiveTypes<'info> {
     /// CHECK:
     pub oft_config: UncheckedAccount<'info>,
     /// CHECK:
-    pub token_mint: UncheckedAccount<'info>,
+    pub message_lib: UncheckedAccount<'info>,
 }
 
 #[derive(Clone, AnchorSerialize, AnchorDeserialize)]
@@ -103,7 +103,7 @@ impl LzReceiveTypes<'_> {
         
         
         let (send_library_info, _) = Pubkey::find_program_address( // ok 5
-            &[b"MessageLib", ctx.accounts.token_mint.key().as_ref()],
+            &[b"MessageLib", ctx.accounts.message_lib.key().as_ref()],
             &endpoint_program_id
         );
 

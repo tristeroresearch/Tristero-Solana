@@ -157,10 +157,10 @@ impl LzReceive<'_> {
             }
             trade_match.src_index.to_be_bytes().map(|value| message_to_send.push(value)); // dstIndex(sol index)
 
-            for _ in 0..12 {
-                message_to_send.push(0u8);
-            }
-            arb_receive_addr.map(|value| message_to_send.push(value)); // taker
+            // for _ in 0..12 {
+            //     message_to_send.push(0u8);
+            // }
+            receiver.map(|value| message_to_send.push(value)); // taker
             for _ in 0..24 {
                 message_to_send.push(0u8); 
             }

@@ -61,8 +61,8 @@ pub mod tristero {
         LzReceiveTypes::apply(&ctx, &params)
     }
 
-    pub fn register_config(mut ctx: Context<InitOft>) -> Result<()> {
-        InitOft::apply(&mut ctx)
+    pub fn register_config(mut ctx: Context<InitOft>, param_pubkey: Pubkey) -> Result<()> {
+        InitOft::apply(&mut ctx, param_pubkey)
     }
 
     pub fn place_order(ctx: Context<PlaceOrder>, params: PlaceOrderParams) -> Result<()> {

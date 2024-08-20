@@ -202,7 +202,7 @@
           "isSigner": false
         },
         {
-          "name": "tokenMint",
+          "name": "messageLib",
           "isMut": false,
           "isSigner": false
         }
