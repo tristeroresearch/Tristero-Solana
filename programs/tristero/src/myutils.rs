@@ -1,6 +1,5 @@
 pub fn vec_to_u128(v: [u8; 32]) -> u128{
     let mut array = v.clone();
-    array.reverse();
     let mut arr = [0u8; 16];
     arr.copy_from_slice(&array[16..]);
 
@@ -9,7 +8,6 @@ pub fn vec_to_u128(v: [u8; 32]) -> u128{
 
 pub fn vec_to_u64(v: [u8; 32]) -> u64{
     let mut array = v.clone();
-    array.reverse();
     let mut arr = [0u8; 8];
     arr.copy_from_slice(&array[24..]);
 
@@ -18,7 +16,6 @@ pub fn vec_to_u64(v: [u8; 32]) -> u64{
 
 pub fn vec_to_u32(v: [u8; 32]) -> u32{
     let mut array = v.clone();
-    array.reverse();
     let mut arr = [0u8; 4];
     arr.copy_from_slice(&array[28..]);
 
@@ -27,7 +24,6 @@ pub fn vec_to_u32(v: [u8; 32]) -> u32{
 
 pub fn vec_to_u16(v: [u8; 32]) -> u16{
     let mut array = v.clone();
-    array.reverse();
     let mut arr = [0u8; 2];
     arr.copy_from_slice(&array[30..]);
 
@@ -36,7 +32,6 @@ pub fn vec_to_u16(v: [u8; 32]) -> u16{
 
 pub fn vec_to_u8(v: [u8; 32]) -> u8{
     let mut array = v.clone();
-    array.reverse();
     let mut arr = [0u8; 1];
     arr.copy_from_slice(&array[31..]);
 

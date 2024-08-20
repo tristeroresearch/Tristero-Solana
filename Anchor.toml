@@ -90,8 +90,8 @@ wallet = "./tests/id.json"
 #wallet = "~/.config/solana/id.json"
 
 [scripts]
-# test = "yarn run ts-mocha -b -p ./tsconfig.json -t 10000000 tests/**/*.ts"
-test = "python3.10 ./test-python/test.py"
+test = "yarn run ts-mocha -b -p ./tsconfig.json -t 10000000 tests/**/*.ts"
+# test = "python3.10 ./test-python/test.py"
 # test = "yarn run ts-mocha -b -p ./tsconfig.json -t 10000000 tests/lz_receive_test.ts"
 
 [test]

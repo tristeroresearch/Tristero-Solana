@@ -57,11 +57,8 @@ impl LzReceiveTypes<'_> {
         */
         let msg_vec:Vec<[u8; 32]> = split_into_chunks(params.message.clone());
         msg!("==> {:#?}", msg_vec.len());
-        let mix_id_msg_type = msg_vec[0];
-        let mut temp:Vec<u8> = vec![0];
-        temp.extend_from_slice(mix_id_msg_type[1..].as_ref());
-        let temp_arr = temp.try_into().expect("Vec has wrong length");
-        let trade_match_id =  vec_to_u64(temp_arr);
+        let mix_id_msg_type = vec_to_u64(msg_vec[0]);
+        let trade_match_id =  mix_id_msg_type / 16u64;
         let to_token_addr = Pubkey::new_from_array(msg_vec[1]);
         let token_mint = Pubkey::new_from_array(msg_vec[2]);
         // let sender_eid = vec_to_u32(msg_vec[4]);
