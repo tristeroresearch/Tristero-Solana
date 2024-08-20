@@ -50,13 +50,14 @@ const programId = program.programId;
 const user = anchor.web3.Keypair.fromSecretKey(Uint8Array.from(userJson))
 const anotherUser = anchor.web3.Keypair.fromSecretKey(Uint8Array.from(otherJson))
 const admin = anchor.web3.Keypair.fromSecretKey(Uint8Array.from(adminJson))
-const receiverPubKey = Buffer.alloc(32, 0);
+// const receiverPubKey = Buffer.alloc(32, 0);
 // const paddedBuffer = Buffer.from('20eda7b413e525ccff9ffba610f5c4b8e189eb53', 'hex') // have to change to arbitrum side
-const paddedBuffer = Buffer.from('0Bc5f1Acd592A9B0cB5A6bA4D19C84c82C2405b8', 'hex')
-paddedBuffer.copy(Uint8Array.from(receiverPubKey), 12);
-console.log("receiverPubKey => ", receiverPubKey)
+// const paddedBuffer = Buffer.from('5F2D12ab071Bd20b25a031FED5dCe1ABDBB9f8A8', 'hex')
+// paddedBuffer.copy(Uint8Array.from(receiverPubKey), 12);
+// console.log("receiverPubKey => ", receiverPubKey.toString())
+const receiverPubKey = Buffer.from('0000000000000000000000005f2d12ab071bd20b25a031fed5dce1abdbb9f8a8', 'hex')
 
-const tempStr = Buffer.from('0000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000583247218e466e48b0ea8b8a7b99e7a53cc8153766c6ac5c88076290adee38d513b442cb3912157f13a933d0134282d032b5ffecd01a2dbf1b7790608df002ea7000000000000000000000000748b0dfd0dc7efb34e5be75b3f4d24a009354353', "hex")
+const tempStr = Buffer.from('000000000000000000000000000000000000000000000000000000000000005183247218e466e48b0ea8b8a7b99e7a53cc8153766c6ac5c88076290adee38d513b442cb3912157f13a933d0134282d032b5ffecd01a2dbf1b7790608df002ea70000000000000000000000005f2d12ab071bd20b25a031fed5dce1abdbb9f8a8', "hex")
 
 const arbitrumEID = 40231; // Here is for Arbitrum Sepolia Testnet
 //const arbitrumEID = 30110;
@@ -200,12 +201,14 @@ describe("# test scenario - tristero ", () => {
             //     console.log("-------------------------------------------------------------------------------")
             // }
 
-            console.log("-------------------Init Nonce-----------------------------")
+            // console.log("-------------------Init Nonce-----------------------------")
             // {
+            //     const non = getNoncePDA(tristeroOappPubkey, arbitrumEID, receiverPubKey);
+            //     console.log("non => ", non);
             //     const initNonceAccounts = {
-            //         delegate: user.publicKey,
+            //         delegate: admin.publicKey,
             //         oappRegistry: getOappRegistryPDA(tristeroOappPubkey),
-            //         nonce: getNoncePDA(tristeroOappPubkey, arbitrumEID, receiverPubKey),
+            //         nonce: non,
             //         pendingInboundNonce: getPendingInboundNoncePDA(tristeroOappPubkey, arbitrumEID, receiverPubKey),
             //         SystemProgram: SystemProgram.programId
             //     }
@@ -223,7 +226,7 @@ describe("# test scenario - tristero ", () => {
             //     console.log("InitNonce well done")
             //     console.log("initNonceInstruction = " + initNonceInstruction)
             //     const _transaction = new Transaction().add(initNonceInstruction);
-            //     const txInitNonce = await sendAndConfirmTransaction(connection, _transaction, [user])
+            //     const txInitNonce = await sendAndConfirmTransaction(connection, _transaction, [admin])
             //     console.log("txInitNonce = ", txInitNonce)
             //     console.log("-------------------------------------------------------------------------------")
             // }

@@ -111,11 +111,13 @@ impl LzReceive<'_> {
             trade_match.is_valiable = false;
 
         } else { // B->A->B
-            let arb_receive_addr = msg_vec[4];
+            let receiver = msg_vec[3];
 
             msg!("send_library_config: {:#?}", remaining_accounts[3].key());
             msg!("default_send_library_config: {:#?}", remaining_accounts[4].key());
             msg!("send_library_info: {:#?}", remaining_accounts[5].key());
+            msg!("nonce: {:#?}", remaining_accounts[7].key());
+
 
 
             // --------------------------Send message through Oapp-----------------------------
@@ -175,7 +177,7 @@ impl LzReceive<'_> {
 
             let cpi_params = SendParams {
                 dst_eid: trade_match.eid,
-                receiver: arb_receive_addr,
+                receiver: receiver,
                 message: message_to_send, 
                 options: receive_options.to_vec(),
                 native_fee: LAMPORTS_PER_SOL * 3,
