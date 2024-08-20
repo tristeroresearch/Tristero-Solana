@@ -14,14 +14,12 @@ use oapp::{
         ID as ENDPOINT_ID,
     }
 };
+
 use solana_program::native_token::LAMPORTS_PER_SOL;
 
-#[derive(Accounts)]
+#[derive(Accounts, Clone)]
 #[instruction(params: LzReceiveParams)]
 pub struct LzReceive<'info> {
-    #[account(mut)]
-    pub payer: Signer<'info>,
-
     /// CHECK: The PDA of the OApp
     #[account(
         mut,
@@ -68,6 +66,7 @@ pub struct LzReceiveParams {
 
 impl LzReceive<'_> {
     pub fn apply(ctx: &mut Context<LzReceive>, params: &LzReceiveParams) -> Result<()> {
+        let mut accounts = ctx.accounts.clone().to_account_infos();
         let admin_panel = ctx.accounts.oapp.as_mut().clone();
         
         let trade_match = ctx.accounts.trade_match.as_mut();
@@ -91,9 +90,22 @@ impl LzReceive<'_> {
         let cpi_context = CpiContext::new(ctx.accounts.token_program.to_account_info(), cpi_accounts);
         token::transfer(cpi_context.with_signer(signer_seeds), trade_match.source_sell_amount)?;
 
-        let mut accounts = ctx.remaining_accounts.to_vec();
+        let mut remaining_accounts = ctx.remaining_accounts.to_vec();
+        // let tristero_oapp = accounts[0].clone();
+        let endpoint_program_id = remaining_accounts[7].clone();
+        let signer1 = remaining_accounts[10].clone();
+        let send_library_program_id = remaining_accounts[14].clone();
+        let price_fee_program_id = remaining_accounts[17].clone();
+        let price_fee_program_pda = remaining_accounts[18].clone();
+        remaining_accounts.insert(0, endpoint_program_id);
+        // remaining_accounts.insert(1, tristero_oapp);
 
-        // accounts.insert(1, admin_panel.clone().to_account_info());
+        remaining_accounts.insert(2, send_library_program_id);
+        remaining_accounts.insert(13, signer1);
+        remaining_accounts.extend_from_slice(&[
+            price_fee_program_id,
+            price_fee_program_pda
+        ]);
 
         if msg_type == 1u64 { // B->A
             trade_match.is_valiable = false;
@@ -101,9 +113,13 @@ impl LzReceive<'_> {
         } else { // B->A->B
             let arb_receive_addr = msg_vec[4];
 
+            msg!("send_library_config: {:#?}", remaining_accounts[3].key());
+            msg!("default_send_library_config: {:#?}", remaining_accounts[4].key());
+            msg!("send_library_info: {:#?}", remaining_accounts[5].key());
+
 
             // --------------------------Send message through Oapp-----------------------------
-            let cpi_ctx = Send::construct_context(ctx.remaining_accounts[9].key(), ctx.remaining_accounts).unwrap();
+            let cpi_ctx = Send::construct_context(remaining_accounts[9].key(), remaining_accounts.as_ref()).unwrap();
 
             let receive_options= [0, 3, 1, 0, 17, 1, 0,
                     0, 0, 0, 0,  0, 0,   0,
@@ -170,14 +186,14 @@ impl LzReceive<'_> {
         }
 
         // the first 9 accounts are for clear()
-        let accounts_for_clear = &ctx.remaining_accounts[0..2];
+        let accounts_for_clear = &remaining_accounts[0..2];
         let _ = oapp::endpoint_cpi::clear(
             ENDPOINT_ID,
-            ctx.remaining_accounts[1].key(),
+            remaining_accounts[1].key(),
             accounts_for_clear,
             &[b"TristeroOapp", &[admin_panel.bump]],
             ClearParams {
-                receiver: ctx.remaining_accounts[1].key(),
+                receiver: remaining_accounts[1].key(),
                 src_eid: params.src_eid,
                 sender: params.sender,
                 nonce: params.nonce,

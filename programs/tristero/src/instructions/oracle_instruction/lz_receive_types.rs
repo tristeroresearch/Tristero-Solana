@@ -10,6 +10,7 @@ use anchor_lang::{
     prelude::*,
     solana_program::{keccak::hash, system_program::ID as SYSTEM_ID},
 };
+use endpoint::state::SendLibraryConfig;
 
 #[derive(Accounts)]
 pub struct LzReceiveTypes<'info> {
@@ -41,28 +42,27 @@ impl LzReceiveTypes<'_> {
             &program_id,
         );
 
-        let (oapp, _) = Pubkey::find_program_address(
+        let (tristero_oapp, _) = Pubkey::find_program_address(
             &[b"TristeroOapp"], 
             &program_id
         );
 
-        // analyze msg from arb, msg consists of trade_match_id, to_token_address
-        /*
+        /* analyze msg from arb, msg consists of trade_match_id, to_token_address
         0: msgType
         1: tradeMatchID,
         2: destAddr
         3: destMint
         4: sender_eid,
         5: sender
-        6: status
         */
         let msg_vec:Vec<[u8; 32]> = split_into_chunks(params.message.clone());
         msg!("==> {:#?}", msg_vec.len());
         let trade_match_id =  vec_to_u64(msg_vec[1]);
         let to_token_addr = Pubkey::new_from_array(msg_vec[2]);
         let token_mint = Pubkey::new_from_array(msg_vec[3]);
-        let sender_eid = vec_to_u32(msg_vec[4]);
-        let sender_addr = msg_vec[5];
+        // let sender_eid = vec_to_u32(msg_vec[4]);
+        let sender_eid: u32 = 40231;
+        let sender_addr = msg_vec[4];
 
         // account 5
         let (staking_account, _) = Pubkey::find_program_address(
@@ -76,8 +76,8 @@ impl LzReceiveTypes<'_> {
         );
 
         let mut accounts = vec![
-            LzAccount { pubkey: sol_treasury, is_signer: true, is_writable: true },      // 0
-            // LzAccount { pubkey: oapp, is_signer: false, is_writable: true }, //1
+            // LzAccount { pubkey: sol_treasury, is_signer: true, is_writable: true },      // 0
+            LzAccount { pubkey: tristero_oapp, is_signer: false, is_writable: true }, //1
             LzAccount { pubkey: to_token_addr, is_signer: false, is_writable: true }, // 2
             LzAccount { pubkey: staking_account, is_signer: false, is_writable: true }, // 3
             LzAccount { pubkey: trade_match, is_signer: false, is_writable: true }, // 4
@@ -86,10 +86,7 @@ impl LzReceiveTypes<'_> {
 
         // From here, handle remaining accounts
         let endpoint_program_id = Pubkey::from_str("76y77prsiCMvXMjuoZ5VRrhG5qYBrUMYTE5WgHqgjEn6").unwrap(); //ok 0
-        let (tristero_oapp, _) = Pubkey::find_program_address( //ok 1
-            &[b"TristeroOapp", &token_mint.to_bytes()],
-            &program_id
-        );
+        
         let send_library_program = Pubkey::from_str("7a4WjyR8VZ7yZz5XJAKm39BUGn5iT9CKcv2pmG9tdXVH").unwrap(); //ok 2
         let (send_library_config, _) = Pubkey::find_program_address( //ok 3
             &[b"SendLibraryConfig", tristero_oapp.key().as_ref(), &sender_eid.to_be_bytes()],
@@ -99,12 +96,17 @@ impl LzReceiveTypes<'_> {
             &[b"SendLibraryConfig", &sender_eid.to_be_bytes()],
             &endpoint_program_id
         );
+        
+        
         let (send_library_info, _) = Pubkey::find_program_address( // ok 5
-            &[b"MessageLib", &default_send_library_config.key().to_bytes()],
+            &[b"MessageLib", ctx.accounts.token_mint.key().as_ref()],
             &endpoint_program_id
         );
+
+
+
         let (endpoint_pda, _) = Pubkey::find_program_address( // ok 6
-            &[b"Endpoint", &sender_eid.to_be_bytes()],
+            &[b"Endpoint"],
             &endpoint_program_id
         );
         let (nonce_pda, _) = Pubkey::find_program_address( // ok 7
@@ -155,25 +157,23 @@ impl LzReceiveTypes<'_> {
             &[b"PriceFeed"],
             &price_fee_program_id
         );
-
-
-
+        
         // remaining accounts
         accounts.extend_from_slice(&[
-            LzAccount { pubkey: endpoint_program_id, is_signer: false, is_writable: true },
+            // LzAccount { pubkey: endpoint_program_id, is_signer: false, is_writable: true },
             LzAccount { pubkey: tristero_oapp, is_signer: false, is_writable: true },
-            LzAccount { pubkey: send_library_program, is_signer: false, is_writable: true },
+            // LzAccount { pubkey: send_library_program, is_signer: false, is_writable: true },
             LzAccount { pubkey: send_library_config, is_signer: false, is_writable: true },
             LzAccount { pubkey: default_send_library_config, is_signer: false, is_writable: true },
             LzAccount { pubkey: send_library_info, is_signer: false, is_writable: true },
             LzAccount { pubkey: endpoint_pda, is_signer: false, is_writable: true },
             LzAccount { pubkey: nonce_pda, is_signer: false, is_writable: true },
             LzAccount { pubkey: event_authority, is_signer: false, is_writable: true },
-            LzAccount { pubkey: endpoint_program_id, is_signer: false, is_writable: true },
+            LzAccount { pubkey: endpoint_program_id, is_signer: false, is_writable: true }, 
             LzAccount { pubkey: uln_program_pda, is_signer: false, is_writable: true },
             LzAccount { pubkey: send_config, is_signer: false, is_writable: true },
             LzAccount { pubkey: default_send_config, is_signer: false, is_writable: true },
-            LzAccount { pubkey: signer1, is_signer: false, is_writable: true },
+            // LzAccount { pubkey: signer1, is_signer: false, is_writable: true },
             LzAccount { pubkey: signer2, is_signer: false, is_writable: true },
             LzAccount { pubkey: system_program_id, is_signer: false, is_writable: true },
             LzAccount { pubkey: uln_authority, is_signer: false, is_writable: true },
@@ -184,8 +184,8 @@ impl LzReceiveTypes<'_> {
             LzAccount { pubkey: price_fee_program_pda, is_signer: false, is_writable: true },
             LzAccount { pubkey: dvn_program_id, is_signer: false, is_writable: true },
             LzAccount { pubkey: dvn_derive_config, is_signer: false, is_writable: true },
-            LzAccount { pubkey: price_fee_program_id, is_signer: false, is_writable: true },
-            LzAccount { pubkey: price_fee_program_pda, is_signer: false, is_writable: true },
+            // LzAccount { pubkey: price_fee_program_id, is_signer: false, is_writable: true },
+            // LzAccount { pubkey: price_fee_program_pda, is_signer: false, is_writable: true },
         ]);
 
         Ok(accounts)

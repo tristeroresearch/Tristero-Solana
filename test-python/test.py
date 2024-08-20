@@ -740,7 +740,7 @@ async def main():
         # print(f"create_match_tx: {create_match_tx}")
         # print(f"match_id: {trade_match_id}")
         
-        # trade_match_id = 5
+        trade_match_id = 5
         
         # print(f"-------------------------Challenge----------------------------")
         # challenge_accounts : ChallengeAccounts = {
@@ -777,40 +777,42 @@ async def main():
         # challenge_tx = solana_client.send_transaction(txn, *signers, opts=TxOpts(skip_confirmation=False, preflight_commitment=Confirmed)).value
         # print(f"challenge_tx: {challenge_tx}")
         
-        print(f"-------------------------Testing lz_receive_types----------------------------")
-        lz_receive_types_accounts : LzReceiveTypeParams = {
-            "oft_config": tristero_oapp_pubkey,
-            "token_mint": tristero_oapp_pubkey
-        }
+        # print(f"-------------------------Testing lz_receive_types----------------------------")
+        # lz_receive_types_accounts : LzReceiveTypeParams = {
+        #     "oft_config": tristero_oapp_pubkey,
+        #     "token_mint": tristero_oapp_pubkey
+        # }
         
-        lz_receive_types_params_json : LzReceiveTypeParamsJSON = {
-            "src_eid": ARBITRUM_EID,
-            "sender": RECEIVER_PUBKEY,
-            "nonce": 1,
-            "guid": RECEIVER_PUBKEY,
-            "message": payload_buffer,
-            "extra_data": [],
-        }
+        # lz_receive_types_params_json : LzReceiveTypeParamsJSON = {
+        #     "src_eid": ARBITRUM_EID,
+        #     "sender": RECEIVER_PUBKEY,
+        #     "nonce": 1,
+        #     "guid": RECEIVER_PUBKEY,
+        #     "message": payload_buffer,
+        #     "extra_data": [],
+        # }
         
-        lz_receive_type_params = LzReceiveTypeParams.from_json(lz_receive_types_params_json)
+        print(f"get_staking_panel(mint_addr) : {get_staking_panel(mint_addr)}")
         
-        lz_receive_types_ix = lz_receive_types(
-            {
-                "params": lz_receive_type_params
-            },
-            lz_receive_types_accounts,
-            tristero_program_id
-        )
-        latest_blockhash = solana_client.get_latest_blockhash()
-        blockhash = latest_blockhash.value.blockhash
-        signers = [user]
+        # lz_receive_type_params = LzReceiveTypeParams.from_json(lz_receive_types_params_json)
         
-        txn = Transaction(recent_blockhash=blockhash, fee_payer=user.pubkey())
-        txn.add(set_compute_unit_limit(2000000))
-        txn.add(lz_receive_types_ix)
+        # lz_receive_types_ix = lz_receive_types(
+        #     {
+        #         "params": lz_receive_type_params
+        #     },
+        #     lz_receive_types_accounts,
+        #     tristero_program_id
+        # )
+        # latest_blockhash = solana_client.get_latest_blockhash()
+        # blockhash = latest_blockhash.value.blockhash
+        # signers = [user]
         
-        lz_receive_types_tx = solana_client.send_transaction(txn, *signers, opts=TxOpts(skip_confirmation=False, preflight_commitment=Confirmed)).value
-        print(f"lz_receive_types_tx: {lz_receive_types_tx}")
+        # txn = Transaction(recent_blockhash=blockhash, fee_payer=user.pubkey())
+        # txn.add(set_compute_unit_limit(2000000))
+        # txn.add(lz_receive_types_ix)
+        
+        # lz_receive_types_tx = solana_client.send_transaction(txn, *signers, opts=TxOpts(skip_confirmation=False, preflight_commitment=Confirmed)).value
+        # print(f"lz_receive_types_tx: {lz_receive_types_tx}")
         
 
 asyncio.run(main())
