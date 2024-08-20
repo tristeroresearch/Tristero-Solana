@@ -72,7 +72,7 @@ impl LzReceive<'_> {
         let trade_match = ctx.accounts.trade_match.as_mut();
         let msg_vec:Vec<[u8; 32]> = split_into_chunks(params.message.clone());
         
-        let msg_type =  vec_to_u64(msg_vec[0]);
+        let msg_type =  vec_to_u64(msg_vec[0]) % 16;
         
         let stake_acc = ctx.accounts.staking_account.to_account_info();
         let token_acc = ctx.accounts.token_account.to_account_info();

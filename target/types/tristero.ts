@@ -245,7 +245,12 @@ export type Tristero = {
           "isSigner": false
         }
       ],
-      "args": []
+      "args": [
+        {
+          "name": "paramPubkey",
+          "type": "publicKey"
+        }
+      ]
     },
     {
       "name": "placeOrder",
@@ -363,7 +368,7 @@ export type Tristero = {
             "type": "publicKey"
           },
           {
-            "name": "tokenMint",
+            "name": "messageLib",
             "type": "publicKey"
           }
         ]
@@ -1166,7 +1171,12 @@ export const IDL: Tristero = {
           "isSigner": false
         }
       ],
-      "args": []
+      "args": [
+        {
+          "name": "paramPubkey",
+          "type": "publicKey"
+        }
+      ]
     },
     {
       "name": "placeOrder",
@@ -1284,7 +1294,7 @@ export const IDL: Tristero = {
             "type": "publicKey"
           },
           {
-            "name": "tokenMint",
+            "name": "messageLib",
             "type": "publicKey"
           }
         ]

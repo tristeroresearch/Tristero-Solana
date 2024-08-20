@@ -16,7 +16,6 @@ layout = borsh.CStruct("params" / types.lz_receive_params.LzReceiveParams.layout
 
 
 class LzReceiveAccounts(typing.TypedDict):
-    payer: Pubkey
     oapp: Pubkey
     token_account: Pubkey
     staking_account: Pubkey
@@ -30,7 +29,6 @@ def lz_receive(
     remaining_accounts: typing.Optional[typing.List[AccountMeta]] = None,
 ) -> Instruction:
     keys: list[AccountMeta] = [
-        AccountMeta(pubkey=accounts["payer"], is_signer=True, is_writable=True),
         AccountMeta(pubkey=accounts["oapp"], is_signer=False, is_writable=True),
         AccountMeta(
             pubkey=accounts["token_account"], is_signer=False, is_writable=True

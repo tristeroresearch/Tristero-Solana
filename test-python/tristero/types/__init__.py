@@ -18,5 +18,3 @@ from . import challenge_params
 from .challenge_params import ChallengeParams, ChallengeParamsJSON
 from . import place_order_params
 from .place_order_params import PlaceOrderParams, PlaceOrderParamsJSON
-from . import send_stored_params
-from .send_stored_params import SendStoredParams, SendStoredParamsJSON

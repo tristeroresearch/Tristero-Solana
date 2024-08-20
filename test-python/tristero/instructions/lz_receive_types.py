@@ -18,7 +18,7 @@ layout = borsh.CStruct(
 
 class LzReceiveTypesAccounts(typing.TypedDict):
     oft_config: Pubkey
-    token_mint: Pubkey
+    message_lib: Pubkey
 
 
 def lz_receive_types(
@@ -29,7 +29,7 @@ def lz_receive_types(
 ) -> Instruction:
     keys: list[AccountMeta] = [
         AccountMeta(pubkey=accounts["oft_config"], is_signer=False, is_writable=False),
-        AccountMeta(pubkey=accounts["token_mint"], is_signer=False, is_writable=False),
+        AccountMeta(pubkey=accounts["message_lib"], is_signer=False, is_writable=False),
     ]
     if remaining_accounts is not None:
         keys += remaining_accounts
