@@ -3,7 +3,16 @@ import typing
 from solders.pubkey import Pubkey
 from solders.system_program import ID as SYS_PROGRAM_ID
 from solders.instruction import Instruction, AccountMeta
+from anchorpy.borsh_extension import BorshPubkey
+import borsh_construct as borsh
 from ..program_id import PROGRAM_ID
+
+
+class RegisterConfigArgs(typing.TypedDict):
+    param_pubkey: Pubkey
+
+
+layout = borsh.CStruct("param_pubkey" / BorshPubkey)
 
 
 class RegisterConfigAccounts(typing.TypedDict):
@@ -13,6 +22,7 @@ class RegisterConfigAccounts(typing.TypedDict):
 
 
 def register_config(
+    args: RegisterConfigArgs,
     accounts: RegisterConfigAccounts,
     program_id: Pubkey = PROGRAM_ID,
     remaining_accounts: typing.Optional[typing.List[AccountMeta]] = None,
@@ -30,6 +40,10 @@ def register_config(
     if remaining_accounts is not None:
         keys += remaining_accounts
     identifier = b" \xf7R\x83#\xb7\x079"
-    encoded_args = b""
+    encoded_args = layout.build(
+        {
+            "param_pubkey": args["param_pubkey"],
+        }
+    )
     data = identifier + encoded_args
     return Instruction(program_id, data, keys)

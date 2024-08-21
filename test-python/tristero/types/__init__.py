@@ -6,6 +6,8 @@ from .register_tristero_o_app_params import (
     RegisterTristeroOAppParams,
     RegisterTristeroOAppParamsJSON,
 )
+from . import send_stored_params
+from .send_stored_params import SendStoredParams, SendStoredParamsJSON
 from . import update_params
 from .update_params import UpdateParams, UpdateParamsJSON
 from . import lz_receive_type_params

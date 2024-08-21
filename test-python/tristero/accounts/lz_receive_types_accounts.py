@@ -13,17 +13,17 @@ from ..program_id import PROGRAM_ID
 
 class LzReceiveTypesAccountsJSON(typing.TypedDict):
     oft_config: str
-    token_mint: str
+    message_lib: str
 
 
 @dataclass
 class LzReceiveTypesAccounts:
     discriminator: typing.ClassVar = b"\xf8W\xa7u\x05\xfb\x15~"
     layout: typing.ClassVar = borsh.CStruct(
-        "oft_config" / BorshPubkey, "token_mint" / BorshPubkey
+        "oft_config" / BorshPubkey, "message_lib" / BorshPubkey
     )
     oft_config: Pubkey
-    token_mint: Pubkey
+    message_lib: Pubkey
 
     @classmethod
     async def fetch(
@@ -70,18 +70,18 @@ class LzReceiveTypesAccounts:
         dec = LzReceiveTypesAccounts.layout.parse(data[ACCOUNT_DISCRIMINATOR_SIZE:])
         return cls(
             oft_config=dec.oft_config,
-            token_mint=dec.token_mint,
+            message_lib=dec.message_lib,
         )
 
     def to_json(self) -> LzReceiveTypesAccountsJSON:
         return {
             "oft_config": str(self.oft_config),
-            "token_mint": str(self.token_mint),
+            "message_lib": str(self.message_lib),
         }
 
     @classmethod
     def from_json(cls, obj: LzReceiveTypesAccountsJSON) -> "LzReceiveTypesAccounts":
         return cls(
             oft_config=Pubkey.from_string(obj["oft_config"]),
-            token_mint=Pubkey.from_string(obj["token_mint"]),
+            message_lib=Pubkey.from_string(obj["message_lib"]),
         )

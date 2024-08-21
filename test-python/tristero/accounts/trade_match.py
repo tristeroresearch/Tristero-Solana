@@ -23,7 +23,7 @@ class TradeMatchJSON(typing.TypedDict):
     eid: int
     bump: int
     trade_match_id: int
-    is_valiable: bool
+    status: int
 
 
 @dataclass
@@ -41,7 +41,7 @@ class TradeMatch:
         "eid" / borsh.U32,
         "bump" / borsh.U8,
         "trade_match_id" / borsh.U64,
-        "is_valiable" / borsh.Bool,
+        "status" / borsh.U8,
     )
     authority: Pubkey
     user_token_addr: Pubkey
@@ -54,7 +54,7 @@ class TradeMatch:
     eid: int
     bump: int
     trade_match_id: int
-    is_valiable: bool
+    status: int
 
     @classmethod
     async def fetch(
@@ -111,7 +111,7 @@ class TradeMatch:
             eid=dec.eid,
             bump=dec.bump,
             trade_match_id=dec.trade_match_id,
-            is_valiable=dec.is_valiable,
+            status=dec.status,
         )
 
     def to_json(self) -> TradeMatchJSON:
@@ -127,7 +127,7 @@ class TradeMatch:
             "eid": self.eid,
             "bump": self.bump,
             "trade_match_id": self.trade_match_id,
-            "is_valiable": self.is_valiable,
+            "status": self.status,
         }
 
     @classmethod
@@ -144,5 +144,5 @@ class TradeMatch:
             eid=obj["eid"],
             bump=obj["bump"],
             trade_match_id=obj["trade_match_id"],
-            is_valiable=obj["is_valiable"],
+            status=obj["status"],
         )

@@ -76,13 +76,19 @@ impl LzReceiveTypes<'_> {
             &program_id
         );
 
+        let (tristero_event_authority, _) = Pubkey::find_program_address(
+            &[b"__event_authority"],
+            &program_id
+        );
+
         let mut accounts = vec![
             // LzAccount { pubkey: sol_treasury, is_signer: true, is_writable: true },      // 0
             LzAccount { pubkey: tristero_oapp, is_signer: false, is_writable: true }, //1
             LzAccount { pubkey: to_token_addr, is_signer: false, is_writable: true }, // 2
             LzAccount { pubkey: staking_account, is_signer: false, is_writable: true }, // 3
             LzAccount { pubkey: trade_match, is_signer: false, is_writable: true }, // 4
-            LzAccount { pubkey: TOKEN_PROGRAM_ID, is_signer: false, is_writable: false } // 5
+            LzAccount { pubkey: TOKEN_PROGRAM_ID, is_signer: false, is_writable: false }, // 5
+            LzAccount { pubkey: tristero_event_authority, is_signer: false, is_writable: false } // 6
         ];
 
         // From here, handle remaining accounts

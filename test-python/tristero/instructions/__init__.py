@@ -16,5 +16,5 @@ from .lz_receive_types import (
     LzReceiveTypesArgs,
     LzReceiveTypesAccounts,
 )
-from .register_config import register_config, RegisterConfigAccounts
+from .register_config import register_config, RegisterConfigArgs, RegisterConfigAccounts
 from .place_order import place_order, PlaceOrderArgs, PlaceOrderAccounts

@@ -20,6 +20,8 @@ class LzReceiveAccounts(typing.TypedDict):
     token_account: Pubkey
     staking_account: Pubkey
     trade_match: Pubkey
+    event_authority: Pubkey
+    program: Pubkey
 
 
 def lz_receive(
@@ -38,6 +40,10 @@ def lz_receive(
         ),
         AccountMeta(pubkey=accounts["trade_match"], is_signer=False, is_writable=True),
         AccountMeta(pubkey=TOKEN_PROGRAM_ID, is_signer=False, is_writable=False),
+        AccountMeta(
+            pubkey=accounts["event_authority"], is_signer=False, is_writable=False
+        ),
+        AccountMeta(pubkey=accounts["program"], is_signer=False, is_writable=False),
     ]
     if remaining_accounts is not None:
         keys += remaining_accounts
