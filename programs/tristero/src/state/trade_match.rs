@@ -14,7 +14,7 @@ pub struct TradeMatch {
     pub eid: u32, //which eco system
     pub bump: u8,
     pub trade_match_id: u64,
-    pub is_valiable: bool,
+    pub status: u8,
 }
 
 impl anchor_lang::Id for TradeMatch {

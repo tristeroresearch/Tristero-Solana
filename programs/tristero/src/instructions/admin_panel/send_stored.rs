@@ -31,7 +31,8 @@ pub struct SendStored<'info> {
         mut,
         seeds = [b"trade_match", &params.trade_match_id.to_be_bytes()],
         bump,
-        constraint = trade_match.trade_match_id == params.trade_match_id @ CustomError::InvalidTradeMatch
+        constraint = trade_match.trade_match_id == params.trade_match_id @ CustomError::InvalidTradeMatch,
+        constraint = trade_match.status == 1u8 @ CustomError::NotAgain
     )]
     pub trade_match: Box<Account<'info, TradeMatch>>,
 }

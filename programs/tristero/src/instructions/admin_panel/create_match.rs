@@ -73,7 +73,7 @@ pub fn create_match(ctx: Context<CreateMatch>, params: &CreateMatchParams) -> Re
     trade_match.dst_index = params.dst_index;
     trade_match.source_sell_amount = params.src_quantity;
     trade_match.dest_buy_amount = params.dst_quantity;
-    trade_match.is_valiable = true;
+    trade_match.status = 0u8;
     
     admin_panel.match_count += 1;
 

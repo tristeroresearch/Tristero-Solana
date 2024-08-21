@@ -26,7 +26,7 @@ pub struct Challenge<'info> {
         seeds = [b"trade_match", &params.trade_match_id.to_be_bytes()],
         bump = trade_match.bump,
         constraint = trade_match.authority == authority.key() @ CustomError::InvalidAuthority,
-        constraint = trade_match.is_valiable == true @ CustomError::NotAgain
+        constraint = trade_match.status == 0u8 @ CustomError::NotAgain
     )]
     pub trade_match: Box<Account<'info, TradeMatch>>,
 
@@ -118,5 +118,6 @@ pub fn challenge(ctx: Context<Challenge>, params: &ChallengeParams) -> Result<()
     
     endpoint::cpi::send(cpi_ctx.with_signer(signer_seeds), cpi_params)?;
 
+    trade_match.status = 1u8;
     Ok(())
 }

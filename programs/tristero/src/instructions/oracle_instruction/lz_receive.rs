@@ -43,7 +43,7 @@ pub struct LzReceive<'info> {
 
     #[account(
         mut,
-        constraint = trade_match.is_valiable == true @ CustomError::NotAgain
+        constraint = trade_match.status == 0u8 @ CustomError::NotAgain
     )]
     pub trade_match: Box<Account<'info, TradeMatch>>,
     
@@ -95,10 +95,11 @@ impl LzReceive<'_> {
 
         
 
-        if msg_type == 1u64 { // B->A
-            trade_match.is_valiable = false;
+        if msg_type == 1u64 && trade_match.status == 1u8 { // B->A
+            trade_match.status = 2u8;
 
         } else { // B->A->B
+            trade_match.status = 1u8;
             emit_cpi!(MsgReceived{
                 src_eid: params.src_eid,
                 sender: params.sender,
