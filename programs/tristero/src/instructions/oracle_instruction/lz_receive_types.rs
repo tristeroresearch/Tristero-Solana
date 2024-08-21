@@ -86,108 +86,108 @@ impl LzReceiveTypes<'_> {
         ];
 
         // From here, handle remaining accounts
-        let endpoint_program_id = Pubkey::from_str("76y77prsiCMvXMjuoZ5VRrhG5qYBrUMYTE5WgHqgjEn6").unwrap(); //ok 0
+        // let endpoint_program_id = Pubkey::from_str("76y77prsiCMvXMjuoZ5VRrhG5qYBrUMYTE5WgHqgjEn6").unwrap(); //ok 0
         
-        let send_library_program = Pubkey::from_str("7a4WjyR8VZ7yZz5XJAKm39BUGn5iT9CKcv2pmG9tdXVH").unwrap(); //ok 2
-        let (send_library_config, _) = Pubkey::find_program_address( //ok 3
-            &[b"SendLibraryConfig", tristero_oapp.key().as_ref(), &sender_eid.to_be_bytes()],
-            &endpoint_program_id
-        );
-        let (default_send_library_config, _) = Pubkey::find_program_address( //ok 4
-            &[b"SendLibraryConfig", &sender_eid.to_be_bytes()],
-            &endpoint_program_id
-        );
+        // let send_library_program = Pubkey::from_str("7a4WjyR8VZ7yZz5XJAKm39BUGn5iT9CKcv2pmG9tdXVH").unwrap(); //ok 2
+        // let (send_library_config, _) = Pubkey::find_program_address( //ok 3
+        //     &[b"SendLibraryConfig", tristero_oapp.key().as_ref(), &sender_eid.to_be_bytes()],
+        //     &endpoint_program_id
+        // );
+        // let (default_send_library_config, _) = Pubkey::find_program_address( //ok 4
+        //     &[b"SendLibraryConfig", &sender_eid.to_be_bytes()],
+        //     &endpoint_program_id
+        // );
         
         
-        let (send_library_info, _) = Pubkey::find_program_address( // ok 5
-            &[b"MessageLib", ctx.accounts.message_lib.key().as_ref()],
-            &endpoint_program_id
-        );
+        // let (send_library_info, _) = Pubkey::find_program_address( // ok 5
+        //     &[b"MessageLib", ctx.accounts.message_lib.key().as_ref()],
+        //     &endpoint_program_id
+        // );
 
 
 
-        let (endpoint_pda, _) = Pubkey::find_program_address( // ok 6
-            &[b"Endpoint"],
-            &endpoint_program_id
-        );
-        let (nonce_pda, _) = Pubkey::find_program_address( // ok 7
-            &[b"Nonce", tristero_oapp.key().as_ref(), &sender_eid.to_be_bytes(), sender_addr.as_ref()],
-            &endpoint_program_id
-        );
-        let (event_authority, _) = Pubkey::find_program_address( // ok 8
-            &[b"__event_authority"],
-            &endpoint_program_id
-        );
-        let (uln_program_pda, _) = Pubkey::find_program_address( // ok 10
-            &[b"MessageLib"], 
-            &send_library_program
-        );
-        let (send_config, _) = Pubkey::find_program_address( // ok 11
-            &[b"SendConfig", &sender_eid.to_be_bytes(), tristero_oapp.key().as_ref()], 
-            &send_library_program
-        );
-        let (default_send_config, _) = Pubkey::find_program_address( // ok 12
-            &[b"SendConfig", &sender_eid.to_be_bytes()], 
-            &send_library_program
-        );
-        let signer1 = Pubkey::default(); // ok 13
-        let signer2 = Pubkey::default(); // ok 14
-        let system_program_id = SYSTEM_ID; // ok 15
-        let (uln_authority, _) = Pubkey::find_program_address( // ok 16
-            &[b"__event_authority"],
-            &send_library_program
-        );
-        // let send_library_program ok 17
-        let executor_program_id = Pubkey::from_str("6doghB248px58JSSwG4qejQ46kFMW4AMj7vzJnWZHNZn").unwrap(); // ok 18
-        let (executor_pda_deriver, _) = Pubkey::find_program_address( // ok 19
-            &[b"ExecutorConfig"],
-            &executor_program_id
-        );
-        let price_fee_program_id = Pubkey::from_str("8ahPGPjEbpgGaZx2NV1iG5Shj7TDwvsjkEDcGWjt94TP").unwrap(); // ok 20
-        let (price_fee_program_pda, _) = Pubkey::find_program_address( // ok 21
-            &[b"PriceFeed"],
-            &price_fee_program_id
-        );
-        let dvn_program_id = Pubkey::from_str("HtEYV4xB4wvsj5fgTkcfuChYpvGYzgzwvNhgDZQNh7wW").unwrap(); // ok 22
-        let (dvn_derive_config, _) = Pubkey::find_program_address( // ok 23
-            &[b"DvnConfig"],
-            &dvn_program_id
-        );
-        let price_fee_program_id = Pubkey::from_str("8ahPGPjEbpgGaZx2NV1iG5Shj7TDwvsjkEDcGWjt94TP").unwrap(); // ok 24
-        let (price_fee_program_pda, _) = Pubkey::find_program_address( // ok 25
-            &[b"PriceFeed"],
-            &price_fee_program_id
-        );
+        // let (endpoint_pda, _) = Pubkey::find_program_address( // ok 6
+        //     &[b"Endpoint"],
+        //     &endpoint_program_id
+        // );
+        // let (nonce_pda, _) = Pubkey::find_program_address( // ok 7
+        //     &[b"Nonce", tristero_oapp.key().as_ref(), &sender_eid.to_be_bytes(), sender_addr.as_ref()],
+        //     &endpoint_program_id
+        // );
+        // let (event_authority, _) = Pubkey::find_program_address( // ok 8
+        //     &[b"__event_authority"],
+        //     &endpoint_program_id
+        // );
+        // let (uln_program_pda, _) = Pubkey::find_program_address( // ok 10
+        //     &[b"MessageLib"], 
+        //     &send_library_program
+        // );
+        // let (send_config, _) = Pubkey::find_program_address( // ok 11
+        //     &[b"SendConfig", &sender_eid.to_be_bytes(), tristero_oapp.key().as_ref()], 
+        //     &send_library_program
+        // );
+        // let (default_send_config, _) = Pubkey::find_program_address( // ok 12
+        //     &[b"SendConfig", &sender_eid.to_be_bytes()], 
+        //     &send_library_program
+        // );
+        // let signer1 = Pubkey::default(); // ok 13
+        // let signer2 = Pubkey::default(); // ok 14
+        // let system_program_id = SYSTEM_ID; // ok 15
+        // let (uln_authority, _) = Pubkey::find_program_address( // ok 16
+        //     &[b"__event_authority"],
+        //     &send_library_program
+        // );
+        // // let send_library_program ok 17
+        // let executor_program_id = Pubkey::from_str("6doghB248px58JSSwG4qejQ46kFMW4AMj7vzJnWZHNZn").unwrap(); // ok 18
+        // let (executor_pda_deriver, _) = Pubkey::find_program_address( // ok 19
+        //     &[b"ExecutorConfig"],
+        //     &executor_program_id
+        // );
+        // let price_fee_program_id = Pubkey::from_str("8ahPGPjEbpgGaZx2NV1iG5Shj7TDwvsjkEDcGWjt94TP").unwrap(); // ok 20
+        // let (price_fee_program_pda, _) = Pubkey::find_program_address( // ok 21
+        //     &[b"PriceFeed"],
+        //     &price_fee_program_id
+        // );
+        // let dvn_program_id = Pubkey::from_str("HtEYV4xB4wvsj5fgTkcfuChYpvGYzgzwvNhgDZQNh7wW").unwrap(); // ok 22
+        // let (dvn_derive_config, _) = Pubkey::find_program_address( // ok 23
+        //     &[b"DvnConfig"],
+        //     &dvn_program_id
+        // );
+        // let price_fee_program_id = Pubkey::from_str("8ahPGPjEbpgGaZx2NV1iG5Shj7TDwvsjkEDcGWjt94TP").unwrap(); // ok 24
+        // let (price_fee_program_pda, _) = Pubkey::find_program_address( // ok 25
+        //     &[b"PriceFeed"],
+        //     &price_fee_program_id
+        // );
         
         // remaining accounts
-        accounts.extend_from_slice(&[
-            // LzAccount { pubkey: endpoint_program_id, is_signer: false, is_writable: true },
-            LzAccount { pubkey: tristero_oapp, is_signer: false, is_writable: true },
-            // LzAccount { pubkey: send_library_program, is_signer: false, is_writable: true },
-            LzAccount { pubkey: send_library_config, is_signer: false, is_writable: true },
-            LzAccount { pubkey: default_send_library_config, is_signer: false, is_writable: true },
-            LzAccount { pubkey: send_library_info, is_signer: false, is_writable: true },
-            LzAccount { pubkey: endpoint_pda, is_signer: false, is_writable: true },
-            LzAccount { pubkey: nonce_pda, is_signer: false, is_writable: true },
-            LzAccount { pubkey: event_authority, is_signer: false, is_writable: true },
-            LzAccount { pubkey: endpoint_program_id, is_signer: false, is_writable: true }, 
-            LzAccount { pubkey: uln_program_pda, is_signer: false, is_writable: true },
-            LzAccount { pubkey: send_config, is_signer: false, is_writable: true },
-            LzAccount { pubkey: default_send_config, is_signer: false, is_writable: true },
-            // LzAccount { pubkey: signer1, is_signer: false, is_writable: true },
-            LzAccount { pubkey: sol_treasury, is_signer: false, is_writable: true },
-            LzAccount { pubkey: system_program_id, is_signer: false, is_writable: true },
-            LzAccount { pubkey: uln_authority, is_signer: false, is_writable: true },
-            LzAccount { pubkey: send_library_program, is_signer: false, is_writable: true },
-            LzAccount { pubkey: executor_program_id, is_signer: false, is_writable: true },
-            LzAccount { pubkey: executor_pda_deriver, is_signer: false, is_writable: true },
-            LzAccount { pubkey: price_fee_program_id, is_signer: false, is_writable: true },
-            LzAccount { pubkey: price_fee_program_pda, is_signer: false, is_writable: true },
-            LzAccount { pubkey: dvn_program_id, is_signer: false, is_writable: true },
-            LzAccount { pubkey: dvn_derive_config, is_signer: false, is_writable: true },
-            // LzAccount { pubkey: price_fee_program_id, is_signer: false, is_writable: true },
-            // LzAccount { pubkey: price_fee_program_pda, is_signer: false, is_writable: true },
-        ]);
+        // accounts.extend_from_slice(&[
+        //     // LzAccount { pubkey: endpoint_program_id, is_signer: false, is_writable: true },
+        //     LzAccount { pubkey: tristero_oapp, is_signer: false, is_writable: true },
+        //     // LzAccount { pubkey: send_library_program, is_signer: false, is_writable: true },
+        //     LzAccount { pubkey: send_library_config, is_signer: false, is_writable: true },
+        //     LzAccount { pubkey: default_send_library_config, is_signer: false, is_writable: true },
+        //     LzAccount { pubkey: send_library_info, is_signer: false, is_writable: true },
+        //     LzAccount { pubkey: endpoint_pda, is_signer: false, is_writable: true },
+        //     LzAccount { pubkey: nonce_pda, is_signer: false, is_writable: true },
+        //     LzAccount { pubkey: event_authority, is_signer: false, is_writable: true },
+        //     LzAccount { pubkey: endpoint_program_id, is_signer: false, is_writable: true }, 
+        //     LzAccount { pubkey: uln_program_pda, is_signer: false, is_writable: true },
+        //     LzAccount { pubkey: send_config, is_signer: false, is_writable: true },
+        //     LzAccount { pubkey: default_send_config, is_signer: false, is_writable: true },
+        //     // LzAccount { pubkey: signer1, is_signer: false, is_writable: true },
+        //     LzAccount { pubkey: sol_treasury, is_signer: false, is_writable: true },
+        //     LzAccount { pubkey: system_program_id, is_signer: false, is_writable: true },
+        //     LzAccount { pubkey: uln_authority, is_signer: false, is_writable: true },
+        //     LzAccount { pubkey: send_library_program, is_signer: false, is_writable: true },
+        //     LzAccount { pubkey: executor_program_id, is_signer: false, is_writable: true },
+        //     LzAccount { pubkey: executor_pda_deriver, is_signer: false, is_writable: true },
+        //     LzAccount { pubkey: price_fee_program_id, is_signer: false, is_writable: true },
+        //     LzAccount { pubkey: price_fee_program_pda, is_signer: false, is_writable: true },
+        //     LzAccount { pubkey: dvn_program_id, is_signer: false, is_writable: true },
+        //     LzAccount { pubkey: dvn_derive_config, is_signer: false, is_writable: true },
+        //     // LzAccount { pubkey: price_fee_program_id, is_signer: false, is_writable: true },
+        //     // LzAccount { pubkey: price_fee_program_pda, is_signer: false, is_writable: true },
+        // ]);
 
         Ok(accounts)
     }
