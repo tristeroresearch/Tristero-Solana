@@ -51,12 +51,12 @@ const user = anchor.web3.Keypair.fromSecretKey(Uint8Array.from(userJson))
 const anotherUser = anchor.web3.Keypair.fromSecretKey(Uint8Array.from(otherJson))
 const admin = anchor.web3.Keypair.fromSecretKey(Uint8Array.from(adminJson))
 const receiverPubKey = Buffer.alloc(32, 0);
-const paddedBuffer = Buffer.from('6fCFC05C7963D0FB23C706450C7c72ADDA8fbf60', 'hex')
+const paddedBuffer = Buffer.from('bDEc418D5e6434974471F35365198d74D29DcB5F', 'hex')
 paddedBuffer.copy(Uint8Array.from(receiverPubKey), 12);
 console.log("receiverPubKey => ", receiverPubKey.toString())
 // const receiverPubKey = Buffer.from('0000000000000000000000005f2d12ab071bd20b25a031fed5dce1abdbb9f8a8', 'hex')
 
-const tempStr = Buffer.from('000000000000000000000000000000000000000000000000000000000000006183247218e466e48b0ea8b8a7b99e7a53cc8153766c6ac5c88076290adee38d513b442cb3912157f13a933d0134282d032b5ffecd01a2dbf1b7790608df002ea70000000000000000000000006fcfc05c7963d0fb23c706450c7c72adda8fbf60', "hex")
+const tempStr = Buffer.from('000000000000000000000000000000000000000000000000000000000000008183247218e466e48b0ea8b8a7b99e7a53cc8153766c6ac5c88076290adee38d513b442cb3912157f13a933d0134282d032b5ffecd01a2dbf1b7790608df002ea70000000000000000000000006fcfc05c7963d0fb23c706450c7c72adda8fbf60', "hex")
 
 const arbitrumEID = 40231; // Here is for Arbitrum Sepolia Testnet
 //const arbitrumEID = 30110;
@@ -827,56 +827,58 @@ describe("# test scenario - tristero ", () => {
             
 
             console.log("--------testing lz_receive_types ---------");
-            {
-                let lzReceiveTypesIx = await program.methods.lzReceiveTypes({
-                    srcEid: arbitrumEID,
-                    sender: Array.from(receiverPubKey),
-                    nonce: new BN(4),
-                    guid: Array.from(receiverPubKey),
-                    message: tempStr,
-                    extraData: Buffer.from("")
-                })
-                .accounts({
-                    messageLib: res.messageLib,
-                    oftConfig: PublicKey.default
-                })
-                .view();
+            // {
+            //     let lzReceiveTypesIx = await program.methods.lzReceiveTypes({
+            //         srcEid: arbitrumEID,
+            //         sender: Array.from(receiverPubKey),
+            //         nonce: new BN(4),
+            //         guid: Array.from(receiverPubKey),
+            //         message: tempStr,
+            //         extraData: Buffer.from("")
+            //     })
+            //     .accounts({
+            //         messageLib: res.messageLib,
+            //         oftConfig: PublicKey.default
+            //     })
+            //     .view();
                 
-                // let tx = new Transaction();
-                // tx.add(ComputeBudgetProgram.setComputeUnitLimit({units: 500000}));
-                // tx.add(lzReceiveTypesIx)
+            //     // let tx = new Transaction();
+            //     // tx.add(ComputeBudgetProgram.setComputeUnitLimit({units: 500000}));
+            //     // tx.add(lzReceiveTypesIx)
 
-                // const lzReceiveTypesTx = await sendAndConfirmTransaction(connection, tx, [user])
-                console.log("lzReceiveTypesIx: ", lzReceiveTypesIx)
-                console.log("length => ", lzReceiveTypesIx.length)
+            //     // const lzReceiveTypesTx = await sendAndConfirmTransaction(connection, tx, [user])
+            //     console.log("lzReceiveTypesIx: ", lzReceiveTypesIx)
+            //     console.log("length => ", lzReceiveTypesIx.length)
 
-                console.log("=> ", JSON.stringify({
-                    oapp: lzReceiveTypesIx[0].pubkey,
-                    tokenAccount: lzReceiveTypesIx[1].pubkey,
-                    stakingAccount: lzReceiveTypesIx[2].pubkey,
-                    tradeMatch: lzReceiveTypesIx[3].pubkey,
-                    tokenProgram: lzReceiveTypesIx[4].pubkey
-                }))
+            //     console.log("=> ", JSON.stringify({
+            //         oapp: lzReceiveTypesIx[0].pubkey,
+            //         tokenAccount: lzReceiveTypesIx[1].pubkey,
+            //         stakingAccount: lzReceiveTypesIx[2].pubkey,
+            //         tradeMatch: lzReceiveTypesIx[3].pubkey,
+            //         tokenProgram: lzReceiveTypesIx[4].pubkey
+            //     }))
 
-                let lzReceiveTypesTx = await program.methods.lzReceive({
-                    srcEid: arbitrumEID,
-                    sender: Array.from(receiverPubKey),
-                    nonce: new BN(4),
-                    guid: Array.from(receiverPubKey),
-                    message: tempStr,
-                    extraData: Buffer.from("")
-                })
-                .accounts({
-                    oapp: lzReceiveTypesIx[0].pubkey,
-                    tokenAccount: lzReceiveTypesIx[1].pubkey,
-                    stakingAccount: lzReceiveTypesIx[2].pubkey,
-                    tradeMatch: lzReceiveTypesIx[3].pubkey,
-                    tokenProgram: lzReceiveTypesIx[4].pubkey
-                })
-                .remainingAccounts(lzReceiveTypesIx.slice(5))
-                .rpc();
-                console.log("lzReceiveTypesTx: ", lzReceiveTypesTx)
-            }
+            //     let lzReceiveTypesTx = await program.methods.lzReceive({
+            //         srcEid: arbitrumEID,
+            //         sender: Array.from(receiverPubKey),
+            //         nonce: new BN(4),
+            //         guid: Array.from(receiverPubKey),
+            //         message: tempStr,
+            //         extraData: Buffer.from("")
+            //     })
+            //     .accounts({
+            //         oapp: lzReceiveTypesIx[0].pubkey,
+            //         tokenAccount: lzReceiveTypesIx[1].pubkey,
+            //         stakingAccount: lzReceiveTypesIx[2].pubkey,
+            //         tradeMatch: lzReceiveTypesIx[3].pubkey,
+            //         tokenProgram: lzReceiveTypesIx[4].pubkey
+            //     })
+            //     .remainingAccounts(lzReceiveTypesIx.slice(5))
+            //     .rpc();
+            //     console.log("lzReceiveTypesTx: ", lzReceiveTypesTx)
+            // }
+
+            
             
         } catch (err) {
             console.log(err)

@@ -92,28 +92,29 @@ impl LzReceive<'_> {
         let cpi_context = CpiContext::new(ctx.accounts.token_program.to_account_info(), cpi_accounts);
         token::transfer(cpi_context.with_signer(signer_seeds), trade_match.source_sell_amount)?;
 
-        let mut remaining_accounts = ctx.remaining_accounts.to_vec();
-        // let tristero_oapp = accounts[0].clone();
-        let endpoint_program_id = remaining_accounts[7].clone();
-        let signer1 = remaining_accounts[10].clone();
-        let send_library_program_id = remaining_accounts[14].clone();
-        let price_fee_program_id = remaining_accounts[17].clone();
-        let price_fee_program_pda = remaining_accounts[18].clone();
-        remaining_accounts.insert(0, endpoint_program_id);
-        // remaining_accounts.insert(1, tristero_oapp);
-
-        remaining_accounts.insert(2, send_library_program_id);
-        remaining_accounts.insert(13, signer1);
-        remaining_accounts.extend_from_slice(&[
-            price_fee_program_id,
-            price_fee_program_pda
-        ]);
+        
 
         if msg_type == 1u64 { // B->A
             trade_match.is_valiable = false;
 
         } else { // B->A->B
             let receiver = msg_vec[3];
+            let mut remaining_accounts = ctx.remaining_accounts.to_vec();
+            // let tristero_oapp = accounts[0].clone();
+            let endpoint_program_id = remaining_accounts[7].clone();
+            let signer1 = remaining_accounts[10].clone();
+            let send_library_program_id = remaining_accounts[14].clone();
+            let price_fee_program_id = remaining_accounts[17].clone();
+            let price_fee_program_pda = remaining_accounts[18].clone();
+            remaining_accounts.insert(0, endpoint_program_id);
+            // remaining_accounts.insert(1, tristero_oapp);
+
+            remaining_accounts.insert(2, send_library_program_id);
+            remaining_accounts.insert(13, signer1);
+            remaining_accounts.extend_from_slice(&[
+                price_fee_program_id,
+                price_fee_program_pda
+            ]);
 
             msg!("send_library_config: {:#?}", remaining_accounts[3].key());
             msg!("default_send_library_config: {:#?}", remaining_accounts[4].key());
@@ -187,24 +188,24 @@ impl LzReceive<'_> {
             };
             
             endpoint::cpi::send(cpi_ctx.with_signer(signer_seeds), cpi_params)?;
-        }
 
-        // the first 9 accounts are for clear()
-        let accounts_for_clear = &remaining_accounts[0..2];
-        let _ = oapp::endpoint_cpi::clear(
-            ENDPOINT_ID,
-            remaining_accounts[1].key(),
-            accounts_for_clear,
-            &[b"TristeroOapp", &[admin_panel.bump]],
-            ClearParams {
-                receiver: remaining_accounts[1].key(),
-                src_eid: params.src_eid,
-                sender: params.sender,
-                nonce: params.nonce,
-                guid: params.guid,
-                message: params.message.clone(),
-            },
-        )?;
+            // the first 9 accounts are for clear()
+            let accounts_for_clear = &remaining_accounts[0..2];
+            let _ = oapp::endpoint_cpi::clear(
+                ENDPOINT_ID,
+                remaining_accounts[1].key(),
+                accounts_for_clear,
+                &[b"TristeroOapp", &[admin_panel.bump]],
+                ClearParams {
+                    receiver: remaining_accounts[1].key(),
+                    src_eid: params.src_eid,
+                    sender: params.sender,
+                    nonce: params.nonce,
+                    guid: params.guid,
+                    message: params.message.clone(),
+                },
+            )?;
+        }
         Ok(())
     }
 }
