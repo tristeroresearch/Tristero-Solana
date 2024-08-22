@@ -70,10 +70,10 @@ impl LzReceiveTypes<'_> {
 
             accounts = vec![
                 LzAccount { pubkey: tristero_oapp, is_signer: false, is_writable: true }, //0
-                LzAccount { pubkey: to_token_addr, is_signer: false, is_writable: true }, // 1
+                LzAccount { pubkey: trade_match, is_signer: false, is_writable: true }, // 1
                 LzAccount { pubkey: tristero_oapp, is_signer: false, is_writable: true }, //2
                 LzAccount { pubkey: staking_account, is_signer: false, is_writable: true }, // 3
-                LzAccount { pubkey: trade_match, is_signer: false, is_writable: true }, // 4
+                LzAccount { pubkey: to_token_addr, is_signer: false, is_writable: true }, // 4
                 LzAccount { pubkey: TOKEN_PROGRAM_ID, is_signer: false, is_writable: false }, // 5
             ];
         } else if msg_type == 2u64 {
