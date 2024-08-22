@@ -1,16 +1,8 @@
 use std::str::FromStr;
 
 use crate::*;
-use anchor_lang::solana_program;
-use anchor_spl::token::TokenAccount;
-use anchor_spl::associated_token::get_associated_token_address;
 use spl_token::ID as TOKEN_PROGRAM_ID;
-use solana_program::system_program;
-use anchor_lang::{
-    prelude::*,
-    solana_program::{keccak::hash, system_program::ID as SYSTEM_ID},
-};
-use endpoint::state::SendLibraryConfig;
+use anchor_lang::solana_program::system_program::ID as SYSTEM_ID;
 
 #[derive(Accounts)]
 pub struct LzReceiveTypes<'info> {
@@ -76,11 +68,6 @@ impl LzReceiveTypes<'_> {
                 &program_id
             );
 
-            let (tristero_event_authority, _) = Pubkey::find_program_address(
-                &[b"__event_authority"],
-                &program_id
-            );
-
             accounts = vec![
                 LzAccount { pubkey: tristero_oapp, is_signer: false, is_writable: true }, //0
                 LzAccount { pubkey: to_token_addr, is_signer: false, is_writable: true }, // 1
@@ -105,13 +92,10 @@ impl LzReceiveTypes<'_> {
                 &endpoint_program_id
             );
             
-            
             let (send_library_info, _) = Pubkey::find_program_address( // ok 5
                 &[b"MessageLib", ctx.accounts.message_lib.key().as_ref()],
                 &endpoint_program_id
             );
-
-
 
             let (endpoint_pda, _) = Pubkey::find_program_address( // ok 6
                 &[b"Endpoint"],
@@ -137,8 +121,6 @@ impl LzReceiveTypes<'_> {
                 &[b"SendConfig", &sender_eid.to_be_bytes()], 
                 &send_library_program
             );
-            let signer1 = Pubkey::default(); // ok 13
-            let signer2 = Pubkey::default(); // ok 14
             let system_program_id = SYSTEM_ID; // ok 15
             let (uln_authority, _) = Pubkey::find_program_address( // ok 16
                 &[b"__event_authority"],
@@ -159,11 +141,6 @@ impl LzReceiveTypes<'_> {
             let (dvn_derive_config, _) = Pubkey::find_program_address( // ok 23
                 &[b"DvnConfig"],
                 &dvn_program_id
-            );
-            let price_fee_program_id = Pubkey::from_str("8ahPGPjEbpgGaZx2NV1iG5Shj7TDwvsjkEDcGWjt94TP").unwrap(); // ok 24
-            let (price_fee_program_pda, _) = Pubkey::find_program_address( // ok 25
-                &[b"PriceFeed"],
-                &price_fee_program_id
             );
             //context accounts
             accounts.extend_from_slice(&[
