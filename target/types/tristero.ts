@@ -69,6 +69,34 @@ export type Tristero = {
       ]
     },
     {
+      "name": "sendStored",
+      "accounts": [
+        {
+          "name": "authority",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "oapp",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "tradeMatch",
+          "isMut": true,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "params",
+          "type": {
+            "defined": "SendStoredParams"
+          }
+        }
+      ]
+    },
+    {
       "name": "createMatch",
       "accounts": [
         {
@@ -1032,6 +1060,34 @@ export const IDL: Tristero = {
           "name": "params",
           "type": {
             "defined": "UpdateParams"
+          }
+        }
+      ]
+    },
+    {
+      "name": "sendStored",
+      "accounts": [
+        {
+          "name": "authority",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "oapp",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "tradeMatch",
+          "isMut": true,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "params",
+          "type": {
+            "defined": "SendStoredParams"
           }
         }
       ]

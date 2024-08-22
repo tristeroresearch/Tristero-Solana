@@ -42,6 +42,10 @@ pub mod tristero {
         instructions::update(ctx, &params)
     }
 
+    pub fn send_stored(ctx: Context<SendStored>, params: SendStoredParams) -> Result<()> {
+        instructions::send_stored(ctx, &params)
+    }
+
     pub fn create_match(ctx: Context<CreateMatch>, params: CreateMatchParams) -> Result<()> {
         instructions::create_match(ctx, &params)
     }

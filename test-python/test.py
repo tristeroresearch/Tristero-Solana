@@ -28,6 +28,7 @@ from tristero.instructions.place_order import place_order, PlaceOrderAccounts
 from tristero.instructions.challenge import challenge, ChallengeAccounts
 from tristero.instructions.register_tristero_oapp import register_tristero_oapp, RegisterTristeroOappAccounts
 from tristero.instructions.lz_receive_types import lz_receive_types, LzReceiveTypesAccounts
+from tristero.instructions.send_stored import send_stored, SendStoredAccounts
 from endpoint.instructions.init_nonce import init_nonce, InitNonceAccounts
 from endpoint.instructions.init_send_library import init_send_library, InitSendLibraryAccounts
 from endpoint.instructions.init_receive_library import init_receive_library, InitReceiveLibraryAccounts
@@ -39,6 +40,7 @@ from tristero.types.place_order_params import PlaceOrderParams, PlaceOrderParams
 from tristero.types.challenge_params import ChallengeParams, ChallengeParamsJSON
 from tristero.types.register_tristero_o_app_params import RegisterTristeroOAppParams, RegisterTristeroOAppParamsJSON
 from tristero.types.lz_receive_type_params import LzReceiveTypeParams, LzReceiveTypeParamsJSON
+from tristero.types.send_stored_params import SendStoredParams, SendStoredParamsJSON
 from endpoint.types.init_nonce_params import InitNonceParams, InitNonceParamsJSON
 from endpoint.types.init_send_library_params import InitSendLibraryParams, InitSendLibraryParamsJSON
 from endpoint.types.init_receive_library_params import InitReceiveLibraryParams, InitReceiveLibraryParamsJSON
@@ -82,7 +84,7 @@ ARBITRUM_EID = 40231
 RECEIVER_PUBKEY = bytearray(32)
 
 # Hexadecimal string to be converted to bytes
-hex_string = '6fCFC05C7963D0FB23C706450C7c72ADDA8fbf60'
+hex_string = 'bDEc418D5e6434974471F35365198d74D29DcB5F'
 
 # Convert the hexadecimal string to bytes
 padded_buffer = binascii.unhexlify(hex_string)
@@ -601,40 +603,40 @@ async def main():
         # init_receive_library_tx = solana_client.send_transaction(txn, *signers, opts=TxOpts(skip_confirmation=False, preflight_commitment=Confirmed)).value
         # print(f"init_receive_library_tx: {init_receive_library_tx}")
         
-        # print(f"-----------------------Init Nonce---------------------------")
-        # init_nonce_accounts: InitNonceAccounts = {
-        #     "delegate": admin.pubkey(),
-        #     "oapp_registry": get_oapp_registry_pda(tristero_oapp_pubkey),
-        #     "nonce": get_nonce_pda(tristero_oapp_pubkey, ARBITRUM_EID, RECEIVER_PUBKEY),
-        #     "pending_inbound_nonce": get_pending_inbound_nonce_pda(tristero_oapp_pubkey, ARBITRUM_EID, RECEIVER_PUBKEY)
-        # }
+        print(f"-----------------------Init Nonce---------------------------")
+        init_nonce_accounts: InitNonceAccounts = {
+            "delegate": admin.pubkey(),
+            "oapp_registry": get_oapp_registry_pda(tristero_oapp_pubkey),
+            "nonce": get_nonce_pda(tristero_oapp_pubkey, ARBITRUM_EID, RECEIVER_PUBKEY),
+            "pending_inbound_nonce": get_pending_inbound_nonce_pda(tristero_oapp_pubkey, ARBITRUM_EID, RECEIVER_PUBKEY)
+        }
         
-        # init_nonce_params_json : InitNonceParamsJSON = {
-        #     "local_oapp": str(tristero_oapp_pubkey),
-        #     "remote_eid": ARBITRUM_EID,
-        #     "remote_oapp": RECEIVER_PUBKEY
-        # }
+        init_nonce_params_json : InitNonceParamsJSON = {
+            "local_oapp": str(tristero_oapp_pubkey),
+            "remote_eid": ARBITRUM_EID,
+            "remote_oapp": RECEIVER_PUBKEY
+        }
         
-        # init_nonce_params = InitNonceParams.from_json(init_nonce_params_json)
+        init_nonce_params = InitNonceParams.from_json(init_nonce_params_json)
         
-        # init_nonce_ix = init_nonce(
-        #     {
-        #         "params": init_nonce_params
-        #     },
-        #     init_nonce_accounts,
-        #     endpoint_program_id
-        # )
+        init_nonce_ix = init_nonce(
+            {
+                "params": init_nonce_params
+            },
+            init_nonce_accounts,
+            endpoint_program_id
+        )
         
-        # latest_blockhash = solana_client.get_latest_blockhash()
-        # blockhash = latest_blockhash.value.blockhash
-        # signers = [admin]
+        latest_blockhash = solana_client.get_latest_blockhash()
+        blockhash = latest_blockhash.value.blockhash
+        signers = [admin]
         
-        # txn = Transaction(recent_blockhash=blockhash, fee_payer=admin.pubkey())
-        # txn.add(set_compute_unit_limit(2000000))
-        # txn.add(init_nonce_ix)
+        txn = Transaction(recent_blockhash=blockhash, fee_payer=admin.pubkey())
+        txn.add(set_compute_unit_limit(2000000))
+        txn.add(init_nonce_ix)
         
-        # init_nonce_tx = solana_client.send_transaction(txn, *signers, opts=TxOpts(skip_confirmation=False, preflight_commitment=Confirmed)).value
-        # print(f"init_nonce_tx: {init_nonce_tx}")
+        init_nonce_tx = solana_client.send_transaction(txn, *signers, opts=TxOpts(skip_confirmation=False, preflight_commitment=Confirmed)).value
+        print(f"init_nonce_tx: {init_nonce_tx}")
         
         # print(f"---------------------Init Oft-Config------------------------")
         # register_config_accounts: RegisterConfigAccounts = {
@@ -715,7 +717,7 @@ async def main():
         
         create_match_params_json : CreateMatchParamsJSON = {
             "src_index": order_id,
-            "dst_index": 1,
+            "dst_index": 2,
             "src_quantity": 100,
             "dst_quantity": 100,
             "trade_match_id": trade_match_id,
@@ -743,7 +745,7 @@ async def main():
         print(f"create_match_tx: {create_match_tx}")
         print(f"match_id: {trade_match_id}")
         
-        trade_match_id = 10
+        trade_match_id = 11
         
         print(f"-------------------------Challenge----------------------------")
         challenge_accounts : ChallengeAccounts = {
@@ -819,5 +821,32 @@ async def main():
         # lz_receive_types_tx = solana_client.send_transaction(txn, *signers, opts=TxOpts(skip_confirmation=False, preflight_commitment=Confirmed)).value
         # print(f"lz_receive_types_tx: {lz_receive_types_tx}")
         
-
+        # print(f"-------------------------Testing send_stored----------------------------")
+        # send_stored_accounts: SendStoredAccounts = {
+        #     "authority": admin.pubkey(),
+        #     "oapp": tristero_oapp_pubkey,
+        #     "trade_match": get_trade_match_pda(trade_match_id)
+        # }
+        # send_stored_params_json: SendStoredParamsJSON = {
+        #     "trade_match_id": trade_match_id
+        # }
+        
+        # send_stored_params = SendStoredParams.from_json(send_stored_params_json)
+        # send_stored_ix = send_stored(
+        #     {
+        #         "params": send_stored_params
+        #     },
+        #     send_stored_accounts,
+        #     tristero_program_id
+        # )
+        # latest_blockhash = solana_client.get_latest_blockhash()
+        # blockhash = latest_blockhash.value.blockhash
+        # signers = [user]
+        
+        # txn = Transaction(recent_blockhash=blockhash, fee_payer=user.pubkey())
+        # txn.add(set_compute_unit_limit(2000000))
+        # txn.add(send_stored_ix)
+        
+        # send_stored_tx = solana_client.send_transaction(txn, *signers, opts=TxOpts(skip_confirmation=False, preflight_commitment=Confirmed)).value
+        # print(f"send_stored_tx: {send_stored_tx}")
 asyncio.run(main())
