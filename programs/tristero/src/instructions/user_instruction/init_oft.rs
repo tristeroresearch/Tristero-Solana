@@ -10,7 +10,7 @@ pub struct InitOft<'info> {
     /// CHECK:
     pub oapp_config: UncheckedAccount<'info>,
     #[account(
-        init,
+        init_if_needed,
         payer = payer,
         space = 8 + LzReceiveTypesAccounts::INIT_SPACE,
         seeds = [LZ_RECEIVE_TYPES_SEED, &oapp_config.key().as_ref()],

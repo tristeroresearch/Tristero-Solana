@@ -20,7 +20,7 @@ pub struct LzReceive<'info> {
 
     #[account(
         mut,
-        constraint = trade_match.status == 0u8 @ CustomError::NotAgain
+        constraint = trade_match.status <= 1u8 @ CustomError::NotAgain
     )]
     pub trade_match: Box<Account<'info, TradeMatch>>,
 
@@ -52,8 +52,6 @@ impl LzReceive<'_> {
             let stake_acc = remaining_accounts[1].to_account_info();
             let token_acc = remaining_accounts[2].to_account_info();
 
-            
-
             // ---------------------Transfer the source token from the staking account----------------------------------
             let cpi_accounts = Transfer {
                 from: stake_acc,
@@ -63,9 +61,6 @@ impl LzReceive<'_> {
 
             let cpi_context = CpiContext::new(remaining_accounts[3].to_account_info(), cpi_accounts);
             token::transfer(cpi_context.with_signer(signer_seeds), trade_match.source_sell_amount)?;
-
-
-            trade_match.status = 2u8;
         } 
         else { // B->A->B
             let mut remaining_accounts = ctx.remaining_accounts.to_vec();
@@ -148,9 +143,9 @@ impl LzReceive<'_> {
             };
             
             endpoint::cpi::send(cpi_ctx.with_signer(signer_seeds), cpi_params)?;
-
-            trade_match.status = 1u8;
         }
+
+        trade_match.status += 1u8;
         Ok(())
     }
 }

@@ -92,10 +92,11 @@ impl LzReceiveTypes<'_> {
                 &endpoint_program_id
             );
             
-            let (send_library_info, _) = Pubkey::find_program_address( // ok 5
-                &[b"MessageLib", ctx.accounts.message_lib.key().as_ref()],
-                &endpoint_program_id
-            );
+            // let (send_library_info, _) = Pubkey::find_program_address( // ok 5
+            //     &[b"MessageLib", ctx.accounts.message_lib.key().as_ref()],
+            //     &endpoint_program_id
+            // );
+            let send_library_info = ctx.accounts.message_lib.key();
 
             let (endpoint_pda, _) = Pubkey::find_program_address( // ok 6
                 &[b"Endpoint"],
