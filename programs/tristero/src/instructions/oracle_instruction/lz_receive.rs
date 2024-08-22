@@ -58,7 +58,7 @@ impl LzReceive<'_> {
         let msg_type =  vec_to_u64(msg_vec[0]) % 16;
 
         msg!("msg_type: => {} {}", msg_type, vec_to_u64(msg_vec[0]));
-        if msg_type == 1u64 && trade_match.status == 1u8 { // B->A
+        if msg_type == 1u64{ // B->A
             let authority = remaining_accounts[0].to_account_info();
             let stake_acc = remaining_accounts[1].to_account_info();
             let token_acc = remaining_accounts[2].to_account_info();

@@ -189,36 +189,8 @@ export type Tristero = {
           "isSigner": false
         },
         {
-          "name": "tokenAccount",
-          "isMut": true,
-          "isSigner": false,
-          "docs": [
-            "token account address"
-          ]
-        },
-        {
-          "name": "stakingAccount",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
           "name": "tradeMatch",
           "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "tokenProgram",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "eventAuthority",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "program",
-          "isMut": false,
           "isSigner": false
         }
       ],
@@ -1185,36 +1157,8 @@ export const IDL: Tristero = {
           "isSigner": false
         },
         {
-          "name": "tokenAccount",
-          "isMut": true,
-          "isSigner": false,
-          "docs": [
-            "token account address"
-          ]
-        },
-        {
-          "name": "stakingAccount",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
           "name": "tradeMatch",
           "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "tokenProgram",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "eventAuthority",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "program",
-          "isMut": false,
           "isSigner": false
         }
       ],
