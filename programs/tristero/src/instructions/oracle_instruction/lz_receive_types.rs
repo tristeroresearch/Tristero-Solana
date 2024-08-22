@@ -62,18 +62,17 @@ impl LzReceiveTypes<'_> {
         let msg_type = mix_id_msg_type % 16;
         let sender_eid: u32 = 40231;
         let mut accounts = Vec::new();
+        let (trade_match, _) = Pubkey::find_program_address(
+            &[b"trade_match", &trade_match_id.to_be_bytes()],
+            &program_id
+        );
+
         if msg_type == 1u64 {
             let to_token_addr = Pubkey::new_from_array(msg_vec[1]);
             let token_mint = Pubkey::new_from_array(msg_vec[2]);
 
-            // account 5
             let (staking_account, _) = Pubkey::find_program_address(
                 &[b"staking_account", &token_mint.to_bytes()],
-                &program_id
-            );
-
-            let (trade_match, _) = Pubkey::find_program_address(
-                &[b"trade_match", &trade_match_id.to_be_bytes()],
                 &program_id
             );
 
@@ -83,15 +82,15 @@ impl LzReceiveTypes<'_> {
             );
 
             accounts = vec![
-                // LzAccount { pubkey: sol_treasury, is_signer: true, is_writable: true },      // 0
-                LzAccount { pubkey: tristero_oapp, is_signer: false, is_writable: true }, //1
-                LzAccount { pubkey: to_token_addr, is_signer: false, is_writable: true }, // 2
+                LzAccount { pubkey: tristero_oapp, is_signer: false, is_writable: true }, //0
+                LzAccount { pubkey: to_token_addr, is_signer: false, is_writable: true }, // 1
+                LzAccount { pubkey: tristero_oapp, is_signer: false, is_writable: true }, //2
                 LzAccount { pubkey: staking_account, is_signer: false, is_writable: true }, // 3
                 LzAccount { pubkey: trade_match, is_signer: false, is_writable: true }, // 4
                 LzAccount { pubkey: TOKEN_PROGRAM_ID, is_signer: false, is_writable: false }, // 5
             ];
         } else if msg_type == 2u64 {
-            let sender_addr = msg_vec[3];
+            let sender_addr = msg_vec[1];
 
             // From here, handle remaining accounts
             let endpoint_program_id = Pubkey::from_str("76y77prsiCMvXMjuoZ5VRrhG5qYBrUMYTE5WgHqgjEn6").unwrap(); //ok 0
@@ -166,7 +165,11 @@ impl LzReceiveTypes<'_> {
                 &[b"PriceFeed"],
                 &price_fee_program_id
             );
-            
+            //context accounts
+            accounts.extend_from_slice(&[
+                LzAccount { pubkey: tristero_oapp, is_signer: false, is_writable: true },
+                LzAccount { pubkey: trade_match, is_signer: false, is_writable: true },
+            ]);
             //remaining accounts
             accounts.extend_from_slice(&[
                 // LzAccount { pubkey: endpoint_program_id, is_signer: false, is_writable: true },
