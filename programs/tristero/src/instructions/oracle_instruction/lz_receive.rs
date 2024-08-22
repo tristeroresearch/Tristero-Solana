@@ -49,8 +49,7 @@ pub struct LzReceiveParams {
 
 impl LzReceive<'_> {
     pub fn apply(ctx: &mut Context<LzReceive>, params: &LzReceiveParams) -> Result<()> {
-        let mut accounts = ctx.accounts.clone().to_account_infos();
-        let mut remaining_accounts = ctx.remaining_accounts;
+        let remaining_accounts = ctx.remaining_accounts;
         let admin_panel = ctx.accounts.oapp.as_mut().clone();
         let signer_seeds: &[&[&[u8]]] = &[&[b"TristeroOapp", &[admin_panel.bump]]];
         let trade_match = ctx.accounts.trade_match.as_mut();
