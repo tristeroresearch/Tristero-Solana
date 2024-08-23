@@ -602,40 +602,41 @@ async def main():
         # init_receive_library_tx = solana_client.send_transaction(txn, *signers, opts=TxOpts(skip_confirmation=False, preflight_commitment=Confirmed)).value
         # print(f"init_receive_library_tx: {init_receive_library_tx}")
         
-        # print(f"-----------------------Init Nonce---------------------------")
-        # init_nonce_accounts: InitNonceAccounts = {
-        #     "delegate": admin.pubkey(),
-        #     "oapp_registry": get_oapp_registry_pda(tristero_oapp_pubkey),
-        #     "nonce": get_nonce_pda(tristero_oapp_pubkey, ARBITRUM_EID, RECEIVER_PUBKEY),
-        #     "pending_inbound_nonce": get_pending_inbound_nonce_pda(tristero_oapp_pubkey, ARBITRUM_EID, RECEIVER_PUBKEY)
-        # }
+        print(f"-----------------------Init Nonce---------------------------")
+        print(f"get_nonce_pda(tristero_oapp_pubkey, ARBITRUM_EID, RECEIVER_PUBKEY) => {get_nonce_pda(tristero_oapp_pubkey, ARBITRUM_EID, RECEIVER_PUBKEY)}")
+        init_nonce_accounts: InitNonceAccounts = {
+            "delegate": admin.pubkey(),
+            "oapp_registry": get_oapp_registry_pda(tristero_oapp_pubkey),
+            "nonce": get_nonce_pda(tristero_oapp_pubkey, ARBITRUM_EID, RECEIVER_PUBKEY),
+            "pending_inbound_nonce": get_pending_inbound_nonce_pda(tristero_oapp_pubkey, ARBITRUM_EID, RECEIVER_PUBKEY)
+        }
         
-        # init_nonce_params_json : InitNonceParamsJSON = {
-        #     "local_oapp": str(tristero_oapp_pubkey),
-        #     "remote_eid": ARBITRUM_EID,
-        #     "remote_oapp": RECEIVER_PUBKEY
-        # }
+        init_nonce_params_json : InitNonceParamsJSON = {
+            "local_oapp": str(tristero_oapp_pubkey),
+            "remote_eid": ARBITRUM_EID,
+            "remote_oapp": RECEIVER_PUBKEY
+        }
         
-        # init_nonce_params = InitNonceParams.from_json(init_nonce_params_json)
+        init_nonce_params = InitNonceParams.from_json(init_nonce_params_json)
         
-        # init_nonce_ix = init_nonce(
-        #     {
-        #         "params": init_nonce_params
-        #     },
-        #     init_nonce_accounts,
-        #     endpoint_program_id
-        # )
+        init_nonce_ix = init_nonce(
+            {
+                "params": init_nonce_params
+            },
+            init_nonce_accounts,
+            endpoint_program_id
+        )
         
-        # latest_blockhash = solana_client.get_latest_blockhash()
-        # blockhash = latest_blockhash.value.blockhash
-        # signers = [admin]
+        latest_blockhash = solana_client.get_latest_blockhash()
+        blockhash = latest_blockhash.value.blockhash
+        signers = [admin]
         
-        # txn = Transaction(recent_blockhash=blockhash, fee_payer=admin.pubkey())
-        # txn.add(set_compute_unit_limit(2000000))
-        # txn.add(init_nonce_ix)
+        txn = Transaction(recent_blockhash=blockhash, fee_payer=admin.pubkey())
+        txn.add(set_compute_unit_limit(2000000))
+        txn.add(init_nonce_ix)
         
-        # init_nonce_tx = solana_client.send_transaction(txn, *signers, opts=TxOpts(skip_confirmation=False, preflight_commitment=Confirmed)).value
-        # print(f"init_nonce_tx: {init_nonce_tx}")
+        init_nonce_tx = solana_client.send_transaction(txn, *signers, opts=TxOpts(skip_confirmation=False, preflight_commitment=Confirmed)).value
+        print(f"init_nonce_tx: {init_nonce_tx}")
         
         # print(f"---------------------Init Oft-Config------------------------")
         # print(f"get_send_library_info_pda(send_library_info_pubkey) => {get_send_library_info_pda(send_library_info_pubkey)}")
@@ -664,88 +665,88 @@ async def main():
         # register_config_tx = solana_client.send_transaction(txn, *signers, opts=TxOpts(skip_confirmation=False, preflight_commitment=Confirmed)).value
         # print(f"register_config_tx: {register_config_tx}")
         
-        print(f"-----------------------Place Order--------------------------")
-        place_order_accounts: PlaceOrderAccounts = {
-            "authority": user.pubkey(),
-            "admin_panel": tristero_oapp_pubkey,
-            "sol_treasury": get_sol_treasury(),
-            "token_mint": mint_addr,
-            "token_account": Pubkey.from_string("6RzJ96TziaKHitum3KW5524D6GbvqqYJAeaNfQyicmEx"),
-            "staking_account": get_staking_panel(mint_addr),
-            "order": get_order_pda(order_id)
-        }
+        # print(f"-----------------------Place Order--------------------------")
+        # place_order_accounts: PlaceOrderAccounts = {
+        #     "authority": user.pubkey(),
+        #     "admin_panel": tristero_oapp_pubkey,
+        #     "sol_treasury": get_sol_treasury(),
+        #     "token_mint": mint_addr,
+        #     "token_account": Pubkey.from_string("6RzJ96TziaKHitum3KW5524D6GbvqqYJAeaNfQyicmEx"),
+        #     "staking_account": get_staking_panel(mint_addr),
+        #     "order": get_order_pda(order_id)
+        # }
         
-        place_order_params_json : PlaceOrderParamsJSON = {
-            "source_sell_amount": 100,
-            "min_sell_amount": 10,
-            "dest_token_mint": erc20_addr,
-            "dest_buy_amount": 100,
-            "order_id": order_id,
-            "eid": ARBITRUM_EID
-        }
+        # place_order_params_json : PlaceOrderParamsJSON = {
+        #     "source_sell_amount": 100,
+        #     "min_sell_amount": 10,
+        #     "dest_token_mint": erc20_addr,
+        #     "dest_buy_amount": 100,
+        #     "order_id": order_id,
+        #     "eid": ARBITRUM_EID
+        # }
         
-        place_order_params = PlaceOrderParams.from_json(place_order_params_json)
+        # place_order_params = PlaceOrderParams.from_json(place_order_params_json)
         
-        place_order_ix = place_order(
-            {
-                "params": place_order_params
-            },
-            place_order_accounts,
-            tristero_program_id
-        )
+        # place_order_ix = place_order(
+        #     {
+        #         "params": place_order_params
+        #     },
+        #     place_order_accounts,
+        #     tristero_program_id
+        # )
         
-        latest_blockhash = solana_client.get_latest_blockhash()
-        blockhash = latest_blockhash.value.blockhash
-        signers = [user]
+        # latest_blockhash = solana_client.get_latest_blockhash()
+        # blockhash = latest_blockhash.value.blockhash
+        # signers = [user]
         
-        txn = Transaction(recent_blockhash=blockhash, fee_payer=user.pubkey())
-        txn.add(set_compute_unit_limit(2000000))
-        txn.add(place_order_ix)
+        # txn = Transaction(recent_blockhash=blockhash, fee_payer=user.pubkey())
+        # txn.add(set_compute_unit_limit(2000000))
+        # txn.add(place_order_ix)
         
-        place_order_tx = solana_client.send_transaction(txn, *signers, opts=TxOpts(skip_confirmation=False, preflight_commitment=Confirmed)).value
-        print(f"place_order_tx: {place_order_tx}")
-        print(f"order_id: :{order_id}")
+        # place_order_tx = solana_client.send_transaction(txn, *signers, opts=TxOpts(skip_confirmation=False, preflight_commitment=Confirmed)).value
+        # print(f"place_order_tx: {place_order_tx}")
+        # print(f"order_id: :{order_id}")
         
-        # calling create_match instruction
-        print(f"-----------------------Create Match--------------------------")
-        create_match_accounts : CreateMatchAccounts = {
-            "authority": admin.pubkey(),
-            "admin_panel": tristero_oapp_pubkey,
-            "order": get_order_pda(order_id),
-            "trade_match": get_trade_match_pda(trade_match_id)
-        }
+        # # calling create_match instruction
+        # print(f"-----------------------Create Match--------------------------")
+        # create_match_accounts : CreateMatchAccounts = {
+        #     "authority": admin.pubkey(),
+        #     "admin_panel": tristero_oapp_pubkey,
+        #     "order": get_order_pda(order_id),
+        #     "trade_match": get_trade_match_pda(trade_match_id)
+        # }
         
-        create_match_params_json : CreateMatchParamsJSON = {
-            "src_index": order_id,
-            "dst_index": 2,
-            "src_quantity": 100,
-            "dst_quantity": 100,
-            "trade_match_id": trade_match_id,
-            "arb_source_token_addr": arb_wallet_addr
-        }
+        # create_match_params_json : CreateMatchParamsJSON = {
+        #     "src_index": order_id,
+        #     "dst_index": 2,
+        #     "src_quantity": 100,
+        #     "dst_quantity": 100,
+        #     "trade_match_id": trade_match_id,
+        #     "arb_source_token_addr": arb_wallet_addr
+        # }
         
-        create_match_params = CreateMatchParams.from_json(create_match_params_json)
+        # create_match_params = CreateMatchParams.from_json(create_match_params_json)
         
-        create_match_ix = create_match(
-            {
-                "params": create_match_params
-            },
-            create_match_accounts,
-            tristero_program_id
-        )
-        latest_blockhash = solana_client.get_latest_blockhash()
-        blockhash = latest_blockhash.value.blockhash
-        signers = [admin]
+        # create_match_ix = create_match(
+        #     {
+        #         "params": create_match_params
+        #     },
+        #     create_match_accounts,
+        #     tristero_program_id
+        # )
+        # latest_blockhash = solana_client.get_latest_blockhash()
+        # blockhash = latest_blockhash.value.blockhash
+        # signers = [admin]
         
-        txn = Transaction(recent_blockhash=blockhash, fee_payer=admin.pubkey())
-        txn.add(set_compute_unit_limit(2000000))
-        txn.add(create_match_ix)
+        # txn = Transaction(recent_blockhash=blockhash, fee_payer=admin.pubkey())
+        # txn.add(set_compute_unit_limit(2000000))
+        # txn.add(create_match_ix)
         
-        create_match_tx = solana_client.send_transaction(txn, *signers, opts=TxOpts(skip_confirmation=False, preflight_commitment=Confirmed)).value
-        print(f"create_match_tx: {create_match_tx}")
-        print(f"match_id: {trade_match_id}")
+        # create_match_tx = solana_client.send_transaction(txn, *signers, opts=TxOpts(skip_confirmation=False, preflight_commitment=Confirmed)).value
+        # print(f"create_match_tx: {create_match_tx}")
+        # print(f"match_id: {trade_match_id}")
         
-        trade_match_id = 15
+        trade_match_id = 16
         
         # print(f"-------------------------Challenge----------------------------")
         # challenge_accounts : ChallengeAccounts = {

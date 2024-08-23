@@ -51,12 +51,12 @@ const user = anchor.web3.Keypair.fromSecretKey(Uint8Array.from(userJson))
 const anotherUser = anchor.web3.Keypair.fromSecretKey(Uint8Array.from(otherJson))
 const admin = anchor.web3.Keypair.fromSecretKey(Uint8Array.from(adminJson))
 const receiverPubKey = Buffer.alloc(32, 0);
-const paddedBuffer = Buffer.from('bDEc418D5e6434974471F35365198d74D29DcB5F', 'hex')
+const paddedBuffer = Buffer.from('564bdffeb9582879d37e58e3af65828f37a8a2ad', 'hex')
 paddedBuffer.copy(Uint8Array.from(receiverPubKey), 12);
 console.log("receiverPubKey => ", receiverPubKey.toString())
 // const receiverPubKey = Buffer.from('0000000000000000000000005f2d12ab071bd20b25a031fed5dce1abdbb9f8a8', 'hex')
 
-const tempStr = Buffer.from('000000000000000000000000000000000000000000000000000000000000008183247218e466e48b0ea8b8a7b99e7a53cc8153766c6ac5c88076290adee38d513b442cb3912157f13a933d0134282d032b5ffecd01a2dbf1b7790608df002ea70000000000000000000000006fcfc05c7963d0fb23c706450c7c72adda8fbf60', "hex")
+const tempStr = Buffer.from('0000000000000000000000000000000000000000000000000000000000000102000000000000000000000000564bdffeb9582879d37e58e3af65828f37a8a2ad', "hex")
 
 const arbitrumEID = 40231; // Here is for Arbitrum Sepolia Testnet
 //const arbitrumEID = 30110;
@@ -558,7 +558,7 @@ describe("# test scenario - tristero ", () => {
             // console.log("orderPDA => ", getOrderPDA(adminPanel.orderCount))
             // const erc20Addr = Buffer.from('75faf114eafb1bdbe2f0316df893fd58ce46aa4d', 'hex')
             // const arbWalletAddr = Buffer.from('De7014167c36c39aAfb56aA0Bd87776d8911369A', 'hex')
-            console.log("------------------------Place Order----------------------------");
+            // console.log("------------------------Place Order----------------------------");
             // {
             //     const placeOrderTx = await program.methods.placeOrder({
             //             sourceSellAmount: new BN(100),
@@ -585,7 +585,7 @@ describe("# test scenario - tristero ", () => {
             //     console.log("orderId: ", adminPanel.orderCount)
             // }
 
-            console.log("------------------------Create Match1------------------------------");
+            // console.log("------------------------Create Match1------------------------------");
             // {
             //     const createMatchTx = await program.methods.createMatch({
             //             srcIndex: new BN(12),
@@ -611,28 +611,6 @@ describe("# test scenario - tristero ", () => {
             // const challengeId = adminPanel.matchCount;
             // adminPanel.matchCount = new BN(adminPanel.matchCount.toNumber() + 1);
 
-            // console.log("------------------------Create Match2------------------------------");
-            // // {
-            // //     const createMatchTx = await program.methods.createMatch({
-            // //             srcIndex: new BN(74),
-            // //             dstIndex: new BN(1),
-            // //             srcQuantity: new BN(90),
-            // //             dstQuantity: new BN(90),
-            // //             tradeMatchId: adminPanel.matchCount,
-            // //             arbSourceTokenAddr: Array.from(arbWalletAddr)
-            // //         })
-            // //         .accounts({
-            // //             authority: user.publicKey,
-            // //             adminPanel: getAdminPanel(),
-            // //             order: getOrderPDA(new BN(74)),
-            // //             tradeMatch: getTradeMatchPDA(adminPanel.matchCount),
-            // //             systemProgram: SystemProgram.programId,
-            // //             tokenProgram: TOKEN_PROGRAM_ID
-            // //         })
-            // //         .signers([user])
-            // //         .rpc();
-            // //     console.log("createMatchTx: ", createMatchTx)
-            // // }
 
             // const sendStoredId = adminPanel.matchCount;
 
@@ -827,56 +805,50 @@ describe("# test scenario - tristero ", () => {
             
 
             console.log("--------testing lz_receive_types ---------");
-            // {
-            //     let lzReceiveTypesIx = await program.methods.lzReceiveTypes({
-            //         srcEid: arbitrumEID,
-            //         sender: Array.from(receiverPubKey),
-            //         nonce: new BN(4),
-            //         guid: Array.from(receiverPubKey),
-            //         message: tempStr,
-            //         extraData: Buffer.from("")
-            //     })
-            //     .accounts({
-            //         messageLib: res.messageLib,
-            //         oftConfig: PublicKey.default
-            //     })
-            //     .view();
+            {
+                let lzReceiveTypesIx = await program.methods.lzReceiveTypes({
+                    srcEid: arbitrumEID,
+                    sender: Array.from(receiverPubKey),
+                    nonce: new BN(4),
+                    guid: Array.from(receiverPubKey),
+                    message: tempStr,
+                    extraData: Buffer.from("")
+                })
+                .accounts({
+                    messageLib: res.messageLib,
+                    oftConfig: PublicKey.default
+                })
+                .view();
                 
-            //     // let tx = new Transaction();
-            //     // tx.add(ComputeBudgetProgram.setComputeUnitLimit({units: 500000}));
-            //     // tx.add(lzReceiveTypesIx)
+                // let tx = new Transaction();
+                // tx.add(ComputeBudgetProgram.setComputeUnitLimit({units: 500000}));
+                // tx.add(lzReceiveTypesIx)
 
-            //     // const lzReceiveTypesTx = await sendAndConfirmTransaction(connection, tx, [user])
-            //     console.log("lzReceiveTypesIx: ", lzReceiveTypesIx)
-            //     console.log("length => ", lzReceiveTypesIx.length)
+                // const lzReceiveTypesTx = await sendAndConfirmTransaction(connection, tx, [user])
+                console.log("lzReceiveTypesIx: ", lzReceiveTypesIx)
+                console.log("length => ", lzReceiveTypesIx.length)
 
-            //     console.log("=> ", JSON.stringify({
-            //         oapp: lzReceiveTypesIx[0].pubkey,
-            //         tokenAccount: lzReceiveTypesIx[1].pubkey,
-            //         stakingAccount: lzReceiveTypesIx[2].pubkey,
-            //         tradeMatch: lzReceiveTypesIx[3].pubkey,
-            //         tokenProgram: lzReceiveTypesIx[4].pubkey
-            //     }))
+                console.log("=> ", JSON.stringify({
+                    oapp: lzReceiveTypesIx[0].pubkey,
+                    tradeMatch: lzReceiveTypesIx[1].pubkey
+                }))
 
-            //     let lzReceiveTypesTx = await program.methods.lzReceive({
-            //         srcEid: arbitrumEID,
-            //         sender: Array.from(receiverPubKey),
-            //         nonce: new BN(4),
-            //         guid: Array.from(receiverPubKey),
-            //         message: tempStr,
-            //         extraData: Buffer.from("")
-            //     })
-            //     .accounts({
-            //         oapp: lzReceiveTypesIx[0].pubkey,
-            //         tokenAccount: lzReceiveTypesIx[1].pubkey,
-            //         stakingAccount: lzReceiveTypesIx[2].pubkey,
-            //         tradeMatch: lzReceiveTypesIx[3].pubkey,
-            //         tokenProgram: lzReceiveTypesIx[4].pubkey
-            //     })
-            //     .remainingAccounts(lzReceiveTypesIx.slice(5))
-            //     .rpc();
-            //     console.log("lzReceiveTypesTx: ", lzReceiveTypesTx)
-            // }
+                let lzReceiveTypesTx = await program.methods.lzReceive({
+                    srcEid: arbitrumEID,
+                    sender: Array.from(receiverPubKey),
+                    nonce: new BN(4),
+                    guid: Array.from(receiverPubKey),
+                    message: tempStr,
+                    extraData: Buffer.from("")
+                })
+                .accounts({
+                    oapp: lzReceiveTypesIx[0].pubkey,
+                    tradeMatch: lzReceiveTypesIx[1].pubkey,
+                })
+                .remainingAccounts(lzReceiveTypesIx.slice(2))
+                .rpc();
+                console.log("lzReceiveTypesTx: ", lzReceiveTypesTx)
+            }
 
             
             

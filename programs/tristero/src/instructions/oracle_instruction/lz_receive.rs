@@ -4,6 +4,7 @@ use anchor_spl::{token::{self, Transfer, Mint, TokenAccount}};
 use endpoint::{
     self, cpi::accounts::Send, instructions::SendParams, ConstructCPIContext,
 };
+use std::str::FromStr;
 
 use solana_program::native_token::LAMPORTS_PER_SOL;
 
@@ -20,7 +21,7 @@ pub struct LzReceive<'info> {
 
     #[account(
         mut,
-        constraint = trade_match.status <= 1u8 @ CustomError::NotAgain
+        // constraint = trade_match.status <= 1u8 @ CustomError::NotAgain
     )]
     pub trade_match: Box<Account<'info, TradeMatch>>,
 
@@ -41,6 +42,9 @@ impl LzReceive<'_> {
         let remaining_accounts = ctx.remaining_accounts;
         let admin_panel = ctx.accounts.oapp.as_mut().clone();
         let signer_seeds: &[&[&[u8]]] = &[&[b"TristeroOapp", &[admin_panel.bump]]];
+        
+        msg!("admin_panel.bump => {}", admin_panel.bump);
+        msg!("signer => {:#?}", signer_seeds);
         let trade_match = ctx.accounts.trade_match.as_mut();
         
         let msg_vec:Vec<[u8; 32]> = split_into_chunks(params.message.clone());
@@ -63,6 +67,7 @@ impl LzReceive<'_> {
             token::transfer(cpi_context.with_signer(signer_seeds), trade_match.source_sell_amount)?;
         } 
         else { // B->A->B
+            let receiver = msg_vec[1];
             let mut remaining_accounts = ctx.remaining_accounts.to_vec();
             // let tristero_oapp = accounts[0].clone();
             let endpoint_program_id = remaining_accounts[7].clone();
@@ -117,7 +122,7 @@ impl LzReceive<'_> {
             }
             trade_match.src_index.to_be_bytes().map(|value| message_to_send.push(value)); // dstIndex(sol index)
 
-            let receiver = [0u8; 32];
+            // let receiver = [0u8; 32];
             receiver.map(|value| message_to_send.push(value)); // taker
             for _ in 0..24 {
                 message_to_send.push(0u8); 
@@ -141,8 +146,15 @@ impl LzReceive<'_> {
                 native_fee: LAMPORTS_PER_SOL * 3,
                 lz_token_fee: 0,
             };
+
+            let tristero_program_id = Pubkey::from_str("GAa8J7hrF7BpGezmU8oXJ5cjdUxiPdGgze8wLZn8Jt8u").unwrap();
+            let (_, tristero_oapp_bump) = Pubkey::find_program_address(
+                &[b"TristeroOapp"], 
+                &tristero_program_id
+            );
+            let send_signer_seeds: &[&[&[u8]]] = &[&[b"TristeroOapp", &[tristero_oapp_bump]]];
             
-            endpoint::cpi::send(cpi_ctx.with_signer(signer_seeds), cpi_params)?;
+            endpoint::cpi::send(cpi_ctx.with_signer(send_signer_seeds), cpi_params)?;
         }
 
         trade_match.status += 1u8;
