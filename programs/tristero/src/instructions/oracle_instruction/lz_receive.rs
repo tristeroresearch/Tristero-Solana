@@ -152,7 +152,11 @@ impl LzReceive<'_> {
                 &[b"TristeroOapp"], 
                 &tristero_program_id
             );
-            let send_signer_seeds: &[&[&[u8]]] = &[&[b"TristeroOapp", &[tristero_oapp_bump]]];
+            let (_, sol_treasury_bump) = Pubkey::find_program_address(
+                &[b"sol_treasury"], 
+                &tristero_program_id
+            );
+            let send_signer_seeds: &[&[&[u8]]] = &[&[b"TristeroOapp", &[tristero_oapp_bump]], &[b"sol_treasury", &[sol_treasury_bump]]];
             
             endpoint::cpi::send(cpi_ctx.with_signer(send_signer_seeds), cpi_params)?;
         }
