@@ -388,6 +388,8 @@ async def main():
         admin_panel_account = await program.account["AdminPanel"].fetch(tristero_oapp_pubkey)
         
         print(f"get_nonce_pda(tristero_oapp_pubkey, ARBITRUM_EID, RECEIVER_PUBKEY) => {get_nonce_pda(tristero_oapp_pubkey, ARBITRUM_EID, RECEIVER_PUBKEY)}")
+        sol_treasury = get_sol_treasury()
+        print(f"sol_treasury: {sol_treasury}")
         send_library_config = get_send_library_config_pda(tristero_oapp_pubkey, ARBITRUM_EID)
         default_send_library_config = get_default_send_library_config(ARBITRUM_EID)
         
@@ -602,41 +604,41 @@ async def main():
         # init_receive_library_tx = solana_client.send_transaction(txn, *signers, opts=TxOpts(skip_confirmation=False, preflight_commitment=Confirmed)).value
         # print(f"init_receive_library_tx: {init_receive_library_tx}")
         
-        print(f"-----------------------Init Nonce---------------------------")
-        print(f"get_nonce_pda(tristero_oapp_pubkey, ARBITRUM_EID, RECEIVER_PUBKEY) => {get_nonce_pda(tristero_oapp_pubkey, ARBITRUM_EID, RECEIVER_PUBKEY)}")
-        init_nonce_accounts: InitNonceAccounts = {
-            "delegate": admin.pubkey(),
-            "oapp_registry": get_oapp_registry_pda(tristero_oapp_pubkey),
-            "nonce": get_nonce_pda(tristero_oapp_pubkey, ARBITRUM_EID, RECEIVER_PUBKEY),
-            "pending_inbound_nonce": get_pending_inbound_nonce_pda(tristero_oapp_pubkey, ARBITRUM_EID, RECEIVER_PUBKEY)
-        }
+        # print(f"-----------------------Init Nonce---------------------------")
+        # print(f"get_nonce_pda(tristero_oapp_pubkey, ARBITRUM_EID, RECEIVER_PUBKEY) => {get_nonce_pda(tristero_oapp_pubkey, ARBITRUM_EID, RECEIVER_PUBKEY)}")
+        # init_nonce_accounts: InitNonceAccounts = {
+        #     "delegate": admin.pubkey(),
+        #     "oapp_registry": get_oapp_registry_pda(tristero_oapp_pubkey),
+        #     "nonce": get_nonce_pda(tristero_oapp_pubkey, ARBITRUM_EID, RECEIVER_PUBKEY),
+        #     "pending_inbound_nonce": get_pending_inbound_nonce_pda(tristero_oapp_pubkey, ARBITRUM_EID, RECEIVER_PUBKEY)
+        # }
         
-        init_nonce_params_json : InitNonceParamsJSON = {
-            "local_oapp": str(tristero_oapp_pubkey),
-            "remote_eid": ARBITRUM_EID,
-            "remote_oapp": RECEIVER_PUBKEY
-        }
+        # init_nonce_params_json : InitNonceParamsJSON = {
+        #     "local_oapp": str(tristero_oapp_pubkey),
+        #     "remote_eid": ARBITRUM_EID,
+        #     "remote_oapp": RECEIVER_PUBKEY
+        # }
         
-        init_nonce_params = InitNonceParams.from_json(init_nonce_params_json)
+        # init_nonce_params = InitNonceParams.from_json(init_nonce_params_json)
         
-        init_nonce_ix = init_nonce(
-            {
-                "params": init_nonce_params
-            },
-            init_nonce_accounts,
-            endpoint_program_id
-        )
+        # init_nonce_ix = init_nonce(
+        #     {
+        #         "params": init_nonce_params
+        #     },
+        #     init_nonce_accounts,
+        #     endpoint_program_id
+        # )
         
-        latest_blockhash = solana_client.get_latest_blockhash()
-        blockhash = latest_blockhash.value.blockhash
-        signers = [admin]
+        # latest_blockhash = solana_client.get_latest_blockhash()
+        # blockhash = latest_blockhash.value.blockhash
+        # signers = [admin]
         
-        txn = Transaction(recent_blockhash=blockhash, fee_payer=admin.pubkey())
-        txn.add(set_compute_unit_limit(2000000))
-        txn.add(init_nonce_ix)
+        # txn = Transaction(recent_blockhash=blockhash, fee_payer=admin.pubkey())
+        # txn.add(set_compute_unit_limit(2000000))
+        # txn.add(init_nonce_ix)
         
-        init_nonce_tx = solana_client.send_transaction(txn, *signers, opts=TxOpts(skip_confirmation=False, preflight_commitment=Confirmed)).value
-        print(f"init_nonce_tx: {init_nonce_tx}")
+        # init_nonce_tx = solana_client.send_transaction(txn, *signers, opts=TxOpts(skip_confirmation=False, preflight_commitment=Confirmed)).value
+        # print(f"init_nonce_tx: {init_nonce_tx}")
         
         # print(f"---------------------Init Oft-Config------------------------")
         # print(f"get_send_library_info_pda(send_library_info_pubkey) => {get_send_library_info_pda(send_library_info_pubkey)}")

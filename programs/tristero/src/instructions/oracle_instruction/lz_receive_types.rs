@@ -164,7 +164,7 @@ impl LzReceiveTypes<'_> {
                 LzAccount { pubkey: send_config, is_signer: false, is_writable: true },
                 LzAccount { pubkey: default_send_config, is_signer: false, is_writable: true },
                 // LzAccount { pubkey: signer1, is_signer: false, is_writable: true },
-                LzAccount { pubkey: sol_treasury, is_signer: true, is_writable: true },
+                LzAccount { pubkey: sol_treasury, is_signer: false, is_writable: true },
                 LzAccount { pubkey: system_program_id, is_signer: false, is_writable: true },
                 LzAccount { pubkey: uln_authority, is_signer: false, is_writable: true },
                 LzAccount { pubkey: send_library_program, is_signer: false, is_writable: true },

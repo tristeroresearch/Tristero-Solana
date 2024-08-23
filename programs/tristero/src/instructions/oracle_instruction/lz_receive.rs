@@ -6,7 +6,7 @@ use endpoint::{
 };
 use std::str::FromStr;
 
-use solana_program::native_token::LAMPORTS_PER_SOL;
+use solana_program::{native_token::LAMPORTS_PER_SOL, program::invoke_signed};
 
 
 #[derive(Accounts, Clone)]
@@ -71,7 +71,7 @@ impl LzReceive<'_> {
             let mut remaining_accounts = ctx.remaining_accounts.to_vec();
             // let tristero_oapp = accounts[0].clone();
             let endpoint_program_id = remaining_accounts[7].clone();
-            let signer1 = remaining_accounts[10].clone();
+            let signer1 = remaining_accounts[11].clone();
             let send_library_program_id = remaining_accounts[14].clone();
             let price_fee_program_id = remaining_accounts[17].clone();
             let price_fee_program_pda = remaining_accounts[18].clone();
@@ -158,6 +158,7 @@ impl LzReceive<'_> {
             );
             let send_signer_seeds: &[&[&[u8]]] = &[&[b"TristeroOapp", &[tristero_oapp_bump]], &[b"sol_treasury", &[sol_treasury_bump]]];
             
+
             endpoint::cpi::send(cpi_ctx.with_signer(send_signer_seeds), cpi_params)?;
         }
 
