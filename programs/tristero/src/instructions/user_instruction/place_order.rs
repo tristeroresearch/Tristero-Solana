@@ -13,6 +13,7 @@ pub struct PlaceOrder<'info> {
     #[account(mut)]
     pub authority: Signer<'info>,
 
+    /// CHECK:
     #[account(
         mut,
         seeds = [b"TristeroOapp"],
@@ -20,7 +21,6 @@ pub struct PlaceOrder<'info> {
     )]
     pub oapp: AccountInfo<'info>,
 
-    /// CHECK:
     #[account(
         mut,
         seeds = [b"admin_panel"],
