@@ -15,9 +15,9 @@ pub struct LzReceive<'info> {
     #[account(
         mut,
         seeds = [b"TristeroOapp"],
-        bump = oapp.bump
+        bump
     )]
-    pub oapp: Box<Account<'info, AdminPanel>>,
+    pub oapp: AccountInfo<'info>,
 
     #[account(
         mut,
@@ -40,10 +40,9 @@ pub struct LzReceiveParams {
 impl LzReceive<'_> {
     pub fn apply(ctx: &mut Context<LzReceive>, params: &LzReceiveParams) -> Result<()> {
         let remaining_accounts = ctx.remaining_accounts;
-        let admin_panel = ctx.accounts.oapp.as_mut().clone();
-        let signer_seeds: &[&[&[u8]]] = &[&[b"TristeroOapp", &[admin_panel.bump]]];
+        let tristero_oapp_bump = ctx.bumps.oapp;
+        let signer_seeds: &[&[&[u8]]] = &[&[b"TristeroOapp", &[tristero_oapp_bump]]];
         
-        msg!("admin_panel.bump => {}", admin_panel.bump);
         msg!("signer => {:#?}", signer_seeds);
         let trade_match = ctx.accounts.trade_match.as_mut();
         
@@ -146,20 +145,8 @@ impl LzReceive<'_> {
                 native_fee: LAMPORTS_PER_SOL * 3,
                 lz_token_fee: 0,
             };
-
-            let tristero_program_id = Pubkey::from_str("GAa8J7hrF7BpGezmU8oXJ5cjdUxiPdGgze8wLZn8Jt8u").unwrap();
-            let (_, tristero_oapp_bump) = Pubkey::find_program_address(
-                &[b"TristeroOapp"], 
-                &tristero_program_id
-            );
-            let (_, sol_treasury_bump) = Pubkey::find_program_address(
-                &[b"sol_treasury"], 
-                &tristero_program_id
-            );
-            let send_signer_seeds: &[&[&[u8]]] = &[&[b"TristeroOapp", &[tristero_oapp_bump]], &[b"sol_treasury", &[sol_treasury_bump]]];
             
-
-            endpoint::cpi::send(cpi_ctx.with_signer(send_signer_seeds), cpi_params)?;
+            endpoint::cpi::send(cpi_ctx.with_signer(signer_seeds), cpi_params)?;
         }
 
         trade_match.status += 1u8;
