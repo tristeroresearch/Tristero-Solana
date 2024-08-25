@@ -16,13 +16,6 @@ pub struct Challenge<'info> {
 
     #[account(
         mut,
-        seeds = [b"TristeroOapp"],
-        bump = admin_panel.bump,
-    )]
-    pub admin_panel: Box<Account<'info, AdminPanel>>,
-
-    #[account(
-        mut,
         seeds = [b"trade_match", &params.trade_match_id.to_be_bytes()],
         bump = trade_match.bump,
         constraint = trade_match.authority == authority.key() @ CustomError::InvalidAuthority,
