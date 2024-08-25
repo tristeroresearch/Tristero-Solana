@@ -13,12 +13,21 @@ pub struct RegisterTristeroOApp<'info> {
     /// CHECK: The PDA of the OApp
     #[account(
         init,
-        space = AdminPanel::LEN,
+        space = 8,
         payer = payer,
         seeds = [b"TristeroOapp"],
+        bump,
+    )]
+    pub oapp: AccountInfo<'info>,
+
+    #[account(
+        init,
+        space = AdminPanel::LEN,
+        payer = payer,
+        seeds = [b"admin_panel"],
         bump
     )]
-    pub oapp: Box<Account<'info, AdminPanel>>,
+    pub admin_panel: Box<Account<'info, AdminPanel>>,
     /// CHECK: oapp registry
     #[account(
         mut,
@@ -43,10 +52,10 @@ pub struct RegisterTristeroOAppParams{
 }
 
 pub fn register_tristero_oapp(ctx: Context<RegisterTristeroOApp>, params: &RegisterTristeroOAppParams) -> Result<()> {
-    let admin_panel = ctx.accounts.oapp.as_mut();
+    let admin_panel = ctx.accounts.admin_panel.as_mut();
 
     admin_panel.authority = params.admin_wallet;
-    admin_panel.bump = ctx.bumps.oapp;
+    admin_panel.bump = ctx.bumps.admin_panel;
     admin_panel.payment_wallet = params.payment_wallet;
 
 
