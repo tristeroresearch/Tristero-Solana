@@ -8,13 +8,19 @@ use spl_token::ID as TOKEN_PROGRAM_ID;
 #[derive(Accounts)]
 #[instruction(params: CreateMatchParams)]
 pub struct CreateMatch<'info> {
-
     #[account(mut)]
     pub authority: Signer<'info>,
 
     #[account(
         mut,
         seeds = [b"TristeroOapp"],
+        bump,
+    )]
+    pub oapp: AccountInfo<'info>,
+
+    #[account(
+        mut,
+        seeds = [b"admin_panel"],
         bump = admin_panel.bump,
         has_one = authority
     )]
