@@ -13,13 +13,6 @@ pub struct CreateMatch<'info> {
 
     #[account(
         mut,
-        seeds = [b"TristeroOapp"],
-        bump,
-    )]
-    pub oapp: AccountInfo<'info>,
-
-    #[account(
-        mut,
         seeds = [b"admin_panel"],
         bump = admin_panel.bump,
         has_one = authority
