@@ -113,9 +113,9 @@ def get_refund_token_account_pda(pubkey):
     ]
     return Pubkey.find_program_address(seeds, tristero_program_id)[0]
 
-def get_sol_treasury():
+def get_admin_panel():
     seeds = [
-        b"sol_treasury"
+        b"admin_panel"
     ]
     return Pubkey.find_program_address(seeds, tristero_program_id)[0]
 

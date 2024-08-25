@@ -16,6 +16,11 @@ export type Tristero = {
           "isSigner": false
         },
         {
+          "name": "adminPanel",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
           "name": "oappRegistry",
           "isMut": true,
           "isSigner": false
@@ -151,11 +156,6 @@ export type Tristero = {
           "isSigner": true
         },
         {
-          "name": "adminPanel",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
           "name": "tradeMatch",
           "isMut": true,
           "isSigner": false
@@ -271,12 +271,12 @@ export type Tristero = {
           "isSigner": true
         },
         {
-          "name": "adminPanel",
+          "name": "oapp",
           "isMut": true,
           "isSigner": false
         },
         {
-          "name": "solTreasury",
+          "name": "adminPanel",
           "isMut": true,
           "isSigner": false
         },
@@ -984,6 +984,11 @@ export const IDL: Tristero = {
           "isSigner": false
         },
         {
+          "name": "adminPanel",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
           "name": "oappRegistry",
           "isMut": true,
           "isSigner": false
@@ -1119,11 +1124,6 @@ export const IDL: Tristero = {
           "isSigner": true
         },
         {
-          "name": "adminPanel",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
           "name": "tradeMatch",
           "isMut": true,
           "isSigner": false
@@ -1239,12 +1239,12 @@ export const IDL: Tristero = {
           "isSigner": true
         },
         {
-          "name": "adminPanel",
+          "name": "oapp",
           "isMut": true,
           "isSigner": false
         },
         {
-          "name": "solTreasury",
+          "name": "adminPanel",
           "isMut": true,
           "isSigner": false
         },

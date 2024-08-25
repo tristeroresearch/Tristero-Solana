@@ -14,7 +14,7 @@ use state::*;
 use myutils::*;
 use events::*;
 
-declare_id!("GAa8J7hrF7BpGezmU8oXJ5cjdUxiPdGgze8wLZn8Jt8u"); // for devnet
+declare_id!("72XfyfUj63xvVh4d8r9ReFddebwoLQSzXikTS5RAstrx"); // for devnet
 // declare_id!("Eq22HfHg6KjtAoqeEU1UhmbA2iSxUdJQC1syuv36xK1U"); // for mainnet
 
 pub const ENDPOINT_SEED: &[u8] = b"Endpoint";
