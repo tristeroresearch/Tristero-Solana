@@ -18,15 +18,15 @@ pub struct PlaceOrder<'info> {
         seeds = [b"TristeroOapp"],
         bump,
     )]
-    pub admin_panel: Box<Account<'info, AdminPanel>>,
+    pub oapp: AccountInfo<'info>,
 
     /// CHECK:
     #[account(
         mut,
-        seeds = [b"sol_treasury"],
+        seeds = [b"admin_panel"],
         bump,
     )]
-    pub sol_treasury: AccountInfo<'info>,
+    pub admin_panel: Box<Account<'info, AdminPanel>>,
 
     /// token mint address
     pub token_mint: Box<Account<'info, Mint>>,
@@ -108,12 +108,12 @@ pub fn place_order(ctx: Context<PlaceOrder>, params: &PlaceOrderParams) -> Resul
     // ---------------------Transfer the sol for fee to the sol staking account----------------------------------
     let ix = anchor_lang::solana_program::system_instruction::transfer(
         &ctx.accounts.authority.key(), 
-        &ctx.accounts.sol_treasury.key(), 
+        &ctx.accounts.oapp.key(), 
         5000000
     );
     let _ = anchor_lang::solana_program::program::invoke(
         &ix, 
-        &[ctx.accounts.authority.to_account_info(), ctx.accounts.sol_treasury.to_account_info()],
+        &[ctx.accounts.authority.to_account_info(), ctx.accounts.oapp.to_account_info()],
     );
 
     Ok(())
