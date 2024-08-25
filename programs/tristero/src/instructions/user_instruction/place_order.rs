@@ -44,7 +44,7 @@ pub struct PlaceOrder<'info> {
         init_if_needed,
         payer = authority,
         token::mint = token_mint,
-        token::authority = admin_panel,
+        token::authority = oapp,
         seeds = [b"staking_account", token_mint.key().as_ref()],
         bump,
     )]
