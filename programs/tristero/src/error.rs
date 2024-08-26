@@ -26,6 +26,9 @@ pub enum CustomError {
     #[msg("Already canceled or traded")]
     NotAgain,
 
+    #[msg("Not even started")]
+    NotEvenStarted,
+
     #[msg("Wrong msg type")]
     WrongMsgTypeError,
 
