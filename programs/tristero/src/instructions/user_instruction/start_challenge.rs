@@ -98,7 +98,7 @@ pub fn start_challenge(ctx: Context<Challenge>, params: &ChallengeParams) -> Res
     for _ in 0..31 {
         message_to_send.push(0u8);
     }
-    message_to_send.push(2u8); // _msgType
+    message_to_send.push(1u8); // _msgType 1: start_challenge 2: finish_challenge
 
     let cpi_params = SendParams {
         dst_eid: trade_match.eid,
