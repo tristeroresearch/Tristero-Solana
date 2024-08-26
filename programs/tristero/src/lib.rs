@@ -50,8 +50,8 @@ pub mod tristero {
         instructions::create_match(ctx, &params)
     }
 
-    pub fn challenge(ctx: Context<Challenge>, params: ChallengeParams) -> Result<()> {
-        instructions::challenge(ctx, &params)
+    pub fn start_challenge(ctx: Context<Challenge>, params: ChallengeParams) -> Result<()> {
+        instructions::start_challenge(ctx, &params)
     }
 
     pub fn lz_receive(mut ctx: Context<LzReceive>, params: LzReceiveParams) -> Result<()> {

@@ -38,7 +38,7 @@ pub struct ChallengeParams {
     pub receiver:[u8; 32]
 }
 
-pub fn challenge(ctx: Context<Challenge>, params: &ChallengeParams) -> Result<()>  {
+pub fn start_challenge(ctx: Context<Challenge>, params: &ChallengeParams) -> Result<()>  {
 
     let trade_match = ctx.accounts.trade_match.as_mut();
 
