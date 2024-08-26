@@ -23,6 +23,13 @@ pub struct FinishChallenge<'info> {
     )]
     pub trade_match: Box<Account<'info, TradeMatch>>,
 
+    #[account(
+        mut,
+        constraint = arb_user_token_account.mint == trade_match.source_token_mint @ CustomError::InvalidTokenMintAddress,
+        constraint = arb_user_token_account.key() == trade_mathc.arb_user_token_account @ CustomError::InvalidTokenOwner
+    )]
+    pub arb_user_token_account: Box<Account<'info, TokenAccount>>,
+
     pub system_program: Program<'info, System>,
 
     /// CHECK: This is not dangerous because we don't read or write from this account
@@ -111,6 +118,16 @@ pub fn finish_challenge(ctx: Context<FinishChallenge>, params: &FinishChallengeP
     
     endpoint::cpi::send(cpi_ctx.with_signer(signer_seeds), cpi_params)?;
 
-    trade_match.status = 1u8;
+    // ---------------------Transfer the source token from the staking account----------------------------------
+    let cpi_accounts = Transfer {
+        from: stake_acc,
+        to: ctx.accounts.arb_user_token_account,
+        authority: authority
+    };
+
+    let cpi_context = CpiContext::new(ctx.accounts.token_program.to_account_info(), cpi_accounts);
+    token::transfer(cpi_context.with_signer(signer_seeds), trade_match.source_sell_amount)?;
+
+    trade_match.status = 2u8;
     Ok(())
 }
