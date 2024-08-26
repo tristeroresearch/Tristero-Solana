@@ -49,8 +49,7 @@ pub struct CreateMatchParams {
     pub dst_index: u64,
     pub src_quantity: u64,
     pub dst_quantity: u64,
-    pub trade_match_id: u64,
-    pub arb_source_token_addr: [u8; 20],
+    pub trade_match_id: u64
 }
 
 pub fn create_match(ctx: Context<CreateMatch>, params: &CreateMatchParams) -> Result<()>  {
