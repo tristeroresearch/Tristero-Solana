@@ -20,8 +20,7 @@ pub struct LzReceive<'info> {
     pub oapp: AccountInfo<'info>,
 
     #[account(
-        mut,
-        constraint = trade_match.status == 1u8 @ CustomError::NotAgain
+        mut
     )]
     pub trade_match: Box<Account<'info, TradeMatch>>,
 
@@ -45,21 +44,31 @@ impl LzReceive<'_> {
 
         let trade_match = ctx.accounts.trade_match.as_mut();
 
-        let authority = remaining_accounts[0].to_account_info();
-        let stake_acc = remaining_accounts[1].to_account_info();
-        let token_acc = remaining_accounts[2].to_account_info();
+        let msg_vec:Vec<[u8; 32]> = split_into_chunks(params.message.clone());
+        let mix_id_msg_type = vec_to_u64(msg_vec[0]);
+        let msg_type =  mix_id_msg_type % 16; // 1: start_challenge from arb, 2: finish_challenge from arb
 
-        // ---------------------Transfer the source token from the staking account----------------------------------
-        let cpi_accounts = Transfer {
-            from: stake_acc,
-            to: token_acc,
-            authority: authority
-        };
+        if msg_type == 1u64 {
+            require!(trade_match.status == 0u8, CustomError::NotAgain);
+            trade_match.status = 1u8;
+        } else {
+            require!(trade_match.status == 1u8, CustomError::NotEvenStarted);
+            let authority = remaining_accounts[0].to_account_info();
+            let stake_acc = remaining_accounts[1].to_account_info();
+            let token_acc = remaining_accounts[2].to_account_info();
 
-        let cpi_context = CpiContext::new(remaining_accounts[3].to_account_info(), cpi_accounts);
-        token::transfer(cpi_context.with_signer(signer_seeds), trade_match.source_sell_amount)?;
+            // ---------------------Transfer the source token from the staking account----------------------------------
+            let cpi_accounts = Transfer {
+                from: stake_acc,
+                to: token_acc,
+                authority: authority
+            };
 
-        trade_match.status = 2u8;
+            let cpi_context = CpiContext::new(remaining_accounts[3].to_account_info(), cpi_accounts);
+            token::transfer(cpi_context.with_signer(signer_seeds), trade_match.source_sell_amount)?;
+
+            trade_match.status = 2u8;
+        }
         Ok(())
     }
 }

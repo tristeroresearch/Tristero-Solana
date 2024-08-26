@@ -43,8 +43,6 @@ impl LzReceiveTypes<'_> {
         msg!("==> {:#?}", msg_vec.len());
         let mix_id_msg_type = vec_to_u64(msg_vec[0]);
         let trade_match_id =  mix_id_msg_type / 16u64;
-        let msg_type = mix_id_msg_type % 16;
-        let sender_eid: u32 = 40231;
         let mut accounts = Vec::new();
         let (trade_match, _) = Pubkey::find_program_address(
             &[b"trade_match", &trade_match_id.to_be_bytes()],

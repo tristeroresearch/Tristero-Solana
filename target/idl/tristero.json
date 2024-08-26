@@ -148,7 +148,7 @@
       ]
     },
     {
-      "name": "challenge",
+      "name": "startChallenge",
       "accounts": [
         {
           "name": "authority",
@@ -472,6 +472,10 @@
             }
           },
           {
+            "name": "arbUserTokenAccount",
+            "type": "publicKey"
+          },
+          {
             "name": "srcIndex",
             "type": "u64"
           },
@@ -532,15 +536,6 @@
           {
             "name": "tradeMatchId",
             "type": "u64"
-          },
-          {
-            "name": "arbSourceTokenAddr",
-            "type": {
-              "array": [
-                "u8",
-                20
-              ]
-            }
           }
         ]
       }
@@ -701,40 +696,6 @@
       }
     },
     {
-      "name": "ChallengeParams",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "tradeMatchId",
-            "type": "u64"
-          },
-          {
-            "name": "tristeroOappBump",
-            "type": "u8"
-          },
-          {
-            "name": "sourceTokenAddressInArbitrumChain",
-            "type": {
-              "array": [
-                "u8",
-                20
-              ]
-            }
-          },
-          {
-            "name": "receiver",
-            "type": {
-              "array": [
-                "u8",
-                32
-              ]
-            }
-          }
-        ]
-      }
-    },
-    {
       "name": "PlaceOrderParams",
       "type": {
         "kind": "struct",
@@ -767,6 +728,40 @@
           {
             "name": "eid",
             "type": "u32"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ChallengeParams",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "tradeMatchId",
+            "type": "u64"
+          },
+          {
+            "name": "tristeroOappBump",
+            "type": "u8"
+          },
+          {
+            "name": "sourceTokenAddressInArbitrumChain",
+            "type": {
+              "array": [
+                "u8",
+                20
+              ]
+            }
+          },
+          {
+            "name": "receiver",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
           }
         ]
       }
@@ -862,109 +857,114 @@
     },
     {
       "code": 6008,
+      "name": "NotEvenStarted",
+      "msg": "Not even started"
+    },
+    {
+      "code": 6009,
       "name": "WrongMsgTypeError",
       "msg": "Wrong msg type"
     },
     {
-      "code": 6009,
+      "code": 6010,
       "name": "WrongMsgDstIndex",
       "msg": "Can not find with dst index"
     },
     {
-      "code": 6010,
+      "code": 6011,
       "name": "WrongMsgSrcToken",
       "msg": "Can not find with src token address"
     },
     {
-      "code": 6011,
+      "code": 6012,
       "name": "WrongMsgDstToken",
       "msg": "Can not find with dst token address"
     },
     {
-      "code": 6012,
+      "code": 6013,
       "name": "WrongAuthorityToCancel",
       "msg": "Can not cancel with this authority"
     },
     {
-      "code": 6013,
+      "code": 6014,
       "name": "MinSellAmountConflict",
       "msg": "Min Sell Amount Conflict"
     },
     {
-      "code": 6014,
+      "code": 6015,
       "name": "InSufficientFundsOfOrder",
       "msg": "Insufficient Funds of Order"
     },
     {
-      "code": 6015,
+      "code": 6016,
       "name": "InvalidSendLibrary"
     },
     {
-      "code": 6016,
+      "code": 6017,
       "name": "InvalidReceiveLibrary"
     },
     {
-      "code": 6017,
+      "code": 6018,
       "name": "SameValue"
     },
     {
-      "code": 6018,
+      "code": 6019,
       "name": "AccountNotFound"
     },
     {
-      "code": 6019,
+      "code": 6020,
       "name": "OnlySendLib"
     },
     {
-      "code": 6020,
+      "code": 6021,
       "name": "OnlyReceiveLib"
     },
     {
-      "code": 6021,
+      "code": 6022,
       "name": "InvalidExpiry"
     },
     {
-      "code": 6022,
+      "code": 6023,
       "name": "OnlyNonDefaultLib"
     },
     {
-      "code": 6023,
+      "code": 6024,
       "name": "InvalidAmount"
     },
     {
-      "code": 6024,
+      "code": 6025,
       "name": "InvalidNonce"
     },
     {
-      "code": 6025,
+      "code": 6026,
       "name": "Unauthorized"
     },
     {
-      "code": 6026,
+      "code": 6027,
       "name": "ComposeNotFound"
     },
     {
-      "code": 6027,
+      "code": 6028,
       "name": "InvalidPayloadHash"
     },
     {
-      "code": 6028,
+      "code": 6029,
       "name": "LzTokenUnavailable"
     },
     {
-      "code": 6029,
+      "code": 6030,
       "name": "ReadOnlyAccount"
     },
     {
-      "code": 6030,
+      "code": 6031,
       "name": "InvalidMessageLib"
     },
     {
-      "code": 6031,
+      "code": 6032,
       "name": "WritableAccountNotAllowed"
     }
   ],
   "metadata": {
-    "address": "72XfyfUj63xvVh4d8r9ReFddebwoLQSzXikTS5RAstrx"
+    "address": "EcRNzbsJJ1VemdXLbCH51pndgySMVrk9D1F2YMRF58ra"
   }
 }
