@@ -7,7 +7,10 @@ use endpoint::{
 use std::str::FromStr;
 
 use solana_program::{native_token::LAMPORTS_PER_SOL, program::invoke_signed};
-
+use oapp::endpoint::{
+    cpi::accounts::Clear,
+    instructions::{ClearParams, SendComposeParams},
+};
 
 #[derive(Accounts, Clone)]
 pub struct LzReceive<'info> {
@@ -41,6 +44,24 @@ impl LzReceive<'_> {
         let remaining_accounts = ctx.remaining_accounts;
         let tristero_oapp_bump = ctx.bumps.oapp;
         let signer_seeds: &[&[&[u8]]] = &[&[b"TristeroOapp", &[tristero_oapp_bump]]];
+        let seed = signer_seeds[0];
+
+        let accounts_for_clear = &ctx.remaining_accounts[4..12];
+        let endpoint_program_id = Pubkey::from_str("76y77prsiCMvXMjuoZ5VRrhG5qYBrUMYTE5WgHqgjEn6").unwrap();
+        let _ = oapp::endpoint_cpi::clear(
+            endpoint_program_id,
+            ctx.accounts.oapp.key(),
+            accounts_for_clear,
+            seed,
+            ClearParams {
+                receiver: ctx.accounts.oapp.key(),
+                src_eid: params.src_eid,
+                sender: params.sender,
+                nonce: params.nonce,
+                guid: params.guid,
+                message: params.message.clone(),
+            },
+        )?;
 
         let trade_match = ctx.accounts.trade_match.as_mut();
 

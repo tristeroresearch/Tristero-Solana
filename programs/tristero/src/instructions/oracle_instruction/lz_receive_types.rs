@@ -3,6 +3,7 @@ use std::str::FromStr;
 use crate::*;
 use spl_token::ID as TOKEN_PROGRAM_ID;
 use anchor_lang::solana_program::system_program::ID as SYSTEM_ID;
+use oapp::endpoint_cpi::LzAccount;
 
 #[derive(Accounts)]
 pub struct LzReceiveTypes<'info> {
@@ -65,15 +66,26 @@ impl LzReceiveTypes<'_> {
             LzAccount { pubkey: to_token_addr, is_signer: false, is_writable: true }, // 4
             LzAccount { pubkey: TOKEN_PROGRAM_ID, is_signer: false, is_writable: false }, // 5
         ];
+
+        let endpoint_program_id = Pubkey::from_str("76y77prsiCMvXMjuoZ5VRrhG5qYBrUMYTE5WgHqgjEn6").unwrap();
+        // remaining accounts 0..9
+        let accounts_for_clear = oapp::endpoint_cpi::get_accounts_for_clear(
+            endpoint_program_id,
+            &tristero_oapp.key(),
+            params.src_eid,
+            &params.sender,
+            params.nonce,
+        );
+        accounts.extend(accounts_for_clear);
         
         Ok(accounts)
     }
 }
 
-/// same to anchor_lang::prelude::AccountMeta
-#[derive(Clone, AnchorSerialize, AnchorDeserialize, Debug)]
-pub struct LzAccount {
-    pub pubkey: Pubkey,
-    pub is_signer: bool,
-    pub is_writable: bool,
-}
+// /// same to anchor_lang::prelude::AccountMeta
+// #[derive(Clone, AnchorSerialize, AnchorDeserialize, Debug)]
+// pub struct LzAccount {
+//     pub pubkey: Pubkey,
+//     pub is_signer: bool,
+//     pub is_writable: bool,
+// }

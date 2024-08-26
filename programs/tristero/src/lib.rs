@@ -13,6 +13,7 @@ use instructions::*;
 use state::*;
 use myutils::*;
 use events::*;
+use oapp::endpoint_cpi::LzAccount;
 
 declare_id!("EcRNzbsJJ1VemdXLbCH51pndgySMVrk9D1F2YMRF58ra"); // for devnet
 // declare_id!("Eq22HfHg6KjtAoqeEU1UhmbA2iSxUdJQC1syuv36xK1U"); // for mainnet

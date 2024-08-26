@@ -679,29 +679,6 @@ export type Tristero = {
       }
     },
     {
-      "name": "LzAccount",
-      "docs": [
-        "same to anchor_lang::prelude::AccountMeta"
-      ],
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "pubkey",
-            "type": "publicKey"
-          },
-          {
-            "name": "isSigner",
-            "type": "bool"
-          },
-          {
-            "name": "isWritable",
-            "type": "bool"
-          }
-        ]
-      }
-    },
-    {
       "name": "LzReceiveParams",
       "type": {
         "kind": "struct",
@@ -1724,29 +1701,6 @@ export const IDL: Tristero = {
           {
             "name": "extraData",
             "type": "bytes"
-          }
-        ]
-      }
-    },
-    {
-      "name": "LzAccount",
-      "docs": [
-        "same to anchor_lang::prelude::AccountMeta"
-      ],
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "pubkey",
-            "type": "publicKey"
-          },
-          {
-            "name": "isSigner",
-            "type": "bool"
-          },
-          {
-            "name": "isWritable",
-            "type": "bool"
           }
         ]
       }
