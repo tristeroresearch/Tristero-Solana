@@ -7,6 +7,7 @@ pub struct TradeMatch {
     pub user_token_addr: Pubkey,
     pub source_token_mint: Pubkey,
     pub dest_token_mint: [u8; 20],
+    pub arb_user_token_account: Pubkey,
     pub src_index: u64,
     pub dst_index: u64,
     pub source_sell_amount: u64,
