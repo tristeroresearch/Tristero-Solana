@@ -19,7 +19,7 @@ pub struct FinishChallenge<'info> {
         seeds = [b"trade_match", &params.trade_match_id.to_be_bytes()],
         bump = trade_match.bump,
         constraint = trade_match.authority == authority.key() @ CustomError::InvalidAuthority,
-        constraint = trade_match.status == 1u8 @ CustomError::NotAgain
+        constraint = trade_match.status == 1u8 @ CustomError::NotEvenStarted
     )]
     pub trade_match: Box<Account<'info, TradeMatch>>,
 
