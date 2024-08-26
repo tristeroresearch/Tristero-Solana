@@ -181,6 +181,54 @@ export type Tristero = {
       ]
     },
     {
+      "name": "finishChallenge",
+      "accounts": [
+        {
+          "name": "authority",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "tradeMatch",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "oapp",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "arbUserTokenAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "stakingAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "params",
+          "type": {
+            "defined": "FinishChallengeParams"
+          }
+        }
+      ]
+    },
+    {
       "name": "lzReceive",
       "accounts": [
         {
@@ -691,6 +739,40 @@ export type Tristero = {
           {
             "name": "extraData",
             "type": "bytes"
+          }
+        ]
+      }
+    },
+    {
+      "name": "FinishChallengeParams",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "tradeMatchId",
+            "type": "u64"
+          },
+          {
+            "name": "tristeroOappBump",
+            "type": "u8"
+          },
+          {
+            "name": "sourceTokenAddressInArbitrumChain",
+            "type": {
+              "array": [
+                "u8",
+                20
+              ]
+            }
+          },
+          {
+            "name": "receiver",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
           }
         ]
       }
@@ -1149,6 +1231,54 @@ export const IDL: Tristero = {
       ]
     },
     {
+      "name": "finishChallenge",
+      "accounts": [
+        {
+          "name": "authority",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "tradeMatch",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "oapp",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "arbUserTokenAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "stakingAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "params",
+          "type": {
+            "defined": "FinishChallengeParams"
+          }
+        }
+      ]
+    },
+    {
       "name": "lzReceive",
       "accounts": [
         {
@@ -1659,6 +1789,40 @@ export const IDL: Tristero = {
           {
             "name": "extraData",
             "type": "bytes"
+          }
+        ]
+      }
+    },
+    {
+      "name": "FinishChallengeParams",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "tradeMatchId",
+            "type": "u64"
+          },
+          {
+            "name": "tristeroOappBump",
+            "type": "u8"
+          },
+          {
+            "name": "sourceTokenAddressInArbitrumChain",
+            "type": {
+              "array": [
+                "u8",
+                20
+              ]
+            }
+          },
+          {
+            "name": "receiver",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
           }
         ]
       }

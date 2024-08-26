@@ -16,7 +16,9 @@ from . import lz_account
 from .lz_account import LzAccount, LzAccountJSON
 from . import lz_receive_params
 from .lz_receive_params import LzReceiveParams, LzReceiveParamsJSON
-from . import challenge_params
-from .challenge_params import ChallengeParams, ChallengeParamsJSON
+from . import finish_challenge_params
+from .finish_challenge_params import FinishChallengeParams, FinishChallengeParamsJSON
 from . import place_order_params
 from .place_order_params import PlaceOrderParams, PlaceOrderParamsJSON
+from . import challenge_params
+from .challenge_params import ChallengeParams, ChallengeParamsJSON

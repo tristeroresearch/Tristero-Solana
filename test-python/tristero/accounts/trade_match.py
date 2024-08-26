@@ -16,6 +16,7 @@ class TradeMatchJSON(typing.TypedDict):
     user_token_addr: str
     source_token_mint: str
     dest_token_mint: list[int]
+    arb_user_token_account: str
     src_index: int
     dst_index: int
     source_sell_amount: int
@@ -34,6 +35,7 @@ class TradeMatch:
         "user_token_addr" / BorshPubkey,
         "source_token_mint" / BorshPubkey,
         "dest_token_mint" / borsh.U8[20],
+        "arb_user_token_account" / BorshPubkey,
         "src_index" / borsh.U64,
         "dst_index" / borsh.U64,
         "source_sell_amount" / borsh.U64,
@@ -47,6 +49,7 @@ class TradeMatch:
     user_token_addr: Pubkey
     source_token_mint: Pubkey
     dest_token_mint: list[int]
+    arb_user_token_account: Pubkey
     src_index: int
     dst_index: int
     source_sell_amount: int
@@ -104,6 +107,7 @@ class TradeMatch:
             user_token_addr=dec.user_token_addr,
             source_token_mint=dec.source_token_mint,
             dest_token_mint=dec.dest_token_mint,
+            arb_user_token_account=dec.arb_user_token_account,
             src_index=dec.src_index,
             dst_index=dec.dst_index,
             source_sell_amount=dec.source_sell_amount,
@@ -120,6 +124,7 @@ class TradeMatch:
             "user_token_addr": str(self.user_token_addr),
             "source_token_mint": str(self.source_token_mint),
             "dest_token_mint": self.dest_token_mint,
+            "arb_user_token_account": str(self.arb_user_token_account),
             "src_index": self.src_index,
             "dst_index": self.dst_index,
             "source_sell_amount": self.source_sell_amount,
@@ -137,6 +142,7 @@ class TradeMatch:
             user_token_addr=Pubkey.from_string(obj["user_token_addr"]),
             source_token_mint=Pubkey.from_string(obj["source_token_mint"]),
             dest_token_mint=obj["dest_token_mint"],
+            arb_user_token_account=Pubkey.from_string(obj["arb_user_token_account"]),
             src_index=obj["src_index"],
             dst_index=obj["dst_index"],
             source_sell_amount=obj["source_sell_amount"],

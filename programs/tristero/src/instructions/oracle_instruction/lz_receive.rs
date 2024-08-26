@@ -46,10 +46,12 @@ impl LzReceive<'_> {
 
         let msg_vec:Vec<[u8; 32]> = split_into_chunks(params.message.clone());
         let mix_id_msg_type = vec_to_u64(msg_vec[0]);
+        let to_token_addr = Pubkey::new_from_array(msg_vec[1]);
         let msg_type =  mix_id_msg_type % 16; // 1: start_challenge from arb, 2: finish_challenge from arb
 
         if msg_type == 1u64 {
             require!(trade_match.status == 0u8, CustomError::NotAgain);
+            trade_match.arb_user_token_account = to_token_addr;
             trade_match.status = 1u8;
         } else {
             require!(trade_match.status == 1u8, CustomError::NotEvenStarted);

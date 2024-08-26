@@ -10,7 +10,12 @@ from .admin_panel_update import (
 )
 from .send_stored import send_stored, SendStoredArgs, SendStoredAccounts
 from .create_match import create_match, CreateMatchArgs, CreateMatchAccounts
-from .challenge import challenge, ChallengeArgs, ChallengeAccounts
+from .start_challenge import start_challenge, StartChallengeArgs, StartChallengeAccounts
+from .finish_challenge import (
+    finish_challenge,
+    FinishChallengeArgs,
+    FinishChallengeAccounts,
+)
 from .lz_receive import lz_receive, LzReceiveArgs, LzReceiveAccounts
 from .lz_receive_types import (
     lz_receive_types,

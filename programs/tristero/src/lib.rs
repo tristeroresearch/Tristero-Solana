@@ -54,6 +54,10 @@ pub mod tristero {
         instructions::start_challenge(ctx, &params)
     }
 
+    pub fn finish_challenge(ctx: Context<FinishChallenge>, params: FinishChallengeParams) -> Result<()> {
+        instructions::finish_challenge(ctx, &params)
+    }
+
     pub fn lz_receive(mut ctx: Context<LzReceive>, params: LzReceiveParams) -> Result<()> {
         LzReceive::apply(&mut ctx, &params)
     }

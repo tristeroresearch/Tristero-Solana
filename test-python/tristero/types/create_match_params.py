@@ -11,7 +11,6 @@ class CreateMatchParamsJSON(typing.TypedDict):
     src_quantity: int
     dst_quantity: int
     trade_match_id: int
-    arb_source_token_addr: list[int]
 
 
 @dataclass
@@ -22,14 +21,12 @@ class CreateMatchParams:
         "src_quantity" / borsh.U64,
         "dst_quantity" / borsh.U64,
         "trade_match_id" / borsh.U64,
-        "arb_source_token_addr" / borsh.U8[20],
     )
     src_index: int
     dst_index: int
     src_quantity: int
     dst_quantity: int
     trade_match_id: int
-    arb_source_token_addr: list[int]
 
     @classmethod
     def from_decoded(cls, obj: Container) -> "CreateMatchParams":
@@ -39,7 +36,6 @@ class CreateMatchParams:
             src_quantity=obj.src_quantity,
             dst_quantity=obj.dst_quantity,
             trade_match_id=obj.trade_match_id,
-            arb_source_token_addr=obj.arb_source_token_addr,
         )
 
     def to_encodable(self) -> dict[str, typing.Any]:
@@ -49,7 +45,6 @@ class CreateMatchParams:
             "src_quantity": self.src_quantity,
             "dst_quantity": self.dst_quantity,
             "trade_match_id": self.trade_match_id,
-            "arb_source_token_addr": self.arb_source_token_addr,
         }
 
     def to_json(self) -> CreateMatchParamsJSON:
@@ -59,7 +54,6 @@ class CreateMatchParams:
             "src_quantity": self.src_quantity,
             "dst_quantity": self.dst_quantity,
             "trade_match_id": self.trade_match_id,
-            "arb_source_token_addr": self.arb_source_token_addr,
         }
 
     @classmethod
@@ -70,5 +64,4 @@ class CreateMatchParams:
             src_quantity=obj["src_quantity"],
             dst_quantity=obj["dst_quantity"],
             trade_match_id=obj["trade_match_id"],
-            arb_source_token_addr=obj["arb_source_token_addr"],
         )

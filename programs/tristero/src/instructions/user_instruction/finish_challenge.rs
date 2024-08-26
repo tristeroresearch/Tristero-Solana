@@ -1,6 +1,8 @@
 use solana_program::native_token::LAMPORTS_PER_SOL;
 use crate::*;
-
+use anchor_spl::{
+    token::{self, Transfer, Mint, TokenAccount},
+};
 use {crate::error::*, crate::state::*};
 use spl_token::ID as TOKEN_PROGRAM_ID;
 use endpoint::{
@@ -23,12 +25,27 @@ pub struct FinishChallenge<'info> {
     )]
     pub trade_match: Box<Account<'info, TradeMatch>>,
 
+    /// CHECK:
+    #[account(
+        mut,
+        seeds = [b"TristeroOapp"],
+        bump,
+    )]
+    pub oapp: AccountInfo<'info>,
+
     #[account(
         mut,
         constraint = arb_user_token_account.mint == trade_match.source_token_mint @ CustomError::InvalidTokenMintAddress,
-        constraint = arb_user_token_account.key() == trade_mathc.arb_user_token_account @ CustomError::InvalidTokenOwner
+        constraint = arb_user_token_account.key() == trade_match.arb_user_token_account @ CustomError::InvalidTokenOwner
     )]
     pub arb_user_token_account: Box<Account<'info, TokenAccount>>,
+
+    #[account(
+        mut,
+        seeds = [b"staking_account", arb_user_token_account.mint.as_ref()],
+        bump,
+    )]
+    pub staking_account: Box<Account<'info, TokenAccount>>,
 
     pub system_program: Program<'info, System>,
 
@@ -120,9 +137,9 @@ pub fn finish_challenge(ctx: Context<FinishChallenge>, params: &FinishChallengeP
 
     // ---------------------Transfer the source token from the staking account----------------------------------
     let cpi_accounts = Transfer {
-        from: stake_acc,
-        to: ctx.accounts.arb_user_token_account,
-        authority: authority
+        from: ctx.accounts.staking_account.to_account_info(),
+        to: ctx.accounts.arb_user_token_account.to_account_info(),
+        authority: ctx.accounts.oapp.to_account_info()
     };
 
     let cpi_context = CpiContext::new(ctx.accounts.token_program.to_account_info(), cpi_accounts);
