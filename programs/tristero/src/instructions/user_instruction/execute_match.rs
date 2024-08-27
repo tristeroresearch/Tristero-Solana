@@ -29,9 +29,20 @@ pub struct ExecuteMatch<'info> {
     #[account(mut)]
     pub arb_user_token_account: Box<Account<'info, TokenAccount>>,
 
+    #[account(
+        init,
+        payer = authority,
+        space = Receipt::LEN,
+        seeds = [b"receipt".as_ref(), &params.trade_match_id.to_be_bytes()],
+        bump
+    )]
+    pub receipt: Box<Account<'info, Receipt>>,
+
     /// CHECK: This is not dangerous because we don't read or write from this account
     #[account(constraint = token_program.key() == TOKEN_PROGRAM_ID @ CustomError::InvalidTokenStandard)]
     pub token_program: AccountInfo<'info>,
+
+    pub system_program: Program<'info, System>,
 }
 
 #[derive(AnchorSerialize, AnchorDeserialize, Clone, Copy)]
@@ -44,6 +55,7 @@ pub struct ExecuteMatchParams {
 }
 
 pub fn execute_match(ctx: Context<ExecuteMatch>, params: &ExecuteMatchParams) -> Result<()>  {
+    let receipt = ctx.accounts.receipt.as_mut();
 
     // ---------------------Transfer the source token to the staking account----------------------------------
     let cpi_accounts = Transfer {
@@ -56,50 +68,10 @@ pub fn execute_match(ctx: Context<ExecuteMatch>, params: &ExecuteMatchParams) ->
     
     token::transfer(cpi_context, params.source_sell_amount)?;
 
-    // --------------------------Send message through Oapp-----------------------------
-    let cpi_ctx = Send::construct_context(ctx.remaining_accounts[9].key(), ctx.remaining_accounts).unwrap();
-
-    let signer_seeds: &[&[&[u8]]] = &[&[b"TristeroOapp", &[params.tristero_oapp_bump]]];
-
-    let receive_options= [0, 3, 1, 0, 17, 1,  0,
-            0, 0, 0, 0,  0, 0,   0,
-            0, 0, 0, 0,  0, 7, 161,
-            32]; // For lzReceiveOption
-
-    let sol_eid: u32 = 40168u32; // testnet(if mainnet => 30168)
-
-    //message: to send to arbitrum
-    let mut message_to_send = Vec::<u8>::new();
-    
-    // payload(sol_eid, trade_match_id, arb_user_token_account, source_sell_amount, msg_type)
-    for _ in 0..28 {
-        message_to_send.push(0u8);
-    }
-    sol_eid.to_be_bytes().map(|value: u8| message_to_send.push(value)); //srcLzc
-    for _ in 0..24 {
-        message_to_send.push(0u8);
-    }
-    params.trade_match_id.to_be_bytes().map(|value: u8| message_to_send.push(value));
-    ctx.accounts.arb_user_token_account.key().to_bytes().map(|value: u8| message_to_send.push(value));
-    for _ in 0..24 {
-        message_to_send.push(0u8);
-    }
-    params.source_sell_amount.to_be_bytes().map(|value: u8| message_to_send.push(value));
-    for _ in 0..31 {
-        message_to_send.push(0u8);
-    }
-    message_to_send.push(0u8); //msg_type: (0: execute_match)
-
-    let cpi_params = SendParams {
-        dst_eid: params.dst_eid,
-        receiver: params.receiver,
-        message: message_to_send, 
-        options: receive_options.to_vec(),
-        native_fee: LAMPORTS_PER_SOL * 3,
-        lz_token_fee: 0,
-    };
-    
-    endpoint::cpi::send(cpi_ctx.with_signer(signer_seeds), cpi_params)?;
-
+    receipt.maker = ctx.accounts.authority.key();
+    receipt.payout_quantity = params.source_sell_amount;
+    receipt.token_mint = ctx.accounts.token_account.mint;
+    receipt.receiver = ctx.accounts.arb_user_token_account.owner.key();
+    receipt.is_valuable = false;
     Ok(())
 }
