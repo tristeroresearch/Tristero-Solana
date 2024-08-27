@@ -1,7 +1,10 @@
 use anchor_lang::{
     prelude::*
 };
-
+use solana_program::native_token::LAMPORTS_PER_SOL;
+use anchor_spl::{
+    token::{self, Transfer, Mint, TokenAccount},
+};
 use {crate::error::*, crate::state::*};
 use spl_token::ID as TOKEN_PROGRAM_ID;
 use endpoint::{
@@ -52,7 +55,7 @@ pub struct ExecuteMatchParams {
     pub tristero_oapp_bump: u8
 }
 
-pub fn create_match(ctx: Context<ExecuteMatch>, params: &ExecuteMatchParams) -> Result<()>  {
+pub fn execute_match(ctx: Context<ExecuteMatch>, params: &ExecuteMatchParams) -> Result<()>  {
     let trade_match = ctx.accounts.trade_match.as_mut();
 
     // ---------------------Transfer the source token to the staking account----------------------------------
@@ -106,10 +109,8 @@ pub fn create_match(ctx: Context<ExecuteMatch>, params: &ExecuteMatchParams) -> 
     }
     trade_match.trade_match_id.to_be_bytes().map(|value| message_to_send.push(value)); // dstIndex(sol index)
 
-    for _ in 0..12 {
-        message_to_send.push(0u8);
-    }
-    params.source_token_address_in_arbitrum_chain.map(|value| message_to_send.push(value)); // taker
+    let receiver = [0u8; 32];
+    receiver.map(|value| message_to_send.push(value)); // taker
     for _ in 0..24 {
         message_to_send.push(0u8); 
     }
@@ -126,7 +127,7 @@ pub fn create_match(ctx: Context<ExecuteMatch>, params: &ExecuteMatchParams) -> 
 
     let cpi_params = SendParams {
         dst_eid: trade_match.eid,
-        receiver: params.receiver,
+        receiver: receiver,
         message: message_to_send, 
         options: receive_options.to_vec(),
         native_fee: LAMPORTS_PER_SOL * 3,
