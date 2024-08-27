@@ -13,6 +13,9 @@ pub enum CustomError {
 
     #[msg("InvalidTokenAmount")]
     InvalidTokenAmount,
+
+    #[msg("InvalidOwnerWithTradeMatch")]
+    InvalidOwnerWithTradeMatch,
     
     #[msg("InvalidTradeMatch")]
     InvalidTradeMatch,
