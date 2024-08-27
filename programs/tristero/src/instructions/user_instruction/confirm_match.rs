@@ -1,7 +1,9 @@
 use anchor_lang::{
     prelude::*
 };
-
+use anchor_spl::{
+    token::{self, Transfer, Mint, TokenAccount},
+};
 use {crate::error::*, crate::state::*};
 use spl_token::ID as TOKEN_PROGRAM_ID;
 use endpoint::{
@@ -57,10 +59,10 @@ pub struct ConfirmMatchParams {
     pub tristero_oapp_bump: u8
 }
 
-pub fn create_match(ctx: Context<ConfirmMatch>, params: &ConfirmMatchParams) -> Result<()>  {
+pub fn confirm_match(ctx: Context<ConfirmMatch>, params: &ConfirmMatchParams) -> Result<()>  {
     let trade_match = ctx.accounts.trade_match.as_mut();
 
-    // ---------------------Transfer the source token to the staking account----------------------------------
+    // ---------------------Transfer the source token to the user from staking account----------------------------------
     let cpi_accounts = Transfer {
         from: ctx.accounts.staking_account.to_account_info(),
         to: ctx.accounts.token_account.to_account_info(),
