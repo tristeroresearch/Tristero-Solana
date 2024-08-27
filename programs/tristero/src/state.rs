@@ -6,3 +6,6 @@ pub use trade_match::*;
 
 pub mod order;
 pub use order::*;
+
+pub mod receipt;
+pub use receipt::*;
