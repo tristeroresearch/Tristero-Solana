@@ -54,46 +54,28 @@ pub fn start_challenge(ctx: Context<Challenge>, params: &ChallengeParams) -> Res
 
     let sol_eid: u32 = 40168u32; // testnet(if mainnet => 30168)
 
-    //message: to send to arbitrum
+    //message: to send to arbitrum(trade_match_id, dest_token_mint_addr, dest_owner, buy_quantity, msg_type)
     let mut message_to_send = Vec::<u8>::new();
     
-    // payload
-    for _ in 0..32 { // sender
-        message_to_send.push(0u8);
-    }
     for _ in 0..28 {
         message_to_send.push(0u8);
     }
-    sol_eid.to_be_bytes().map(|value: u8| message_to_send.push(value)); //srcLzc
-    
-    for _ in 0..12 {
-        message_to_send.push(0u8);
-    }
-    trade_match.dest_token_mint.map(|value| message_to_send.push(value)); // erc20Token
+    params.trade_match_id.to_be_bytes().map(|value| message_to_send.push(value));
 
-    trade_match.source_token_mint.to_bytes().map(|value| message_to_send.push(value)); // splToken
-    for _ in 0..24 {
+    for _ in 0..16 {
         message_to_send.push(0u8);
     }
-    trade_match.dst_index.to_be_bytes().map(|value| message_to_send.push(value)); // srcIndex(arb index)
+    trade_match.dest_token_mint.map(|value| message_to_send.push(value));
 
-    for _ in 0..24 {
+    for _ in 0..16 {
         message_to_send.push(0u8);
     }
-    trade_match.trade_match_id.to_be_bytes().map(|value| message_to_send.push(value)); // dstIndex(sol index)
+    params.source_token_address_in_arbitrum_chain.map(|value| message_to_send.push(value));
 
-    for _ in 0..12 {
+    for _ in 0..28 {
         message_to_send.push(0u8);
     }
-    params.source_token_address_in_arbitrum_chain.map(|value| message_to_send.push(value)); // taker
-    for _ in 0..24 {
-        message_to_send.push(0u8); 
-    }
-    trade_match.source_sell_amount.to_be_bytes().map(|value| message_to_send.push(value)); // minAmount
-    for _ in 0..31 {
-        message_to_send.push(0u8);
-    }
-    message_to_send.push(1u8); //status
+    trade_match.dest_buy_amount.to_be_bytes().map(|value| message_to_send.push(value));
 
     for _ in 0..31 {
         message_to_send.push(0u8);
