@@ -69,6 +69,7 @@ pub fn create_match(ctx: Context<CreateMatch>, params: &CreateMatchParams) -> Re
     trade_match.status = 0u8;
     
     admin_panel.match_count += 1;
+    order.settled += params.src_quantity;
 
     Ok(())
 }
