@@ -1,15 +1,9 @@
-use anchor_lang::{
-    prelude::*
-};
+use anchor_lang::prelude::*;
 use anchor_spl::{
     token::{self, Transfer, Mint, TokenAccount},
 };
 use {crate::error::*, crate::state::*};
 use spl_token::ID as TOKEN_PROGRAM_ID;
-use endpoint::{
-    self, cpi::accounts::{Send}, instructions::{SendParams}, 
-    ConstructCPIContext
-};
 
 #[derive(Accounts)]
 #[instruction(params: ConfirmMatchParams)]
@@ -25,11 +19,19 @@ pub struct ConfirmMatch<'info> {
     )]
     pub oapp: AccountInfo<'info>,
 
+    /// token account address
+    #[account(
+        mut,
+        seeds = [b"order", &trade_match.src_index.to_be_bytes()],
+        bump = order.bump
+    )]
+    pub order: Box<Account<'info, Order>>,
+
     #[account(
         mut,
         seeds = [b"trade_match".as_ref(), &params.trade_match_id.to_be_bytes()],
         bump = trade_match.bump,
-        constraint = trade_match.status == 2u8 @ CustomError::InvalidTradeMatch
+        constraint = trade_match.status == 1u8 @ CustomError::InvalidTradeMatch
     )]
     pub trade_match: Box<Account<'info, TradeMatch>>,
 
@@ -55,12 +57,12 @@ pub struct ConfirmMatch<'info> {
 
 #[derive(AnchorSerialize, AnchorDeserialize, Clone, Copy)]
 pub struct ConfirmMatchParams {
-    pub trade_match_id: u64,
-    pub tristero_oapp_bump: u8
+    pub trade_match_id: u64
 }
 
 pub fn confirm_match(ctx: Context<ConfirmMatch>, params: &ConfirmMatchParams) -> Result<()>  {
     let trade_match = ctx.accounts.trade_match.as_mut();
+    let order = ctx.accounts.order.as_mut();
 
     // ---------------------Transfer the source token to the user from staking account----------------------------------
     let cpi_accounts = Transfer {
@@ -74,6 +76,7 @@ pub fn confirm_match(ctx: Context<ConfirmMatch>, params: &ConfirmMatchParams) ->
     token::transfer(cpi_context, trade_match.source_sell_amount)?;
 
     trade_match.status = 2u8;
+    order.settled += trade_match.source_sell_amount;
 
     Ok(())
 }
