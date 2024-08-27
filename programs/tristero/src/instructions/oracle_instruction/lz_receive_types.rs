@@ -1,8 +1,6 @@
 use std::str::FromStr;
 
 use crate::*;
-use spl_token::ID as TOKEN_PROGRAM_ID;
-use anchor_lang::solana_program::system_program::ID as SYSTEM_ID;
 use oapp::endpoint_cpi::LzAccount;
 
 #[derive(Accounts)]
@@ -39,27 +37,9 @@ impl LzReceiveTypes<'_> {
         msg!("==> {:#?}", msg_vec.len());
         let mix_id_msg_type = vec_to_u64(msg_vec[0]);
         let trade_match_id =  mix_id_msg_type / 16u64;
-        let mut accounts = Vec::new();
-        let (trade_match, _) = Pubkey::find_program_address(
-            &[b"trade_match", &trade_match_id.to_be_bytes()],
-            &program_id
-        );
-        
-        let to_token_addr = Pubkey::new_from_array(msg_vec[1]);
-        let token_mint = Pubkey::new_from_array(msg_vec[2]);
-
-        let (staking_account, _) = Pubkey::find_program_address(
-            &[b"staking_account", &token_mint.to_bytes()],
-            &program_id
-        );
-
-        accounts = vec![
+        let msg_type = mix_id_msg_type % 16;
+        let mut accounts = vec![
             LzAccount { pubkey: tristero_oapp, is_signer: false, is_writable: true }, //0
-            LzAccount { pubkey: trade_match, is_signer: false, is_writable: true }, // 1
-            LzAccount { pubkey: tristero_oapp, is_signer: false, is_writable: true }, //2
-            LzAccount { pubkey: staking_account, is_signer: false, is_writable: true }, // 3
-            LzAccount { pubkey: to_token_addr, is_signer: false, is_writable: true }, // 4
-            LzAccount { pubkey: TOKEN_PROGRAM_ID, is_signer: false, is_writable: false }, // 5
         ];
 
         let endpoint_program_id = Pubkey::from_str("76y77prsiCMvXMjuoZ5VRrhG5qYBrUMYTE5WgHqgjEn6").unwrap();
@@ -72,6 +52,24 @@ impl LzReceiveTypes<'_> {
             params.nonce,
         );
         accounts.extend(accounts_for_clear);
+
+        if msg_type == 1 {
+            let (receipt, _) = Pubkey::find_program_address(
+                &[b"receipt", &trade_match_id.to_be_bytes()],
+                &program_id
+            );
+            accounts.extend([
+                LzAccount { pubkey: receipt, is_signer: false, is_writable: true }
+            ]);
+        } else if msg_type == 2 {
+            let (trade_match, _) = Pubkey::find_program_address(
+                &[b"trade_match", &trade_match_id.to_be_bytes()],
+                &program_id
+            );
+            accounts.extend([
+                LzAccount { pubkey: trade_match, is_signer: false, is_writable: true }
+            ]);
+        }
         
         Ok(accounts)
     }
