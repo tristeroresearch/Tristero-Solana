@@ -1,16 +1,7 @@
-use crate::*;
-use {crate::error::*, crate::state::*};
-use anchor_spl::{token::{self, Transfer, Mint, TokenAccount}};
-use endpoint::{
-    self, cpi::accounts::Send, instructions::SendParams, ConstructCPIContext,
-};
 use std::str::FromStr;
 
-use solana_program::{native_token::LAMPORTS_PER_SOL, program::invoke_signed};
-use oapp::endpoint::{
-    cpi::accounts::Clear,
-    instructions::{ClearParams, SendComposeParams},
-};
+use crate::*;
+use oapp::endpoint::instructions::ClearParams;
 
 #[derive(Accounts, Clone)]
 pub struct LzReceive<'info> {
@@ -21,12 +12,6 @@ pub struct LzReceive<'info> {
         bump
     )]
     pub oapp: AccountInfo<'info>,
-
-    #[account(
-        mut
-    )]
-    pub trade_match: Box<Account<'info, TradeMatch>>,
-
 }
 
 #[derive(Clone, AnchorSerialize, AnchorDeserialize)]
@@ -46,7 +31,7 @@ impl LzReceive<'_> {
         let signer_seeds: &[&[&[u8]]] = &[&[b"TristeroOapp", &[tristero_oapp_bump]]];
         let seed = signer_seeds[0];
 
-        let accounts_for_clear = &ctx.remaining_accounts[4..12];
+        let accounts_for_clear = &ctx.remaining_accounts[0..8];
         let endpoint_program_id = Pubkey::from_str("76y77prsiCMvXMjuoZ5VRrhG5qYBrUMYTE5WgHqgjEn6").unwrap();
         let _ = oapp::endpoint_cpi::clear(
             endpoint_program_id,
@@ -63,43 +48,24 @@ impl LzReceive<'_> {
             },
         )?;
 
-        let trade_match = ctx.accounts.trade_match.as_mut();
-
         let msg_vec:Vec<[u8; 32]> = split_into_chunks(params.message.clone());
         let mix_id_msg_type = vec_to_u64(msg_vec[0]);
-        let to_token_addr = Pubkey::new_from_array(msg_vec[1]);
-        let msg_type =  mix_id_msg_type % 16; // 1: start_challenge from arb, 2: finish_challenge from arb
-
-        /* analyze msg from arb, msg consists of trade_match_id, to_token_address
-        0: trade_match_id & msgType(1: start_challenge, 2: finish_challenge, 3: create_match, 4: execute_match)
-        1: destTokenAddr,
-        2: destTokenMint
-        */
+        let msg_type =  mix_id_msg_type % 16; // 1: start_challenge from arb, 2: finish_challenge from arb with ok, 3: with no
         if msg_type == 1u64 {
-            require!(trade_match.status == 0u8, CustomError::NotAgain);
-            trade_match.arb_user_token_account = to_token_addr;
-            trade_match.status = 1u8;
+            let dest_token_mint = Pubkey::new_from_array(msg_vec[1]);
+            let dest_owner = Pubkey::new_from_array(msg_vec[2]);
+            let buy_quantity = vec_to_u64(msg_vec[3]);
+            let market_maker = Pubkey::new_from_array(msg_vec[4]);
+
+            let receipt = &remaining_accounts[9];
+            let mut receipt_state = Receipt::try_from_slice(&receipt.data.borrow())?;
+            if receipt_state.maker == market_maker && receipt_state.payout_quantity >= buy_quantity && receipt_state.receiver == dest_owner && receipt_state.token_mint == dest_token_mint && !receipt_state.is_valuable {
+                receipt_state.is_valuable = true;
+            }
         } else if msg_type == 2u64{
-            require!(trade_match.status == 1u8, CustomError::NotEvenStarted);
-            let authority = remaining_accounts[0].to_account_info();
-            let stake_acc = remaining_accounts[1].to_account_info();
-            let token_acc = remaining_accounts[2].to_account_info();
-
-            // ---------------------Transfer the source token from the staking account----------------------------------
-            let cpi_accounts = Transfer {
-                from: stake_acc,
-                to: token_acc,
-                authority: authority
-            };
-
-            let cpi_context = CpiContext::new(remaining_accounts[3].to_account_info(), cpi_accounts);
-            token::transfer(cpi_context.with_signer(signer_seeds), trade_match.source_sell_amount)?;
-
+            let trade_match_acc = &remaining_accounts[9];
+            let mut trade_match = TradeMatch::try_from_slice(&trade_match_acc.data.borrow())?;
             trade_match.status = 2u8;
-        } else if msg_type == 3u64 {
-            trade_match.status = 1u8;
-        } else if msg_type == 4u64 {
-
         }
         Ok(())
     }
