@@ -70,11 +70,16 @@ impl LzReceive<'_> {
         let to_token_addr = Pubkey::new_from_array(msg_vec[1]);
         let msg_type =  mix_id_msg_type % 16; // 1: start_challenge from arb, 2: finish_challenge from arb
 
+        /* analyze msg from arb, msg consists of trade_match_id, to_token_address
+        0: trade_match_id & msgType(1: start_challenge, 2: finish_challenge, 3: create_match, 4: execute_match)
+        1: destTokenAddr,
+        2: destTokenMint
+        */
         if msg_type == 1u64 {
             require!(trade_match.status == 0u8, CustomError::NotAgain);
             trade_match.arb_user_token_account = to_token_addr;
             trade_match.status = 1u8;
-        } else {
+        } else if msg_type == 2u64{
             require!(trade_match.status == 1u8, CustomError::NotEvenStarted);
             let authority = remaining_accounts[0].to_account_info();
             let stake_acc = remaining_accounts[1].to_account_info();
@@ -91,6 +96,10 @@ impl LzReceive<'_> {
             token::transfer(cpi_context.with_signer(signer_seeds), trade_match.source_sell_amount)?;
 
             trade_match.status = 2u8;
+        } else if msg_type == 3u64 {
+            trade_match.status = 1u8;
+        } else if msg_type == 4u64 {
+
         }
         Ok(())
     }

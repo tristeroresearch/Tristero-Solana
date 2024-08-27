@@ -35,11 +35,6 @@ impl LzReceiveTypes<'_> {
             &program_id
         );
 
-        /* analyze msg from arb, msg consists of trade_match_id, to_token_address
-        0: trade_match_id & msgTyp
-        1: destTokenAddr,
-        2: destTokenMint
-        */
         let msg_vec:Vec<[u8; 32]> = split_into_chunks(params.message.clone());
         msg!("==> {:#?}", msg_vec.len());
         let mix_id_msg_type = vec_to_u64(msg_vec[0]);
