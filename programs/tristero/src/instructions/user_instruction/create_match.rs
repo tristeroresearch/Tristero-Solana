@@ -15,7 +15,6 @@ pub struct CreateMatch<'info> {
         mut,
         seeds = [b"admin_panel"],
         bump = admin_panel.bump,
-        has_one = authority
     )]
     pub admin_panel: Box<Account<'info, AdminPanel>>,
 
@@ -37,10 +36,6 @@ pub struct CreateMatch<'info> {
     pub trade_match: Box<Account<'info, TradeMatch>>,
 
     pub system_program: Program<'info, System>,
-
-    /// CHECK: This is not dangerous because we don't read or write from this account
-    #[account(constraint = token_program.key() == TOKEN_PROGRAM_ID @ CustomError::InvalidTokenStandard)]
-    pub token_program: AccountInfo<'info>,
 }
 
 #[derive(AnchorSerialize, AnchorDeserialize, Clone, Copy)]

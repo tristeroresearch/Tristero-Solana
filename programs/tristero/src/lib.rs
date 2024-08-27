@@ -15,7 +15,7 @@ use myutils::*;
 use events::*;
 use oapp::endpoint_cpi::LzAccount;
 
-declare_id!("EcRNzbsJJ1VemdXLbCH51pndgySMVrk9D1F2YMRF58ra"); // for devnet
+declare_id!("E2okPYndsWqtniTNnoK2YHdZUwMEWpN1PtPW3woaY5Lm"); // for devnet
 // declare_id!("Eq22HfHg6KjtAoqeEU1UhmbA2iSxUdJQC1syuv36xK1U"); // for mainnet
 
 pub const ENDPOINT_SEED: &[u8] = b"Endpoint";
@@ -41,10 +41,6 @@ pub mod tristero {
 
     pub fn admin_panel_update(ctx: Context<Update>, params: UpdateParams) -> Result<()> {
         instructions::update(ctx, &params)
-    }
-
-    pub fn send_stored(ctx: Context<SendStored>, params: SendStoredParams) -> Result<()> {
-        instructions::send_stored(ctx, &params)
     }
 
     pub fn create_match(ctx: Context<CreateMatch>, params: CreateMatchParams) -> Result<()> {
