@@ -44,7 +44,8 @@ pub struct FinishChallenge<'info> {
 #[derive(AnchorSerialize, AnchorDeserialize, Clone)]
 pub struct FinishChallengeParams {
     pub trade_match_id: u64,
-    pub receiver:[u8; 32]
+    pub receiver:[u8; 32],
+    pub source_token_address_in_arbitrum_chain:[u8; 20],
 }
 
 pub fn finish_challenge(ctx: Context<FinishChallenge>, params: &FinishChallengeParams) -> Result<()>  {
@@ -64,7 +65,7 @@ pub fn finish_challenge(ctx: Context<FinishChallenge>, params: &FinishChallengeP
 
     let sol_eid: u32 = 40168u32; // testnet(if mainnet => 30168)
 
-    //message: to send to arbitrum(trade_match_id, msg_type)
+    //message: to send to arbitrum(trade_match_id, dest_token_mint, dest_owner, buy_quantity, msg_type)
     let mut message_to_send = Vec::<u8>::new();
     
     let receipt_state = Receipt::try_from_slice(&receipt.data.borrow());
@@ -84,6 +85,21 @@ pub fn finish_challenge(ctx: Context<FinishChallenge>, params: &FinishChallengeP
         message_to_send.push(0u8);
     }
     params.trade_match_id.to_be_bytes().map(|value| message_to_send.push(value));
+
+    for _ in 0..16 {
+        message_to_send.push(0u8);
+    }
+    trade_match.dest_token_mint.map(|value| message_to_send.push(value));
+
+    for _ in 0..16 {
+        message_to_send.push(0u8);
+    }
+    params.source_token_address_in_arbitrum_chain.map(|value| message_to_send.push(value));
+
+    for _ in 0..28 {
+        message_to_send.push(0u8);
+    }
+    trade_match.dest_buy_amount.to_be_bytes().map(|value| message_to_send.push(value));
 
     for _ in 0..31 {
         message_to_send.push(0u8);
