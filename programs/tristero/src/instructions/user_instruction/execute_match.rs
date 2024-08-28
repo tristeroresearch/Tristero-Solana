@@ -49,9 +49,7 @@ pub struct ExecuteMatch<'info> {
 pub struct ExecuteMatchParams {
     pub dst_eid: u32,
     pub trade_match_id: u64,
-    pub tristero_oapp_bump: u8,
     pub source_sell_amount: u64,
-    pub receiver: [u8; 32],
 }
 
 pub fn execute_match(ctx: Context<ExecuteMatch>, params: &ExecuteMatchParams) -> Result<()>  {
