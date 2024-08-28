@@ -16,7 +16,6 @@ layout = borsh.CStruct("params" / types.lz_receive_params.LzReceiveParams.layout
 
 class LzReceiveAccounts(typing.TypedDict):
     oapp: Pubkey
-    trade_match: Pubkey
 
 
 def lz_receive(
@@ -26,8 +25,7 @@ def lz_receive(
     remaining_accounts: typing.Optional[typing.List[AccountMeta]] = None,
 ) -> Instruction:
     keys: list[AccountMeta] = [
-        AccountMeta(pubkey=accounts["oapp"], is_signer=False, is_writable=True),
-        AccountMeta(pubkey=accounts["trade_match"], is_signer=False, is_writable=True),
+        AccountMeta(pubkey=accounts["oapp"], is_signer=False, is_writable=True)
     ]
     if remaining_accounts is not None:
         keys += remaining_accounts

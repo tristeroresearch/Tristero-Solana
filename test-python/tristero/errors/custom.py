@@ -38,263 +38,272 @@ class InvalidTokenAmount(ProgramError):
     msg = "InvalidTokenAmount"
 
 
-class InvalidTradeMatch(ProgramError):
+class InvalidOwnerWithTradeMatch(ProgramError):
     def __init__(self) -> None:
-        super().__init__(6004, "InvalidTradeMatch")
+        super().__init__(6004, "InvalidOwnerWithTradeMatch")
 
     code = 6004
+    name = "InvalidOwnerWithTradeMatch"
+    msg = "InvalidOwnerWithTradeMatch"
+
+
+class InvalidTradeMatch(ProgramError):
+    def __init__(self) -> None:
+        super().__init__(6005, "InvalidTradeMatch")
+
+    code = 6005
     name = "InvalidTradeMatch"
     msg = "InvalidTradeMatch"
 
 
 class InvalidTokenStandard(ProgramError):
     def __init__(self) -> None:
-        super().__init__(6005, "InvalidTokenStandard")
+        super().__init__(6006, "InvalidTokenStandard")
 
-    code = 6005
+    code = 6006
     name = "InvalidTokenStandard"
     msg = "InvalidTokenStandard"
 
 
 class PayloadHashNotFound(ProgramError):
     def __init__(self) -> None:
-        super().__init__(6006, "PayloadHashNotFound")
+        super().__init__(6007, "PayloadHashNotFound")
 
-    code = 6006
+    code = 6007
     name = "PayloadHashNotFound"
     msg = "PayloadHashNotFound"
 
 
 class NotAgain(ProgramError):
     def __init__(self) -> None:
-        super().__init__(6007, "Already canceled or traded")
+        super().__init__(6008, "Already canceled or traded")
 
-    code = 6007
+    code = 6008
     name = "NotAgain"
     msg = "Already canceled or traded"
 
 
 class NotEvenStarted(ProgramError):
     def __init__(self) -> None:
-        super().__init__(6008, "Not even started")
+        super().__init__(6009, "Not even started")
 
-    code = 6008
+    code = 6009
     name = "NotEvenStarted"
     msg = "Not even started"
 
 
 class WrongMsgTypeError(ProgramError):
     def __init__(self) -> None:
-        super().__init__(6009, "Wrong msg type")
+        super().__init__(6010, "Wrong msg type")
 
-    code = 6009
+    code = 6010
     name = "WrongMsgTypeError"
     msg = "Wrong msg type"
 
 
 class WrongMsgDstIndex(ProgramError):
     def __init__(self) -> None:
-        super().__init__(6010, "Can not find with dst index")
+        super().__init__(6011, "Can not find with dst index")
 
-    code = 6010
+    code = 6011
     name = "WrongMsgDstIndex"
     msg = "Can not find with dst index"
 
 
 class WrongMsgSrcToken(ProgramError):
     def __init__(self) -> None:
-        super().__init__(6011, "Can not find with src token address")
+        super().__init__(6012, "Can not find with src token address")
 
-    code = 6011
+    code = 6012
     name = "WrongMsgSrcToken"
     msg = "Can not find with src token address"
 
 
 class WrongMsgDstToken(ProgramError):
     def __init__(self) -> None:
-        super().__init__(6012, "Can not find with dst token address")
+        super().__init__(6013, "Can not find with dst token address")
 
-    code = 6012
+    code = 6013
     name = "WrongMsgDstToken"
     msg = "Can not find with dst token address"
 
 
 class WrongAuthorityToCancel(ProgramError):
     def __init__(self) -> None:
-        super().__init__(6013, "Can not cancel with this authority")
+        super().__init__(6014, "Can not cancel with this authority")
 
-    code = 6013
+    code = 6014
     name = "WrongAuthorityToCancel"
     msg = "Can not cancel with this authority"
 
 
 class MinSellAmountConflict(ProgramError):
     def __init__(self) -> None:
-        super().__init__(6014, "Min Sell Amount Conflict")
+        super().__init__(6015, "Min Sell Amount Conflict")
 
-    code = 6014
+    code = 6015
     name = "MinSellAmountConflict"
     msg = "Min Sell Amount Conflict"
 
 
 class InSufficientFundsOfOrder(ProgramError):
     def __init__(self) -> None:
-        super().__init__(6015, "Insufficient Funds of Order")
+        super().__init__(6016, "Insufficient Funds of Order")
 
-    code = 6015
+    code = 6016
     name = "InSufficientFundsOfOrder"
     msg = "Insufficient Funds of Order"
 
 
 class InvalidSendLibrary(ProgramError):
     def __init__(self) -> None:
-        super().__init__(6016, None)
+        super().__init__(6017, None)
 
-    code = 6016
+    code = 6017
     name = "InvalidSendLibrary"
     msg = None
 
 
 class InvalidReceiveLibrary(ProgramError):
     def __init__(self) -> None:
-        super().__init__(6017, None)
+        super().__init__(6018, None)
 
-    code = 6017
+    code = 6018
     name = "InvalidReceiveLibrary"
     msg = None
 
 
 class SameValue(ProgramError):
     def __init__(self) -> None:
-        super().__init__(6018, None)
+        super().__init__(6019, None)
 
-    code = 6018
+    code = 6019
     name = "SameValue"
     msg = None
 
 
 class AccountNotFound(ProgramError):
     def __init__(self) -> None:
-        super().__init__(6019, None)
+        super().__init__(6020, None)
 
-    code = 6019
+    code = 6020
     name = "AccountNotFound"
     msg = None
 
 
 class OnlySendLib(ProgramError):
     def __init__(self) -> None:
-        super().__init__(6020, None)
+        super().__init__(6021, None)
 
-    code = 6020
+    code = 6021
     name = "OnlySendLib"
     msg = None
 
 
 class OnlyReceiveLib(ProgramError):
     def __init__(self) -> None:
-        super().__init__(6021, None)
+        super().__init__(6022, None)
 
-    code = 6021
+    code = 6022
     name = "OnlyReceiveLib"
     msg = None
 
 
 class InvalidExpiry(ProgramError):
     def __init__(self) -> None:
-        super().__init__(6022, None)
+        super().__init__(6023, None)
 
-    code = 6022
+    code = 6023
     name = "InvalidExpiry"
     msg = None
 
 
 class OnlyNonDefaultLib(ProgramError):
     def __init__(self) -> None:
-        super().__init__(6023, None)
+        super().__init__(6024, None)
 
-    code = 6023
+    code = 6024
     name = "OnlyNonDefaultLib"
     msg = None
 
 
 class InvalidAmount(ProgramError):
     def __init__(self) -> None:
-        super().__init__(6024, None)
+        super().__init__(6025, None)
 
-    code = 6024
+    code = 6025
     name = "InvalidAmount"
     msg = None
 
 
 class InvalidNonce(ProgramError):
     def __init__(self) -> None:
-        super().__init__(6025, None)
+        super().__init__(6026, None)
 
-    code = 6025
+    code = 6026
     name = "InvalidNonce"
     msg = None
 
 
 class Unauthorized(ProgramError):
     def __init__(self) -> None:
-        super().__init__(6026, None)
+        super().__init__(6027, None)
 
-    code = 6026
+    code = 6027
     name = "Unauthorized"
     msg = None
 
 
 class ComposeNotFound(ProgramError):
     def __init__(self) -> None:
-        super().__init__(6027, None)
+        super().__init__(6028, None)
 
-    code = 6027
+    code = 6028
     name = "ComposeNotFound"
     msg = None
 
 
 class InvalidPayloadHash(ProgramError):
     def __init__(self) -> None:
-        super().__init__(6028, None)
+        super().__init__(6029, None)
 
-    code = 6028
+    code = 6029
     name = "InvalidPayloadHash"
     msg = None
 
 
 class LzTokenUnavailable(ProgramError):
     def __init__(self) -> None:
-        super().__init__(6029, None)
+        super().__init__(6030, None)
 
-    code = 6029
+    code = 6030
     name = "LzTokenUnavailable"
     msg = None
 
 
 class ReadOnlyAccount(ProgramError):
     def __init__(self) -> None:
-        super().__init__(6030, None)
+        super().__init__(6031, None)
 
-    code = 6030
+    code = 6031
     name = "ReadOnlyAccount"
     msg = None
 
 
 class InvalidMessageLib(ProgramError):
     def __init__(self) -> None:
-        super().__init__(6031, None)
+        super().__init__(6032, None)
 
-    code = 6031
+    code = 6032
     name = "InvalidMessageLib"
     msg = None
 
 
 class WritableAccountNotAllowed(ProgramError):
     def __init__(self) -> None:
-        super().__init__(6032, None)
+        super().__init__(6033, None)
 
-    code = 6032
+    code = 6033
     name = "WritableAccountNotAllowed"
     msg = None
 
@@ -304,6 +313,7 @@ CustomError = typing.Union[
     InvalidTokenOwner,
     InvalidTokenMintAddress,
     InvalidTokenAmount,
+    InvalidOwnerWithTradeMatch,
     InvalidTradeMatch,
     InvalidTokenStandard,
     PayloadHashNotFound,
@@ -339,35 +349,36 @@ CUSTOM_ERROR_MAP: dict[int, CustomError] = {
     6001: InvalidTokenOwner(),
     6002: InvalidTokenMintAddress(),
     6003: InvalidTokenAmount(),
-    6004: InvalidTradeMatch(),
-    6005: InvalidTokenStandard(),
-    6006: PayloadHashNotFound(),
-    6007: NotAgain(),
-    6008: NotEvenStarted(),
-    6009: WrongMsgTypeError(),
-    6010: WrongMsgDstIndex(),
-    6011: WrongMsgSrcToken(),
-    6012: WrongMsgDstToken(),
-    6013: WrongAuthorityToCancel(),
-    6014: MinSellAmountConflict(),
-    6015: InSufficientFundsOfOrder(),
-    6016: InvalidSendLibrary(),
-    6017: InvalidReceiveLibrary(),
-    6018: SameValue(),
-    6019: AccountNotFound(),
-    6020: OnlySendLib(),
-    6021: OnlyReceiveLib(),
-    6022: InvalidExpiry(),
-    6023: OnlyNonDefaultLib(),
-    6024: InvalidAmount(),
-    6025: InvalidNonce(),
-    6026: Unauthorized(),
-    6027: ComposeNotFound(),
-    6028: InvalidPayloadHash(),
-    6029: LzTokenUnavailable(),
-    6030: ReadOnlyAccount(),
-    6031: InvalidMessageLib(),
-    6032: WritableAccountNotAllowed(),
+    6004: InvalidOwnerWithTradeMatch(),
+    6005: InvalidTradeMatch(),
+    6006: InvalidTokenStandard(),
+    6007: PayloadHashNotFound(),
+    6008: NotAgain(),
+    6009: NotEvenStarted(),
+    6010: WrongMsgTypeError(),
+    6011: WrongMsgDstIndex(),
+    6012: WrongMsgSrcToken(),
+    6013: WrongMsgDstToken(),
+    6014: WrongAuthorityToCancel(),
+    6015: MinSellAmountConflict(),
+    6016: InSufficientFundsOfOrder(),
+    6017: InvalidSendLibrary(),
+    6018: InvalidReceiveLibrary(),
+    6019: SameValue(),
+    6020: AccountNotFound(),
+    6021: OnlySendLib(),
+    6022: OnlyReceiveLib(),
+    6023: InvalidExpiry(),
+    6024: OnlyNonDefaultLib(),
+    6025: InvalidAmount(),
+    6026: InvalidNonce(),
+    6027: Unauthorized(),
+    6028: ComposeNotFound(),
+    6029: InvalidPayloadHash(),
+    6030: LzTokenUnavailable(),
+    6031: ReadOnlyAccount(),
+    6032: InvalidMessageLib(),
+    6033: WritableAccountNotAllowed(),
 }
 
 

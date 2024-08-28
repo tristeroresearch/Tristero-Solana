@@ -4,4 +4,5 @@ from .lz_receive_types_accounts import (
     LzReceiveTypesAccountsJSON,
 )
 from .order import Order, OrderJSON
+from .receipt import Receipt, ReceiptJSON
 from .trade_match import TradeMatch, TradeMatchJSON

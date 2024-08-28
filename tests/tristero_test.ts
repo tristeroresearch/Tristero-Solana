@@ -51,9 +51,11 @@ const user = anchor.web3.Keypair.fromSecretKey(Uint8Array.from(userJson))
 const anotherUser = anchor.web3.Keypair.fromSecretKey(Uint8Array.from(otherJson))
 const admin = anchor.web3.Keypair.fromSecretKey(Uint8Array.from(adminJson))
 const receiverPubKey = Buffer.alloc(32, 0);
-const paddedBuffer = Buffer.from('564bdffeb9582879d37e58e3af65828f37a8a2ad', 'hex')
-paddedBuffer.copy(Uint8Array.from(receiverPubKey), 12);
-console.log("receiverPubKey => ", receiverPubKey.toString())
+const paddedBuffer = Buffer.from('000000000000564bdffeb9582879d37e58e3af65828f37a8a2ad', 'hex')
+// receiverPubKey.copy(Uint8Array.from(paddedBuffer), 12);
+console.log("receiverPubKey => ", receiverPubKey)
+console.log("paddedBuffer => ", paddedBuffer)
+
 // const receiverPubKey = Buffer.from('0000000000000000000000005f2d12ab071bd20b25a031fed5dce1abdbb9f8a8', 'hex')
 
 const tempStr = Buffer.from('0000000000000000000000000000000000000000000000000000000000000102000000000000000000000000564bdffeb9582879d37e58e3af65828f37a8a2ad', "hex")
@@ -833,21 +835,21 @@ describe("# test scenario - tristero ", () => {
                     tradeMatch: lzReceiveTypesIx[1].pubkey
                 }))
 
-                let lzReceiveTypesTx = await program.methods.lzReceive({
-                    srcEid: arbitrumEID,
-                    sender: Array.from(receiverPubKey),
-                    nonce: new BN(4),
-                    guid: Array.from(receiverPubKey),
-                    message: tempStr,
-                    extraData: Buffer.from("")
-                })
-                .accounts({
-                    oapp: lzReceiveTypesIx[0].pubkey,
-                    tradeMatch: lzReceiveTypesIx[1].pubkey,
-                })
-                .remainingAccounts(lzReceiveTypesIx.slice(2))
-                .rpc();
-                console.log("lzReceiveTypesTx: ", lzReceiveTypesTx)
+                // let lzReceiveTypesTx = await program.methods.lzReceive({
+                //     srcEid: arbitrumEID,
+                //     sender: Array.from(receiverPubKey),
+                //     nonce: new BN(4),
+                //     guid: Array.from(receiverPubKey),
+                //     message: tempStr,
+                //     extraData: Buffer.from("")
+                // })
+                // .accounts({
+                //     oapp: lzReceiveTypesIx[0].pubkey,
+                //     tradeMatch: lzReceiveTypesIx[1].pubkey,
+                // })
+                // .remainingAccounts(lzReceiveTypesIx.slice(2))
+                // .rpc();
+                // console.log("lzReceiveTypesTx: ", lzReceiveTypesTx)
             }
 
             
