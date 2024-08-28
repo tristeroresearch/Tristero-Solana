@@ -33,9 +33,9 @@ pub struct Challenge<'info> {
 #[derive(AnchorSerialize, AnchorDeserialize, Clone)]
 pub struct ChallengeParams {
     pub trade_match_id: u64,
-    pub tristero_oapp_bump: u8, 
-    pub source_token_address_in_arbitrum_chain:[u8; 20],
-    pub receiver:[u8; 32]
+    pub tristero_oapp_bump: u8,
+    pub receiver: [u8; 32],
+    pub taker: [u8; 20]
 }
 
 pub fn start_challenge(ctx: Context<Challenge>, params: &ChallengeParams) -> Result<()>  {
@@ -54,25 +54,27 @@ pub fn start_challenge(ctx: Context<Challenge>, params: &ChallengeParams) -> Res
 
     let sol_eid: u32 = 40168u32; // testnet(if mainnet => 30168)
 
-    //message: to send to arbitrum(trade_match_id, dest_token_mint_addr, dest_owner, buy_quantity, msg_type)
+    //message: to send to arbitrum(trade_match_id, spltoken_mint_addr, erc20token_mint_addr, dest_owner, buy_quantity, msg_type)
     let mut message_to_send = Vec::<u8>::new();
     
-    for _ in 0..28 {
+    for _ in 0..24 {
         message_to_send.push(0u8);
     }
     params.trade_match_id.to_be_bytes().map(|value| message_to_send.push(value));
 
-    for _ in 0..16 {
+    trade_match.source_token_mint.to_bytes().map(|value| message_to_send.push(value));
+
+    for _ in 0..12 {
         message_to_send.push(0u8);
     }
     trade_match.dest_token_mint.map(|value| message_to_send.push(value));
 
-    for _ in 0..16 {
+    for _ in 0..12 {
         message_to_send.push(0u8);
     }
-    params.source_token_address_in_arbitrum_chain.map(|value| message_to_send.push(value));
+    params.taker.map(|value| message_to_send.push(value));
 
-    for _ in 0..28 {
+    for _ in 0..24 {
         message_to_send.push(0u8);
     }
     trade_match.dest_buy_amount.to_be_bytes().map(|value| message_to_send.push(value));

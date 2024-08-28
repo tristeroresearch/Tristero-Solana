@@ -16,15 +16,6 @@ pub struct FinishChallenge<'info> {
     #[account(mut)]
     pub authority: Signer<'info>,
 
-    #[account(
-        mut,
-        seeds = [b"trade_match", &params.trade_match_id.to_be_bytes()],
-        bump = trade_match.bump,
-        constraint = trade_match.authority == authority.key() @ CustomError::InvalidAuthority,
-        constraint = trade_match.status == 1u8 @ CustomError::NotEvenStarted
-    )]
-    pub trade_match: Box<Account<'info, TradeMatch>>,
-
     /// CHECK:
     #[account(
         mut,
@@ -32,25 +23,18 @@ pub struct FinishChallenge<'info> {
         bump,
     )]
     pub oapp: AccountInfo<'info>,
-
-    #[account(
-        mut,
-        constraint = arb_user_token_account.mint == trade_match.source_token_mint @ CustomError::InvalidTokenMintAddress,
-        constraint = arb_user_token_account.key() == trade_match.arb_user_token_account @ CustomError::InvalidTokenOwner
-    )]
-    pub arb_user_token_account: Box<Account<'info, TokenAccount>>,
 }
 
 #[derive(AnchorSerialize, AnchorDeserialize, Clone)]
 pub struct FinishChallengeParams {
+    pub arb_eid: u32,
     pub trade_match_id: u64,
-    pub receiver:[u8; 32],
-    pub source_token_address_in_arbitrum_chain:[u8; 20],
+    pub spl_token: Pubkey,
+    pub erc20token: [u8; 20],
+    pub receiver: [u8; 32]
 }
 
 pub fn finish_challenge(ctx: Context<FinishChallenge>, params: &FinishChallengeParams) -> Result<()>  {
-
-    let trade_match = ctx.accounts.trade_match.as_mut();
     let receipt = &ctx.remaining_accounts[0];
 
     // --------------------------Send message through Oapp-----------------------------
@@ -65,7 +49,7 @@ pub fn finish_challenge(ctx: Context<FinishChallenge>, params: &FinishChallengeP
 
     let sol_eid: u32 = 40168u32; // testnet(if mainnet => 30168)
 
-    //message: to send to arbitrum(trade_match_id, dest_token_mint, dest_owner, buy_quantity, msg_type)
+    //message: to send to arbitrum(trade_match_id, spltoken_mint_addr, erc20token_mint_addr, msg_type)
     let mut message_to_send = Vec::<u8>::new();
     
     let receipt_state = Receipt::try_from_slice(&receipt.data.borrow());
@@ -81,25 +65,17 @@ pub fn finish_challenge(ctx: Context<FinishChallenge>, params: &FinishChallengeP
         }
     }
 
-    for _ in 0..28 {
+    for _ in 0..24 {
         message_to_send.push(0u8);
     }
     params.trade_match_id.to_be_bytes().map(|value| message_to_send.push(value));
 
-    for _ in 0..16 {
+    for _ in 0..12 {
         message_to_send.push(0u8);
     }
-    trade_match.dest_token_mint.map(|value| message_to_send.push(value));
+    params.erc20token.map(|value| message_to_send.push(value));
 
-    for _ in 0..16 {
-        message_to_send.push(0u8);
-    }
-    params.source_token_address_in_arbitrum_chain.map(|value| message_to_send.push(value));
-
-    for _ in 0..28 {
-        message_to_send.push(0u8);
-    }
-    trade_match.dest_buy_amount.to_be_bytes().map(|value| message_to_send.push(value));
+    params.spl_token.to_bytes().map(|value| message_to_send.push(value));
 
     for _ in 0..31 {
         message_to_send.push(0u8);
@@ -107,7 +83,7 @@ pub fn finish_challenge(ctx: Context<FinishChallenge>, params: &FinishChallengeP
     message_to_send.push(msg_type); // _msgType
 
     let cpi_params = SendParams {
-        dst_eid: trade_match.eid,
+        dst_eid: params.arb_eid,
         receiver: params.receiver,
         message: message_to_send, 
         options: receive_options.to_vec(),
