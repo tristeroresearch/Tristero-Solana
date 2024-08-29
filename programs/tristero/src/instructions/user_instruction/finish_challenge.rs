@@ -70,12 +70,17 @@ pub fn finish_challenge(ctx: Context<FinishChallenge>, params: &FinishChallengeP
     }
     params.trade_match_id.to_be_bytes().map(|value| message_to_send.push(value));
 
+    params.spl_token.to_bytes().map(|value| message_to_send.push(value));
+
     for _ in 0..12 {
         message_to_send.push(0u8);
     }
     params.erc20token.map(|value| message_to_send.push(value));
 
-    params.spl_token.to_bytes().map(|value| message_to_send.push(value));
+    params.receiver.map(|value| message_to_send.push(value));
+    for _ in 0..32 {
+        message_to_send.push(0u8);
+    }
 
     for _ in 0..31 {
         message_to_send.push(0u8);
