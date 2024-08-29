@@ -55,7 +55,7 @@ impl LzReceiveTypes<'_> {
 
         if msg_type == 1 {
             let (receipt, _) = Pubkey::find_program_address(
-                &[b"receipt", &trade_match_id.to_be_bytes()],
+                &[b"receipt", params.sender.as_ref(), &trade_match_id.to_be_bytes()],
                 &program_id
             );
             accounts.extend([
