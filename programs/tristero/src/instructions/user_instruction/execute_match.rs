@@ -33,7 +33,7 @@ pub struct ExecuteMatch<'info> {
         init,
         payer = authority,
         space = Receipt::LEN,
-        seeds = [b"receipt".as_ref(), &params.trade_match_id.to_be_bytes()],
+        seeds = [b"receipt".as_ref(), params.sender.as_ref(), &params.trade_match_id.to_be_bytes()],
         bump
     )]
     pub receipt: Box<Account<'info, Receipt>>,
@@ -50,6 +50,7 @@ pub struct ExecuteMatchParams {
     pub dst_eid: u32,
     pub trade_match_id: u64,
     pub source_sell_amount: u64,
+    pub sender: [u8; 32]
 }
 
 pub fn execute_match(ctx: Context<ExecuteMatch>, params: &ExecuteMatchParams) -> Result<()>  {

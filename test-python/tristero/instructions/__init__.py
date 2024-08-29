@@ -9,6 +9,8 @@ from .admin_panel_update import (
     AdminPanelUpdateAccounts,
 )
 from .create_match import create_match, CreateMatchArgs, CreateMatchAccounts
+from .execute_match import execute_match, ExecuteMatchArgs, ExecuteMatchAccounts
+from .confirm_match import confirm_match, ConfirmMatchArgs, ConfirmMatchAccounts
 from .start_challenge import start_challenge, StartChallengeArgs, StartChallengeAccounts
 from .finish_challenge import (
     finish_challenge,

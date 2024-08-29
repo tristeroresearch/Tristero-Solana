@@ -18,9 +18,7 @@ layout = borsh.CStruct(
 
 class FinishChallengeAccounts(typing.TypedDict):
     authority: Pubkey
-    trade_match: Pubkey
     oapp: Pubkey
-    arb_user_token_account: Pubkey
 
 
 def finish_challenge(
@@ -31,11 +29,7 @@ def finish_challenge(
 ) -> Instruction:
     keys: list[AccountMeta] = [
         AccountMeta(pubkey=accounts["authority"], is_signer=True, is_writable=True),
-        AccountMeta(pubkey=accounts["trade_match"], is_signer=False, is_writable=True),
         AccountMeta(pubkey=accounts["oapp"], is_signer=False, is_writable=True),
-        AccountMeta(
-            pubkey=accounts["arb_user_token_account"], is_signer=False, is_writable=True
-        ),
     ]
     if remaining_accounts is not None:
         keys += remaining_accounts

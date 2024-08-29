@@ -47,6 +47,14 @@ pub mod tristero {
         instructions::create_match(ctx, &params)
     }
 
+    pub fn execute_match(ctx: Context<ExecuteMatch>, params: ExecuteMatchParams) -> Result<()> {
+        instructions::execute_match(ctx, &params)
+    }
+
+    pub fn confirm_match(ctx: Context<ConfirmMatch>, params: ConfirmMatchParams) -> Result<()> {
+        instructions::confirm_match(ctx, &params)
+    }
+
     pub fn start_challenge(ctx: Context<Challenge>, params: ChallengeParams) -> Result<()> {
         instructions::start_challenge(ctx, &params)
     }

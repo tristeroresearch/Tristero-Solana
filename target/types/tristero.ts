@@ -115,6 +115,109 @@ export type Tristero = {
       ]
     },
     {
+      "name": "executeMatch",
+      "accounts": [
+        {
+          "name": "authority",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "tokenAccount",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "sol user's token account address"
+          ]
+        },
+        {
+          "name": "arbUserTokenAccount",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "arb user's token account address"
+          ]
+        },
+        {
+          "name": "receipt",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "params",
+          "type": {
+            "defined": "ExecuteMatchParams"
+          }
+        }
+      ]
+    },
+    {
+      "name": "confirmMatch",
+      "accounts": [
+        {
+          "name": "signer",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "oapp",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "order",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "token account address"
+          ]
+        },
+        {
+          "name": "tradeMatch",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "stakingAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "tokenAccount",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "sol user's token account address"
+          ]
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "params",
+          "type": {
+            "defined": "ConfirmMatchParams"
+          }
+        }
+      ]
+    },
+    {
       "name": "startChallenge",
       "accounts": [
         {
@@ -156,17 +259,7 @@ export type Tristero = {
           "isSigner": true
         },
         {
-          "name": "tradeMatch",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
           "name": "oapp",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "arbUserTokenAccount",
           "isMut": true,
           "isSigner": false
         }
@@ -709,15 +802,11 @@ export type Tristero = {
             "type": "u64"
           },
           {
-            "name": "tristeroOappBump",
-            "type": "u8"
-          },
-          {
             "name": "sourceSellAmount",
             "type": "u64"
           },
           {
-            "name": "receiver",
+            "name": "sender",
             "type": {
               "array": [
                 "u8",
@@ -734,8 +823,25 @@ export type Tristero = {
         "kind": "struct",
         "fields": [
           {
+            "name": "arbEid",
+            "type": "u32"
+          },
+          {
             "name": "tradeMatchId",
             "type": "u64"
+          },
+          {
+            "name": "splToken",
+            "type": "publicKey"
+          },
+          {
+            "name": "erc20token",
+            "type": {
+              "array": [
+                "u8",
+                20
+              ]
+            }
           },
           {
             "name": "receiver",
@@ -743,15 +849,6 @@ export type Tristero = {
               "array": [
                 "u8",
                 32
-              ]
-            }
-          },
-          {
-            "name": "sourceTokenAddressInArbitrumChain",
-            "type": {
-              "array": [
-                "u8",
-                20
               ]
             }
           }
@@ -809,20 +906,20 @@ export type Tristero = {
             "type": "u8"
           },
           {
-            "name": "sourceTokenAddressInArbitrumChain",
-            "type": {
-              "array": [
-                "u8",
-                20
-              ]
-            }
-          },
-          {
             "name": "receiver",
             "type": {
               "array": [
                 "u8",
                 32
+              ]
+            }
+          },
+          {
+            "name": "taker",
+            "type": {
+              "array": [
+                "u8",
+                20
               ]
             }
           }
@@ -1151,6 +1248,109 @@ export const IDL: Tristero = {
       ]
     },
     {
+      "name": "executeMatch",
+      "accounts": [
+        {
+          "name": "authority",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "tokenAccount",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "sol user's token account address"
+          ]
+        },
+        {
+          "name": "arbUserTokenAccount",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "arb user's token account address"
+          ]
+        },
+        {
+          "name": "receipt",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "params",
+          "type": {
+            "defined": "ExecuteMatchParams"
+          }
+        }
+      ]
+    },
+    {
+      "name": "confirmMatch",
+      "accounts": [
+        {
+          "name": "signer",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "oapp",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "order",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "token account address"
+          ]
+        },
+        {
+          "name": "tradeMatch",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "stakingAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "tokenAccount",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "sol user's token account address"
+          ]
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "params",
+          "type": {
+            "defined": "ConfirmMatchParams"
+          }
+        }
+      ]
+    },
+    {
       "name": "startChallenge",
       "accounts": [
         {
@@ -1192,17 +1392,7 @@ export const IDL: Tristero = {
           "isSigner": true
         },
         {
-          "name": "tradeMatch",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
           "name": "oapp",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "arbUserTokenAccount",
           "isMut": true,
           "isSigner": false
         }
@@ -1745,15 +1935,11 @@ export const IDL: Tristero = {
             "type": "u64"
           },
           {
-            "name": "tristeroOappBump",
-            "type": "u8"
-          },
-          {
             "name": "sourceSellAmount",
             "type": "u64"
           },
           {
-            "name": "receiver",
+            "name": "sender",
             "type": {
               "array": [
                 "u8",
@@ -1770,8 +1956,25 @@ export const IDL: Tristero = {
         "kind": "struct",
         "fields": [
           {
+            "name": "arbEid",
+            "type": "u32"
+          },
+          {
             "name": "tradeMatchId",
             "type": "u64"
+          },
+          {
+            "name": "splToken",
+            "type": "publicKey"
+          },
+          {
+            "name": "erc20token",
+            "type": {
+              "array": [
+                "u8",
+                20
+              ]
+            }
           },
           {
             "name": "receiver",
@@ -1779,15 +1982,6 @@ export const IDL: Tristero = {
               "array": [
                 "u8",
                 32
-              ]
-            }
-          },
-          {
-            "name": "sourceTokenAddressInArbitrumChain",
-            "type": {
-              "array": [
-                "u8",
-                20
               ]
             }
           }
@@ -1845,20 +2039,20 @@ export const IDL: Tristero = {
             "type": "u8"
           },
           {
-            "name": "sourceTokenAddressInArbitrumChain",
-            "type": {
-              "array": [
-                "u8",
-                20
-              ]
-            }
-          },
-          {
             "name": "receiver",
             "type": {
               "array": [
                 "u8",
                 32
+              ]
+            }
+          },
+          {
+            "name": "taker",
+            "type": {
+              "array": [
+                "u8",
+                20
               ]
             }
           }

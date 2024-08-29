@@ -9,11 +9,10 @@ use spl_token::ID as TOKEN_PROGRAM_ID;
 #[instruction(params: ConfirmMatchParams)]
 pub struct ConfirmMatch<'info> {
     #[account(mut)]
-    pub authority: Signer<'info>,
+    pub signer: Signer<'info>,
 
     /// CHECK: The PDA of the OApp
     #[account(
-        mut,
         seeds = [b"TristeroOapp"],
         bump
     )]
@@ -31,7 +30,7 @@ pub struct ConfirmMatch<'info> {
         mut,
         seeds = [b"trade_match".as_ref(), &params.trade_match_id.to_be_bytes()],
         bump = trade_match.bump,
-        constraint = trade_match.status == 1u8 @ CustomError::InvalidTradeMatch
+        // constraint = trade_match.status == 1u8 @ CustomError::InvalidTradeMatch
     )]
     pub trade_match: Box<Account<'info, TradeMatch>>,
 
@@ -45,7 +44,6 @@ pub struct ConfirmMatch<'info> {
     /// sol user's token account address
     #[account(
         mut,
-        constraint = token_account.owner == authority.key() @ CustomError::InvalidTokenOwner,
         constraint = token_account.mint == trade_match.source_token_mint @ CustomError::InvalidTokenMintAddress,
     )]
     pub token_account: Box<Account<'info, TokenAccount>>,
@@ -73,7 +71,9 @@ pub fn confirm_match(ctx: Context<ConfirmMatch>, params: &ConfirmMatchParams) ->
 
     let cpi_context = CpiContext::new(ctx.accounts.token_program.to_account_info(), cpi_accounts);
     
-    token::transfer(cpi_context, trade_match.source_sell_amount)?;
+    let signer_seeds: &[&[&[u8]]] = &[&[b"TristeroOapp", &[ctx.bumps.oapp]]];
+    
+    token::transfer(cpi_context.with_signer(signer_seeds), trade_match.source_sell_amount)?;
 
     trade_match.status = 2u8;
     order.settled += trade_match.source_sell_amount;
