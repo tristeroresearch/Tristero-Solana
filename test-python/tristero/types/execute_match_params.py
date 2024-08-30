@@ -18,7 +18,7 @@ class ExecuteMatchParams:
         "dst_eid" / borsh.U32,
         "trade_match_id" / borsh.U64,
         "source_sell_amount" / borsh.U64,
-        "sender" / borsh.U8[32],
+        "sender" / borsh.U8[20],
     )
     dst_eid: int
     trade_match_id: int

@@ -31,8 +31,8 @@ def confirm_match(
     remaining_accounts: typing.Optional[typing.List[AccountMeta]] = None,
 ) -> Instruction:
     keys: list[AccountMeta] = [
-        AccountMeta(pubkey=accounts["signer"], is_signer=False, is_writable=False),
-        AccountMeta(pubkey=accounts["oapp"], is_signer=False, is_writable=True),
+        AccountMeta(pubkey=accounts["signer"], is_signer=True, is_writable=True),
+        AccountMeta(pubkey=accounts["oapp"], is_signer=False, is_writable=False),
         AccountMeta(pubkey=accounts["order"], is_signer=False, is_writable=True),
         AccountMeta(pubkey=accounts["trade_match"], is_signer=False, is_writable=True),
         AccountMeta(
