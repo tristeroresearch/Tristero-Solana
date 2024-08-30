@@ -50,7 +50,7 @@ pub struct ExecuteMatchParams {
     pub dst_eid: u32,
     pub trade_match_id: u64,
     pub source_sell_amount: u64,
-    pub sender: [u8; 32]
+    pub sender: [u8; 20]
 }
 
 pub fn execute_match(ctx: Context<ExecuteMatch>, params: &ExecuteMatchParams) -> Result<()>  {
