@@ -57,13 +57,13 @@ impl LzReceive<'_> {
             let buy_quantity = vec_to_u64(msg_vec[3]);
             let market_maker = Pubkey::new_from_array(msg_vec[4]);
 
-            let receipt = &remaining_accounts[9];
+            let receipt = &remaining_accounts[8];
             let mut receipt_state = Receipt::try_from_slice(&receipt.data.borrow())?;
             if receipt_state.maker == market_maker && receipt_state.payout_quantity >= buy_quantity && receipt_state.receiver == dest_owner && receipt_state.token_mint == dest_token_mint && !receipt_state.is_valuable {
                 receipt_state.is_valuable = true;
             }
         } else if msg_type == 2u64{
-            let trade_match_acc = &remaining_accounts[9];
+            let trade_match_acc = &remaining_accounts[8];
             let mut trade_match = TradeMatch::try_from_slice(&trade_match_acc.data.borrow())?;
             trade_match.status = 2u8;
         }
