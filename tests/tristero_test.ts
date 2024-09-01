@@ -1,6 +1,6 @@
 import * as anchor from "@coral-xyz/anchor";
 import { BN, Program } from "@coral-xyz/anchor";
-import { getExecutorProgramId, simulateTransaction, ExecutorPDADeriver, getBlockedMessageLibProgramId, OAPP_SEED, getProgramKeypair, oappIDPDA, OftPDADeriver, OftTools, OPTIONS_SEED, SEND_LIBRARY_CONFIG_SEED, NONCE_SEED, ENDPOINT_SEED, EndpointProgram, MESSAGE_LIB_SEED, SupportedPrograms, getEndpointProgramId, EventPDADeriver, BaseOApp, getSimpleMessageLibProgramId, RECEIVE_LIBRARY_CONFIG_SEED, PENDING_NONCE_SEED, UlnProgram, getULNProgramId, UlnPDADeriver, getDVNProgramId, ULN_SEED, SEND_CONFIG_SEED, ULN_CONFIG_SEED, getPricefeedProgramId, PriceFeedPDADeriver, PRICE_FEED_SEED, EXECUTOR_CONFIG_SEED, DVNDeriver, PAYLOAD_HASH_SEED, messageLibs, SimpleMessageLibProgram, RECEIVE_CONFIG_SEED } from "@layerzerolabs/lz-solana-sdk-v2";
+import { getExecutorProgramId, SetConfigType, simulateTransaction, ExecutorPDADeriver, getBlockedMessageLibProgramId, OAPP_SEED, getProgramKeypair, oappIDPDA, OftPDADeriver, OftTools, OPTIONS_SEED, SEND_LIBRARY_CONFIG_SEED, NONCE_SEED, ENDPOINT_SEED, EndpointProgram, MESSAGE_LIB_SEED, SupportedPrograms, getEndpointProgramId, EventPDADeriver, BaseOApp, getSimpleMessageLibProgramId, RECEIVE_LIBRARY_CONFIG_SEED, PENDING_NONCE_SEED, UlnProgram, getULNProgramId, UlnPDADeriver, getDVNProgramId, ULN_SEED, SEND_CONFIG_SEED, ULN_CONFIG_SEED, getPricefeedProgramId, PriceFeedPDADeriver, PRICE_FEED_SEED, EXECUTOR_CONFIG_SEED, DVNDeriver, PAYLOAD_HASH_SEED, messageLibs, SimpleMessageLibProgram, RECEIVE_CONFIG_SEED } from "@layerzerolabs/lz-solana-sdk-v2";
 import { Options } from "@layerzerolabs/lz-v2-utilities";
 import { ChainKey, EndpointVersion, networkToEndpointId } from '@layerzerolabs/lz-definitions';
 
@@ -78,6 +78,8 @@ describe("# test scenario - tristero ", () => {
         try {
             anchor.setProvider(anchor.AnchorProvider.env());
 
+
+
             // const userAirDroptx = await connection.requestAirdrop(user.publicKey, 5 * LAMPORTS_PER_SOL)
             // await connection.confirmTransaction(userAirDroptx)
             // console.log("User Airdrop successful: ", userAirDroptx)
@@ -113,6 +115,21 @@ describe("# test scenario - tristero ", () => {
             const tristeroOappPubkey = getTristeroOapp();
             const endpointEventPdaDeriver = new EventPDADeriver(endpoint)
             const ulnEventPdaDeriver = new EventPDADeriver(sendLibraryProgram)
+
+            console.log("------------------------Get Endpoint Config------------------------")
+            {
+                const log = await OftTools.getEndpointConfig(
+                    connection,
+                    tristeroOappPubkey, // your OFT Config PDA
+                    arbitrumEID,
+                );
+
+                console.log(
+                    log.sendLibraryConfig.ulnSendConfig.executor,
+                    log.sendLibraryConfig.ulnSendConfig.uln,
+                    log.receiveLibraryConfig.ulnReceiveConfig.uln,
+                );
+            }
 
             console.log("------------------------Register New Oapp------------------------");
 
@@ -266,7 +283,7 @@ describe("# test scenario - tristero ", () => {
             // {
             //     const anchorRemainingAccounts = [
             //         { //1
-            //             pubkey: user.publicKey,
+            //             pubkey: admin.publicKey,
             //             isSigner: true,
             //             isWritable: true
             //         },
@@ -292,7 +309,7 @@ describe("# test scenario - tristero ", () => {
             //         },
             //     ]
             //     const initConfigAccounts = {
-            //         delegate: user.publicKey,
+            //         delegate: admin.publicKey,
             //         oappRegistry: getOappPDA(tristeroOappPubkey),
             //         messageLibInfo: getMessageLibInfoPDA(messageLib),
             //         messageLib: messageLib,
@@ -302,7 +319,7 @@ describe("# test scenario - tristero ", () => {
 
             //     const initConfigRemainAccounts = [
             //         { //1
-            //             pubkey: user.publicKey,
+            //             pubkey: admin.publicKey,
             //             isSigner: true,
             //             isWritable: true
             //         },
@@ -344,7 +361,7 @@ describe("# test scenario - tristero ", () => {
 
             //     console.log("initConfig well done")
             //     const transInitConfig = new Transaction().add(initConfigInstruction);
-            //     const initConfigTx = await sendAndConfirmTransaction(connection, transInitConfig, [user])
+            //     const initConfigTx = await sendAndConfirmTransaction(connection, transInitConfig, [admin])
             //     console.log("initConfigTx = ", initConfigTx)
             //     console.log("-------------------------------------------------------------------------------")
             // }
@@ -352,7 +369,7 @@ describe("# test scenario - tristero ", () => {
             console.log("-------------------Set Receive Library-----------------------------")
             // {
             //     const setReceiveLibraryAccounts = {
-            //         signer: user.publicKey,
+            //         signer: admin.publicKey,
             //         oappRegistry: getOappRegistryPDA(tristeroOappPubkey),
             //         receiveLibraryConfig: getReceiveLibraryConfigPDA(tristeroOappPubkey, arbitrumEID),
             //         messageLibInfo: getMessageLibInfoPDA(messageLib),
@@ -371,7 +388,7 @@ describe("# test scenario - tristero ", () => {
 
             //     const setReceiveLibraryInstruction = EndpointProgram.instructions.createSetReceiveLibraryInstruction(setReceiveLibraryAccounts, setReceiveLibraryParams)
             //     const setReceiveTrans = new Transaction().add(setReceiveLibraryInstruction);
-            //     const setReceiveTx = await sendAndConfirmTransaction(connection, setReceiveTrans, [user])
+            //     const setReceiveTx = await sendAndConfirmTransaction(connection, setReceiveTrans, [admin])
             //     console.log("SetReceiveLibraryTx = ", setReceiveTx)
             // }
 
@@ -401,7 +418,7 @@ describe("# test scenario - tristero ", () => {
             //     console.log("SetSendLibraryTx = ", setSendTx)
             // }
 
-            console.log("-------------------------Set Config-----------------------------")
+            // console.log("-------------------------Set Config-----------------------------")
             // {
             //     const setConfigRemainingAccounts = [
             //         { //2
@@ -450,22 +467,22 @@ describe("# test scenario - tristero ", () => {
             //         anchorRemainingAccounts: setConfigRemainingAccounts
             //     }
 
-            // //     const executorConfig = UlnProgram.executorConfigBeet.serialize({
-            // //         executor: PublicKey.findProgramAddressSync(
-            // //             [Buffer.from(EXECUTOR_CONFIG_SEED, 'utf8')],
-            // //             executorProgramId,
-            // //         )[0],
-            // //         maxMessageSize: 10000,
-            // //     })[0];
+            //     const executorConfig = UlnProgram.executorConfigBeet.serialize({
+            //         executor: PublicKey.findProgramAddressSync(
+            //             [Buffer.from(EXECUTOR_CONFIG_SEED, 'utf8')],
+            //             executorProgramId,
+            //         )[0],
+            //         maxMessageSize: 10000,
+            //     })[0];
 
-            // //     const setConfigExecutorParams = {
-            // //         params: {
-            // //             oapp: tristeroOappPubkey,
-            // //             eid: arbitrumEID,
-            // //             configType: OftTools.ConfigType.Executor,
-            // //             config: executorConfig,
-            // //         }
-            // //     }
+            //     const setConfigExecutorParams = {
+            //         params: {
+            //             oapp: tristeroOappPubkey,
+            //             eid: arbitrumEID,
+            //             configType: OftTools.ConfigType.Executor,
+            //             config: executorConfig,
+            //         }
+            //     }
 
             //     const ulnReceiveConfig = UlnProgram.types.ulnConfigBeet.serialize({
             //         confirmations: 10,
@@ -474,7 +491,7 @@ describe("# test scenario - tristero ", () => {
             //         optionalDvnThreshold: 0,
             //         requiredDvns: [new PublicKey("4VDjp6XQaxoZf5RGwiPU9NR1EXSZn2TP4ATMmiSzLfhb")].sort(),
             //         optionalDvns: [].sort(),
-            //       })[0];
+            //     })[0];
 
             //     const setConfigReceiveParams = {
             //         params: {
@@ -485,20 +502,32 @@ describe("# test scenario - tristero ", () => {
             //         }
             //     }
 
-            // //     const setConfigExecutorInstruction = EndpointProgram.instructions.createSetConfigInstruction(setConfigAccounts, setConfigExecutorParams)
-            //     const setConfigReceiveInstruction = EndpointProgram.instructions.createSetConfigInstruction(setConfigAccounts, setConfigReceiveParams)
+            //     const setConfigExecutorInstruction = await OftTools.createSetConfigIx(
+            //         admin.publicKey,
+            //         tristeroOappPubkey,
+            //         arbitrumEID,
+            //         1,
+            //         new Uint8Array(executorConfig)
+            //     )
+            //     const setConfigReceiveInstruction = await OftTools.createSetConfigIx(
+            //         admin.publicKey,
+            //         tristeroOappPubkey,
+            //         arbitrumEID,
+            //         3,
+            //         new Uint8Array(ulnReceiveConfig)
+            //     )
 
-            // //     console.log("setConfig well done")
-            // //     const transSetConfigExecutor = new Transaction().add(setConfigExecutorInstruction);
+            //     //     console.log("setConfig well done")
+            //     const transSetConfigExecutor = new Transaction().add(setConfigExecutorInstruction);
             //     const transSetConfigReceive = new Transaction().add(setConfigReceiveInstruction);
-            // //     const setConfigExecutorTx = await sendAndConfirmTransaction(connection, transSetConfigExecutor, [user])
-            // //     console.log("setConfigExecutorTx = ", setConfigExecutorTx)
-            //     const setConfigReceiveTx = await sendAndConfirmTransaction(connection, transSetConfigReceive, [user])
+            //     const setConfigExecutorTx = await sendAndConfirmTransaction(connection, transSetConfigExecutor, [admin])
+            //     console.log("setConfigExecutorTx = ", setConfigExecutorTx)
+            //     const setConfigReceiveTx = await sendAndConfirmTransaction(connection, transSetConfigReceive, [admin])
             //     console.log("setConfigReceiveTx = ", setConfigReceiveTx)
             //     console.log("-------------------------------------------------------------------------------")
             // }
 
-            
+
             console.log("------------------------------mint new spl token(only need in localnet)-------------------------------------------------");
             // const mint = await createMint(
             //     connection,
@@ -804,56 +833,58 @@ describe("# test scenario - tristero ", () => {
             // }
 
             const res = await EndpointProgram.accounts.SendLibraryConfig.fromAccountAddress(connection, (await getDefaultSendLibraryConfig(arbitrumEID)))
-            
+
 
             console.log("--------testing lz_receive_types ---------");
-            {
-                let lzReceiveTypesIx = await program.methods.lzReceiveTypes({
-                    srcEid: arbitrumEID,
-                    sender: Array.from(receiverPubKey),
-                    nonce: new BN(4),
-                    guid: Array.from(receiverPubKey),
-                    message: tempStr,
-                    extraData: Buffer.from("")
-                })
-                .accounts({
-                    messageLib: res.messageLib,
-                    oftConfig: PublicKey.default
-                })
-                .view();
-                
-                // let tx = new Transaction();
-                // tx.add(ComputeBudgetProgram.setComputeUnitLimit({units: 500000}));
-                // tx.add(lzReceiveTypesIx)
+            // {
+            //     let lzReceiveTypesIx = await program.methods.lzReceiveTypes({
+            //         srcEid: arbitrumEID,
+            //         sender: Array.from(receiverPubKey),
+            //         nonce: new BN(4),
+            //         guid: Array.from(receiverPubKey),
+            //         message: tempStr,
+            //         extraData: Buffer.from("")
+            //     })
+            //     .accounts({
+            //         messageLib: res.messageLib,
+            //         oftConfig: PublicKey.default
+            //     })
+            //     .view();
 
-                // const lzReceiveTypesTx = await sendAndConfirmTransaction(connection, tx, [user])
-                console.log("lzReceiveTypesIx: ", lzReceiveTypesIx)
-                console.log("length => ", lzReceiveTypesIx.length)
+            //     // let tx = new Transaction();
+            //     // tx.add(ComputeBudgetProgram.setComputeUnitLimit({units: 500000}));
+            //     // tx.add(lzReceiveTypesIx)
 
-                console.log("=> ", JSON.stringify({
-                    oapp: lzReceiveTypesIx[0].pubkey,
-                    tradeMatch: lzReceiveTypesIx[1].pubkey
-                }))
+            //     // const lzReceiveTypesTx = await sendAndConfirmTransaction(connection, tx, [user])
+            //     // console.log("lzReceiveTypesIx: ", lzReceiveTypesIx)
+            //     // console.log("length => ", lzReceiveTypesIx.length)
 
-                // let lzReceiveTypesTx = await program.methods.lzReceive({
-                //     srcEid: arbitrumEID,
-                //     sender: Array.from(receiverPubKey),
-                //     nonce: new BN(4),
-                //     guid: Array.from(receiverPubKey),
-                //     message: tempStr,
-                //     extraData: Buffer.from("")
-                // })
-                // .accounts({
-                //     oapp: lzReceiveTypesIx[0].pubkey,
-                //     tradeMatch: lzReceiveTypesIx[1].pubkey,
-                // })
-                // .remainingAccounts(lzReceiveTypesIx.slice(2))
-                // .rpc();
-                // console.log("lzReceiveTypesTx: ", lzReceiveTypesTx)
-            }
+            //     // console.log("=> ", JSON.stringify({
+            //     //     oapp: lzReceiveTypesIx[0].pubkey,
+            //     //     tradeMatch: lzReceiveTypesIx[1].pubkey
+            //     // }))
 
-            
-            
+            //     // let lzReceiveTypesTx = await program.methods.lzReceive({
+            //     //     srcEid: arbitrumEID,
+            //     //     sender: Array.from(receiverPubKey),
+            //     //     nonce: new BN(4),
+            //     //     guid: Array.from(receiverPubKey),
+            //     //     message: tempStr,
+            //     //     extraData: Buffer.from("")
+            //     // })
+            //     // .accounts({
+            //     //     oapp: lzReceiveTypesIx[0].pubkey,
+            //     //     tradeMatch: lzReceiveTypesIx[1].pubkey,
+            //     // })
+            //     // .remainingAccounts(lzReceiveTypesIx.slice(2))
+            //     // .rpc();
+            //     // console.log("lzReceiveTypesTx: ", lzReceiveTypesTx)
+
+            //     await OftTools.createInitConfigIx
+            // }
+
+
+
         } catch (err) {
             console.log(err)
         }
@@ -1077,4 +1108,33 @@ function hexToUint8Array(hex: string): Uint8Array {
         uint8Array[i / 2] = parseInt(hex.substr(i, 2), 16);
     }
     return uint8Array;
+}
+
+const setReceiveConfig = async (tristeroOApp: PublicKey, adminKeypair: Keypair) => {
+    const dvn1 = new anchor.web3.PublicKey("4VDjp6XQaxoZf5RGwiPU9NR1EXSZn2TP4ATMmiSzLfhb")
+    const dvn2 = new anchor.web3.PublicKey("F7gu9kLcpn4bSTZn183mhn2RXUuMy7zckdxJZdUjuALw")
+    const ulnConfig = {
+        confirmations: 10,
+        requiredDvnCount: 2,
+        optionalDvnCount: 0,
+        optionalDvnThreshold: 0,
+        requiredDvns: [dvn1, dvn2].sort(),
+        optionalDvns: [],
+    }
+
+    // Set the receive uln config for the pathway.
+    const setReceiveUlnConfigTransaction = new anchor.web3.Transaction().add(
+        await OftTools.createSetConfigIx(
+            adminKeypair.publicKey,
+            tristeroOApp,
+            arbitrumEID,
+            3,
+            new Uint8Array(ulnConfig),
+        ),
+    );
+
+    const txHash = await sendAndConfirmTransaction(connection, setReceiveUlnConfigTransaction, [adminKeypair]);
+    console.log(
+        `✅ Set receive configuration for dstEid ${arbitrumEID}! View the transaction here: ${txHash}`,
+    );
 }

@@ -810,7 +810,7 @@ export type Tristero = {
             "type": {
               "array": [
                 "u8",
-                32
+                20
               ]
             }
           }
@@ -1943,7 +1943,7 @@ export const IDL: Tristero = {
             "type": {
               "array": [
                 "u8",
-                32
+                20
               ]
             }
           }

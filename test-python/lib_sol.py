@@ -1,28 +1,14 @@
-import asyncio
-import binascii
 from solders.pubkey import Pubkey
-from solders.keypair import Keypair
-from anchorpy import Provider, Program, Idl, Wallet
-from solders.system_program import ID as SYS_PROGRAM_ID
-from pathlib import Path
 from solana.rpc.async_api import AsyncClient
 from solana.rpc.api import Client
 from solana.transaction import Transaction
-from solders.instruction import AccountMeta
+from solders.keypair import Keypair
 from solders.compute_budget import set_compute_unit_limit
-from solana.rpc.types import TxOpts
 from solana.rpc.commitment import Confirmed
-from anchorpy.borsh_extension import BorshPubkey
-import borsh_construct as borsh
-from web3 import Web3
-import os
-import typing
-import time
-import json
-import struct
-import requests
-from script_tx_handler import safe_build_and_send_tx, ensure_approval
-import base58
+from solana.rpc.types import TxOpts
+from solders.instruction import AccountMeta
+from solders.system_program import ID as SYS_PROGRAM_ID
+from config import solana_contract_addr
 
 from tristero.instructions.create_match import create_match, CreateMatchAccounts
 from tristero.instructions.execute_match import execute_match, ExecuteMatchAccounts
@@ -31,10 +17,10 @@ from tristero.instructions.place_order import place_order, PlaceOrderAccounts
 from tristero.instructions.start_challenge import start_challenge, StartChallengeAccounts
 from tristero.instructions.finish_challenge import finish_challenge, FinishChallengeAccounts
 from tristero.instructions.register_tristero_oapp import register_tristero_oapp, RegisterTristeroOappAccounts
-from tristero.instructions.lz_receive_types import lz_receive_types, LzReceiveTypesAccounts
 from endpoint.instructions.init_nonce import init_nonce, InitNonceAccounts
 from endpoint.instructions.init_send_library import init_send_library, InitSendLibraryAccounts
 from endpoint.instructions.init_receive_library import init_receive_library, InitReceiveLibraryAccounts
+from endpoint.instructions.init_config import init_config, InitConfigAccounts
 
 from tristero.instructions.register_config import register_config, RegisterConfigAccounts
 
@@ -45,15 +31,15 @@ from tristero.types.place_order_params import PlaceOrderParams, PlaceOrderParams
 from tristero.types.challenge_params import ChallengeParams, ChallengeParamsJSON
 from tristero.types.finish_challenge_params import FinishChallengeParams, FinishChallengeParamsJSON
 from tristero.types.register_tristero_o_app_params import RegisterTristeroOAppParams, RegisterTristeroOAppParamsJSON
-from tristero.types.lz_receive_type_params import LzReceiveTypeParams, LzReceiveTypeParamsJSON
 from endpoint.types.init_nonce_params import InitNonceParams, InitNonceParamsJSON
 from endpoint.types.init_send_library_params import InitSendLibraryParams, InitSendLibraryParamsJSON
 from endpoint.types.init_receive_library_params import InitReceiveLibraryParams, InitReceiveLibraryParamsJSON
+from endpoint.types.init_config_params import InitConfigParams, InitConfigParamsJSON
 
 from tristero.accounts.admin_panel import AdminPanel
 from endpoint.accounts.send_library_config import SendLibraryConfig
 
-tristero_program_id = Pubkey.from_string("E2okPYndsWqtniTNnoK2YHdZUwMEWpN1PtPW3woaY5Lm")
+tristero_program_id = Pubkey.from_string(solana_contract_addr)
 endpoint_program_id = Pubkey.from_string("76y77prsiCMvXMjuoZ5VRrhG5qYBrUMYTE5WgHqgjEn6")
 executor_program_id = Pubkey.from_string("6doghB248px58JSSwG4qejQ46kFMW4AMj7vzJnWZHNZn")
 send_library_program_id = Pubkey.from_string("7a4WjyR8VZ7yZz5XJAKm39BUGn5iT9CKcv2pmG9tdXVH")
@@ -61,42 +47,7 @@ price_fee_program_id = Pubkey.from_string("8ahPGPjEbpgGaZx2NV1iG5Shj7TDwvsjkEDcG
 dvn_program_id = Pubkey.from_string("HtEYV4xB4wvsj5fgTkcfuChYpvGYzgzwvNhgDZQNh7wW")
 uln_program_id = Pubkey.from_string("7a4WjyR8VZ7yZz5XJAKm39BUGn5iT9CKcv2pmG9tdXVH")
 
-rpc_url = "https://api.devnet.solana.com"
-
-# Load JSON files
-with open(Path("./tests/user.json"), "r") as user_file:
-    user_json = json.load(user_file)
-
-with open(Path("./tests/other.json"), "r") as other_file:
-    other_json = json.load(other_file)
-
-with open(Path("./tests/adminJson.json"), "r") as admin_file:
-    admin_json = json.load(admin_file)
-
-# Create Keypair instances from secret keys
-user = Keypair.from_bytes(bytes(user_json))
-other_user = Keypair.from_bytes(bytes(other_json))
-admin = Keypair.from_bytes(bytes(admin_json))
-
-LAMPORTS_PER_SOL = 1_000_000_000
-ARBITRUM_EID = 40231
-RECEIVER_PUBKEY = bytearray(32)
-
-# Hexadecimal string to be converted to bytes
-hex_string = '5F9e1079b664deb886281d99610449dB40708198'
-
-# Convert the hexadecimal string to bytes
-padded_buffer = binascii.unhexlify(hex_string)
-
-# Copy the bytes to the RECEIVER_PUBKEY bytearray starting at position 12
-RECEIVER_PUBKEY[12:12 + len(padded_buffer)] = padded_buffer
-
-# payload_string = '000000000000000000000000000000000000000000000000000000000000006183247218e466e48b0ea8b8a7b99e7a53cc8153766c6ac5c88076290adee38d513b442cb3912157f13a933d0134282d032b5ffecd01a2dbf1b7790608df002ea70000000000000000000000006fcfc05c7963d0fb23c706450c7c72adda8fbf60'
-# payload_buffer = binascii.unhexlify(payload_string)
-
-# Print the result
-print("receiverPubKey =>", RECEIVER_PUBKEY)
-
+# Utils functions
 def get_order_pda(order_id):
     order_id_buffer = order_id.to_bytes(8, byteorder="big")
     seeds = [
@@ -285,6 +236,14 @@ def get_send_config_pda(eid, sender_addr):
     )
     return distributor
 
+def get_receive_config_pda(eid, sender_addr):
+    eid_buffer = eid.to_bytes(4, byteorder="big")
+    (distributor, bump) = Pubkey.find_program_address(
+        [b"ReceiveConfig", eid_buffer, bytes(sender_addr)],
+        uln_program_id,
+    )
+    return distributor
+
 def get_default_send_config_pda(eid):
     eid_buffer = eid.to_bytes(4, byteorder="big")
     (distributor, bump) = Pubkey.find_program_address(
@@ -336,30 +295,12 @@ def get_receipt_pda(receiver, ind):
     )
     return distributor
 
-def base58_to_uint8_array(base58_str: str) -> bytes:
-    return base58.b58decode(base58_str)
-# variables used in arbitrum sepolia
-contract_address = "0x54CD7261F6F8736e763E53C078dd8088Bfc23008"
-private_key = "edf47a7dbe67be7960c6aba3606830bf19e0334cdb26a18e6d4715997c271445"
-public_key = "0x748b0dfD0DC7eFb34E5bE75B3f4D24A009354353"
-sol_test_eid = 40168
-spl_token_mint_addr = base58_to_uint8_array("4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU")
-erc20_token_mint_addr = "0x75faf114eafb1bdbe2f0316df893fd58ce46aa4d"
-dest_account_addr = base58_to_uint8_array("9pveBsMdpg8EjBgap9LWWDSfMdY5B8x4yvxk4ZvfobLC")
-arb_rpc_url = "https://sepolia-rollup.arbitrum.io/rpc"
-web3 = Web3(Web3.HTTPProvider(arb_rpc_url))
-erc20_token_mint = web3.to_checksum_address(erc20_token_mint_addr)
-
-# Connect to the Solana testnet
-solana_url = "https://api.devnet.solana.com"
-solana_client = Client(solana_url)
-tristero_oapp_pubkey = get_tristero_oapp()
-admin_panel_pda = get_admin_panel()
-mint_addr = Pubkey.from_string("4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU")
-erc20_addr = binascii.unhexlify('75faf114eafb1bdbe2f0316df893fd58ce46aa4d')
-arb_wallet_addr = binascii.unhexlify('De7014167c36c39aAfb56aA0Bd87776d8911369A')
-
-async def sol_register_new_oapp():
+# Configuration functions
+async def sol_register_new_oapp(solana_url, admin: Keypair):
+    solana_client = Client(solana_url)
+    admin_panel_pda = get_admin_panel()
+    tristero_oapp_pubkey = get_tristero_oapp()
+    
     print(f"--------------------------Register New Oapp------------------------------")
     register_oapp_accounts: RegisterTristeroOappAccounts = {
         "payer": admin.pubkey(),
@@ -397,17 +338,19 @@ async def sol_register_new_oapp():
     print(f"register_tristero_oapp_tx: {register_tristero_oapp_tx}")
     print(f"tristero_oapp: ", tristero_oapp_pubkey)
 
-async def sol_init_send_library():
+async def sol_init_send_library(solana_url, admin: Keypair, dest_eid: int):
+    solana_client = Client(solana_url)
+    tristero_oapp_pubkey = get_tristero_oapp()
     print(f"-----------------------Init Send Library---------------------------")
     init_send_library_accounts: InitSendLibraryAccounts = {
         "delegate": admin.pubkey(),
         "oapp_registry": get_oapp_registry_pda(tristero_oapp_pubkey),
-        "send_library_config": get_send_library_config_pda(tristero_oapp_pubkey, ARBITRUM_EID),
+        "send_library_config": get_send_library_config_pda(tristero_oapp_pubkey, dest_eid),
     }
     
     init_send_library_params_json : InitSendLibraryParamsJSON = {
         "sender":  str(tristero_oapp_pubkey),
-        "eid": ARBITRUM_EID,
+        "eid": dest_eid,
     }
     
     init_send_library_params = InitSendLibraryParams.from_json(init_send_library_params_json)
@@ -431,17 +374,20 @@ async def sol_init_send_library():
     init_send_library_tx = solana_client.send_transaction(txn, *signers, opts=TxOpts(skip_confirmation=False, preflight_commitment=Confirmed)).value
     print(f"init_send_library_tx: {init_send_library_tx}")
     
-async def sol_init_receive_library():
+async def sol_init_receive_library(solana_url, admin: Keypair, dest_eid: int):
+    solana_client = Client(solana_url)
+    tristero_oapp_pubkey = get_tristero_oapp()
+    
     print(f"-----------------------Init Receive Library---------------------------")
     init_receive_library_accounts: InitReceiveLibraryAccounts = {
         "delegate": admin.pubkey(),
         "oapp_registry": get_oapp_registry_pda(tristero_oapp_pubkey),
-        "receive_library_config": get_receive_library_config_pda(tristero_oapp_pubkey, ARBITRUM_EID),
+        "receive_library_config": get_receive_library_config_pda(tristero_oapp_pubkey, dest_eid),
     }
     
     init_receive_library_params_json : InitReceiveLibraryParamsJSON = {
         "receiver": str(tristero_oapp_pubkey),
-        "eid": ARBITRUM_EID,
+        "eid": dest_eid,
     }
     
     init_receive_library_params = InitReceiveLibraryParams.from_json(init_receive_library_params_json)
@@ -465,20 +411,23 @@ async def sol_init_receive_library():
     init_receive_library_tx = solana_client.send_transaction(txn, *signers, opts=TxOpts(skip_confirmation=False, preflight_commitment=Confirmed)).value
     print(f"init_receive_library_tx: {init_receive_library_tx}")   
 
-async def sol_init_nonce():
+async def sol_init_nonce(solana_url, admin: Keypair, dest_eid: int, dest_oapp_addr):
+    solana_client = Client(solana_url)
+    tristero_oapp_pubkey = get_tristero_oapp()
+    
     print(f"-----------------------Init Nonce---------------------------")
-    print(f"get_nonce_pda(tristero_oapp_pubkey, ARBITRUM_EID, RECEIVER_PUBKEY) => {get_nonce_pda(tristero_oapp_pubkey, ARBITRUM_EID, RECEIVER_PUBKEY)}")
+    print(f"get_nonce_pda(tristero_oapp_pubkey, ARBITRUM_EID, RECEIVER_PUBKEY) => {get_nonce_pda(tristero_oapp_pubkey, dest_eid, dest_oapp_addr)}")
     init_nonce_accounts: InitNonceAccounts = {
         "delegate": admin.pubkey(),
         "oapp_registry": get_oapp_registry_pda(tristero_oapp_pubkey),
-        "nonce": get_nonce_pda(tristero_oapp_pubkey, ARBITRUM_EID, RECEIVER_PUBKEY),
-        "pending_inbound_nonce": get_pending_inbound_nonce_pda(tristero_oapp_pubkey, ARBITRUM_EID, RECEIVER_PUBKEY)
+        "nonce": get_nonce_pda(tristero_oapp_pubkey, dest_eid, dest_oapp_addr),
+        "pending_inbound_nonce": get_pending_inbound_nonce_pda(tristero_oapp_pubkey, dest_eid, dest_oapp_addr)
     }
     
     init_nonce_params_json : InitNonceParamsJSON = {
         "local_oapp": str(tristero_oapp_pubkey),
-        "remote_eid": ARBITRUM_EID,
-        "remote_oapp": RECEIVER_PUBKEY
+        "remote_eid": dest_eid,
+        "remote_oapp": dest_oapp_addr
     }
     
     init_nonce_params = InitNonceParams.from_json(init_nonce_params_json)
@@ -502,10 +451,12 @@ async def sol_init_nonce():
     init_nonce_tx = solana_client.send_transaction(txn, *signers, opts=TxOpts(skip_confirmation=False, preflight_commitment=Confirmed)).value
     print(f"init_nonce_tx: {init_nonce_tx}")
 
-async def sol_init_oft_config():
+async def sol_init_oft_config(solana_url, admin: Keypair, dest_eid: int):
+    tristero_oapp_pubkey = get_tristero_oapp()
+    solana_client = Client(solana_url)
     client = AsyncClient(solana_url)
-    send_library_config = get_send_library_config_pda(tristero_oapp_pubkey, ARBITRUM_EID)
-    default_send_library_config = get_default_send_library_config(ARBITRUM_EID)
+    send_library_config = get_send_library_config_pda(tristero_oapp_pubkey, dest_eid)
+    default_send_library_config = get_default_send_library_config(dest_eid)
     
     send_library_info_account = await SendLibraryConfig.fetch(client, default_send_library_config, program_id = endpoint_program_id)
     
@@ -538,26 +489,100 @@ async def sol_init_oft_config():
     register_config_tx = solana_client.send_transaction(txn, *signers, opts=TxOpts(skip_confirmation=False, preflight_commitment=Confirmed)).value
     print(f"register_config_tx: {register_config_tx}")
 
-async def sol_place_order(order_id):
+async def sol_init_config(solana_url, admin: Keypair, dest_eid: int, dest_oapp_addr):
     solana_client = Client(solana_url)
+    tristero_oapp_pubkey = get_tristero_oapp()
+    message_lib_pubkey = get_message_lib_pda()
+    
+    print(f"-----------------------Init Config---------------------------")
+    init_config_accounts: InitConfigAccounts = {
+        "delegate": admin.pubkey(),
+        "oapp_registry": get_oapp_registry_pda(tristero_oapp_pubkey),
+        "message_lib_info": get_message_lib_info_pda(message_lib_pubkey),
+        "message_lib": message_lib_pubkey,
+        "message_lib_program": uln_program_id
+    }
+    
+    init_config_remaining_accounts = [
+        AccountMeta( #0
+            pubkey = admin.pubkey(),
+            is_signer = True,
+            is_writable =  True
+        ),
+        AccountMeta( #1
+            pubkey = message_lib_pubkey,
+            is_signer = False,
+            is_writable =  False
+        ),
+        AccountMeta( #2
+            pubkey = get_send_config_pda(dest_eid, tristero_oapp_pubkey),
+            is_signer = False,
+            is_writable =  True
+        ),
+        AccountMeta( #3
+            pubkey = get_receive_config_pda(dest_eid, tristero_oapp_pubkey),
+            is_signer = False,
+            is_writable =  True
+        ),
+        AccountMeta( #4
+            pubkey = SYS_PROGRAM_ID,
+            is_signer = False,
+            is_writable =  True
+        )
+    ]
+    
+    init_config_params_json : InitConfigParamsJSON = {
+        "oapp": str(tristero_oapp_pubkey),
+        "eid": dest_eid
+    }
+    
+    init_config_params = InitConfigParams.from_json(init_config_params_json)
+    
+    init_config_ix = init_config(
+        {
+            "params": init_config_params
+        },
+        init_config_accounts,
+        endpoint_program_id,
+        init_config_remaining_accounts
+    )
+    
+    latest_blockhash = solana_client.get_latest_blockhash()
+    blockhash = latest_blockhash.value.blockhash
+    signers = [admin]
+    
+    txn = Transaction(recent_blockhash=blockhash, fee_payer=admin.pubkey())
+    txn.add(set_compute_unit_limit(2000000))
+    txn.add(init_config_ix)
+    
+    init_config_tx = solana_client.send_transaction(txn, *signers, opts=TxOpts(skip_confirmation=False, preflight_commitment=Confirmed)).value
+    print(f"init_config_tx: {init_config_tx}")
+
+
+# Main Functions
+async def sol_place_order(solana_url, user: Keypair, order_id: int, dest_eid: int, mint_addr: Pubkey, token_account: Pubkey, erc20_addr, src_quantity: int, dst_quantity: int, min_quantity: int):
+    solana_client = Client(solana_url)
+    admin_panel_pda = get_admin_panel()
+    tristero_oapp_pubkey = get_tristero_oapp()
+    
     print(f"-----------------------Place Order--------------------------")
     place_order_accounts: PlaceOrderAccounts = {
         "authority": user.pubkey(),
         "oapp": tristero_oapp_pubkey,
         "admin_panel": admin_panel_pda,
         "token_mint": mint_addr,
-        "token_account": Pubkey.from_string("6RzJ96TziaKHitum3KW5524D6GbvqqYJAeaNfQyicmEx"),
+        "token_account": token_account,
         "staking_account": get_staking_panel(mint_addr),
         "order": get_order_pda(order_id)
     }
     
     place_order_params_json : PlaceOrderParamsJSON = {
-        "source_sell_amount": 100,
-        "min_sell_amount": 10,
+        "source_sell_amount": src_quantity,
+        "min_sell_amount": min_quantity,
         "dest_token_mint": erc20_addr,
-        "dest_buy_amount": 100,
+        "dest_buy_amount": dst_quantity,
         "order_id": order_id,
-        "eid": ARBITRUM_EID
+        "eid": dest_eid
     }
     
     place_order_params = PlaceOrderParams.from_json(place_order_params_json)
@@ -582,13 +607,14 @@ async def sol_place_order(order_id):
     print(f"place_order_tx: {place_order_tx}")
     print(f"order_id: :{order_id}")
 
-async def sol_create_match(order_id, trade_match_id):
+async def sol_create_match(solana_url, user: Keypair, order_id: int, trade_match_id: int, arb_wallet_addr):
     solana_client = Client(solana_url)
+    admin_panel_pda = get_admin_panel()
     
     # calling create_match instruction
     print(f"-----------------------Create Match--------------------------")
     create_match_accounts : CreateMatchAccounts = {
-        "authority": admin.pubkey(),
+        "authority": user.pubkey(),
         "admin_panel": admin_panel_pda,
         "order": get_order_pda(order_id),
         "trade_match": get_trade_match_pda(trade_match_id)
@@ -614,9 +640,9 @@ async def sol_create_match(order_id, trade_match_id):
     )
     latest_blockhash = solana_client.get_latest_blockhash()
     blockhash = latest_blockhash.value.blockhash
-    signers = [admin]
+    signers = [user]
     
-    txn = Transaction(recent_blockhash=blockhash, fee_payer=admin.pubkey())
+    txn = Transaction(recent_blockhash=blockhash, fee_payer=user.pubkey())
     txn.add(set_compute_unit_limit(2000000))
     txn.add(create_match_ix)
     
@@ -624,20 +650,21 @@ async def sol_create_match(order_id, trade_match_id):
     print(f"create_match_tx: {create_match_tx}")
     print(f"match_id: {trade_match_id}")
 
-async def sol_execute_match(trade_match_id):
+async def sol_execute_match(solana_url, user: Keypair, src_token_addr: Pubkey, dst_token_addr: Pubkey, dst_eid: int, trade_match_id: int, quantity: int, dest_oapp_addr):
+    solana_client = Client(solana_url)
     print(f"-----------------------Execute Match--------------------------")
     execute_match_accounts : ExecuteMatchAccounts = {
         "authority": user.pubkey(),
-        "token_account": Pubkey.from_string("6RzJ96TziaKHitum3KW5524D6GbvqqYJAeaNfQyicmEx"),
-        "arb_user_token_account": Pubkey.from_string("9pveBsMdpg8EjBgap9LWWDSfMdY5B8x4yvxk4ZvfobLC"),
-        "receipt": get_receipt_pda(RECEIVER_PUBKEY, trade_match_id)
+        "token_account": src_token_addr,
+        "arb_user_token_account": dst_token_addr,
+        "receipt": get_receipt_pda(dest_oapp_addr, trade_match_id)
     }
     
     execute_match_params_json : ExecuteMatchParamsJSON = {
-        "dst_eid": ARBITRUM_EID,
+        "dst_eid": dst_eid,
         "trade_match_id": trade_match_id,
-        "source_sell_amount": 1000,
-        "sender": RECEIVER_PUBKEY
+        "source_sell_amount": quantity,
+        "sender": dest_oapp_addr
     }
     
     execute_match_params = ExecuteMatchParams.from_json(execute_match_params_json)
@@ -661,15 +688,17 @@ async def sol_execute_match(trade_match_id):
     print(f"execute_match_tx: {execute_match_tx}")
     print(f"match_id: {trade_match_id}")
 
-async def sol_confirm_match(order_id, trade_match_id):
+async def sol_confirm_match(solana_url, user: Keypair, token_account: Pubkey, token_mint_addr: Pubkey, order_id, trade_match_id):
+    solana_client = Client(solana_url)
+    tristero_oapp_pubkey = get_tristero_oapp()
     print(f"-----------------------Confirm Match--------------------------")
     confirm_match_accounts : ConfirmMatchAccounts = {
         "signer": user.pubkey(),
         "oapp": tristero_oapp_pubkey,
         "order": get_order_pda(order_id),
         "trade_match": get_trade_match_pda(trade_match_id),
-        "token_account": Pubkey.from_string("9pveBsMdpg8EjBgap9LWWDSfMdY5B8x4yvxk4ZvfobLC"),
-        "staking_account": get_staking_panel(mint_addr)
+        "token_account": token_account,
+        "staking_account": get_staking_panel(token_mint_addr)
     }
     
     confirm_match_params_json : ConfirmMatchParamsJSON = {
@@ -697,10 +726,13 @@ async def sol_confirm_match(order_id, trade_match_id):
     print(f"confirm_match_tx: {confirm_match_tx}")
     print(f"match_id: {trade_match_id}") 
 
-async def sol_start_challenge(client, trade_match_id):
+async def sol_start_challenge(solana_url, user: Keypair, trade_match_id: int, dest_eid: int, taker, dest_oapp_addr):
+    tristero_oapp_pubkey = get_tristero_oapp()
+    solana_client = Client(solana_url)
+    client = AsyncClient(solana_url)
     
-    send_library_config = get_send_library_config_pda(tristero_oapp_pubkey, ARBITRUM_EID)
-    default_send_library_config = get_default_send_library_config(ARBITRUM_EID)
+    send_library_config = get_send_library_config_pda(tristero_oapp_pubkey, dest_eid)
+    default_send_library_config = get_default_send_library_config(dest_eid)
     send_library_info_account = await SendLibraryConfig.fetch(client, default_send_library_config, program_id = endpoint_program_id)
     send_library_info_pubkey = send_library_info_account.message_lib
     send_instruction_remaining_accounts = [
@@ -740,7 +772,7 @@ async def sol_start_challenge(client, trade_match_id):
             is_writable =  True
         ),
         AccountMeta( #7
-            pubkey = get_nonce_pda(tristero_oapp_pubkey, ARBITRUM_EID, RECEIVER_PUBKEY),
+            pubkey = get_nonce_pda(tristero_oapp_pubkey, dest_eid, dest_oapp_addr),
             is_signer = False,
             is_writable =  True
         ),
@@ -760,12 +792,12 @@ async def sol_start_challenge(client, trade_match_id):
             is_writable =  True
         ),
         AccountMeta( #11
-            pubkey = get_send_config_pda(ARBITRUM_EID, tristero_oapp_pubkey),
+            pubkey = get_send_config_pda(dest_eid, tristero_oapp_pubkey),
             is_signer = False,
             is_writable =  True
         ),
         AccountMeta( #12
-            pubkey = get_default_send_config_pda(ARBITRUM_EID),
+            pubkey = get_default_send_config_pda(dest_eid),
             is_signer = False,
             is_writable =  True
         ),
@@ -846,8 +878,8 @@ async def sol_start_challenge(client, trade_match_id):
     start_challenge_params_json : ChallengeParamsJSON = {
         "trade_match_id": trade_match_id,
         "tristero_oapp_bump": get_tristero_oapp_bump(),
-        "taker": arb_wallet_addr,
-        "receiver": RECEIVER_PUBKEY
+        "taker": taker,
+        "receiver": dest_oapp_addr
     }
     
     start_challenge_params = ChallengeParams.from_json(start_challenge_params_json)
@@ -871,9 +903,12 @@ async def sol_start_challenge(client, trade_match_id):
     start_challenge_tx = solana_client.send_transaction(txn, *signers, opts=TxOpts(skip_confirmation=False, preflight_commitment=Confirmed)).value
     print(f"challenge_tx: {start_challenge_tx}")
 
-async def sol_finish_challenge(client, trade_match_id):
-    send_library_config = get_send_library_config_pda(tristero_oapp_pubkey, ARBITRUM_EID)
-    default_send_library_config = get_default_send_library_config(ARBITRUM_EID)
+async def sol_finish_challenge(solana_url, user: Keypair, trade_match_id: int, dest_eid: int, spltoken, erc20token, dest_oapp_addr):
+    tristero_oapp_pubkey = get_tristero_oapp()
+    solana_client = Client(solana_url)
+    client = AsyncClient(solana_url)
+    send_library_config = get_send_library_config_pda(tristero_oapp_pubkey, dest_eid)
+    default_send_library_config = get_default_send_library_config(dest_eid)
     send_library_info_account = await SendLibraryConfig.fetch(client, default_send_library_config, program_id = endpoint_program_id)
     send_library_info_pubkey = send_library_info_account.message_lib
     send_instruction_remaining_accounts = [
@@ -913,7 +948,7 @@ async def sol_finish_challenge(client, trade_match_id):
             is_writable =  True
         ),
         AccountMeta( #7
-            pubkey = get_nonce_pda(tristero_oapp_pubkey, ARBITRUM_EID, RECEIVER_PUBKEY),
+            pubkey = get_nonce_pda(tristero_oapp_pubkey, dest_eid, dest_oapp_addr),
             is_signer = False,
             is_writable =  True
         ),
@@ -933,12 +968,12 @@ async def sol_finish_challenge(client, trade_match_id):
             is_writable =  True
         ),
         AccountMeta( #11
-            pubkey = get_send_config_pda(ARBITRUM_EID, tristero_oapp_pubkey),
+            pubkey = get_send_config_pda(dest_eid, tristero_oapp_pubkey),
             is_signer = False,
             is_writable =  True
         ),
         AccountMeta( #12
-            pubkey = get_default_send_config_pda(ARBITRUM_EID),
+            pubkey = get_default_send_config_pda(dest_eid),
             is_signer = False,
             is_writable =  True
         ),
@@ -1016,11 +1051,11 @@ async def sol_finish_challenge(client, trade_match_id):
     }
     
     finish_challenge_params_json : FinishChallengeParamsJSON = {
-        "arb_eid": ARBITRUM_EID,
+        "arb_eid": dest_eid,
         "trade_match_id": trade_match_id,
-        "spl_token": mint_addr,
-        "erc20token": arb_wallet_addr,
-        "receiver": RECEIVER_PUBKEY
+        "spl_token": str(spltoken),
+        "erc20token": erc20token,
+        "receiver": dest_oapp_addr
     }
     
     finish_challenge_params = FinishChallengeParams.from_json(finish_challenge_params_json)
@@ -1043,190 +1078,3 @@ async def sol_finish_challenge(client, trade_match_id):
     
     finish_challenge_tx = solana_client.send_transaction(txn, *signers, opts=TxOpts(skip_confirmation=False, preflight_commitment=Confirmed)).value
     print(f"finish_challenge_tx: {finish_challenge_tx}")
-
-async def arb_set_peer(deployed_contract, oapp_addr):
-    print("---------------------------setPeer----------------------------------")
-    set_peer = deployed_contract.functions.setPeer(sol_test_eid, oapp_addr)
-
-    set_peer_hash = await safe_build_and_send_tx(
-        web3,
-        private_key,
-        web3.eth.default_account,
-        set_peer,
-    )
-    set_peer_receipt = web3.eth.wait_for_transaction_receipt(set_peer_hash, timeout=60)
-    
-    print(f"set_peer_receipt: ", set_peer_receipt)
-    
-async def arb_place_order(deployed_contract):
-    print("---------------------------placeOrder----------------------------------")
-    place_order = deployed_contract.functions.placeOrder(
-        (erc20_token_mint, spl_token_mint_addr, sol_test_eid),
-        (1000, 1000, 10, erc20_token_mint, int(100)),
-        (int(time.time()) + 3600, 20, 40),
-        False
-    )
-
-    place_order_hash = await safe_build_and_send_tx(
-        web3,
-        private_key,
-        web3.eth.default_account,
-        place_order,
-    )
-    place_order_receipt = web3.eth.wait_for_transaction_receipt(place_order_hash, timeout=60)
-    
-    print(f"place_order_receipt: ", place_order_receipt)
-    
-async def arb_create_match(deployed_contract):
-    print("----------------------------createMatch----------------------------------")
-    create_match = deployed_contract.functions.createMatch(
-        (erc20_token_mint, spl_token_mint_addr, sol_test_eid),
-        0, 0, dest_account_addr, 1000, 1000
-    )
-    
-    create_match_hash = await safe_build_and_send_tx(
-        web3,
-        private_key,
-        web3.eth.default_account,
-        create_match,
-    )
-    create_match_receipt = web3.eth.wait_for_transaction_receipt(create_match_hash, timeout=60)
-    
-    print(f"create_match_receipt: ", create_match_receipt)
-    
-async def arb_execute_match(deployed_contract, index):
-    print("----------------------------executeMatch----------------------------------")
-    execute_match = deployed_contract.functions.executeMatch(
-        (erc20_token_mint, spl_token_mint_addr, sol_test_eid),
-        index, web3.to_checksum_address("0xDe7014167c36c39aAfb56aA0Bd87776d8911369A"), 1000
-    )
-    
-    execute_match_hash = await safe_build_and_send_tx(
-        web3,
-        private_key,
-        web3.eth.default_account,
-        execute_match,
-    )
-    execute_match_receipt = web3.eth.wait_for_transaction_receipt(execute_match_hash, timeout=60)
-    
-    print(f"execute_match_receipt: ", execute_match_receipt)
-
-async def arb_confirm_match(deployed_contract):
-    print("----------------------------confirmMatch----------------------------------")
-    confirm_match = deployed_contract.functions.confirmMatch(
-        (erc20_token_mint, spl_token_mint_addr, sol_test_eid),
-        0
-    )
-    
-    confirm_match_hash = await safe_build_and_send_tx(
-        web3,
-        private_key,
-        web3.eth.default_account,
-        confirm_match,
-    )
-    confirm_match_receipt = web3.eth.wait_for_transaction_receipt(confirm_match_hash, timeout=60)
-    
-    print(f"confirm_match_receipt: ", confirm_match_receipt)
-
-async def arb_start_challenge(deployed_contract, index):
-    print("----------------------------ArbStartChallenge----------------------------------")
-    
-    get_quote = deployed_contract.functions.getQuote(
-        (erc20_token_mint, spl_token_mint_addr, sol_test_eid),
-        index
-    )
-    
-    get_quote_hash = await safe_build_and_send_tx(
-        web3,
-        private_key,
-        web3.eth.default_account,
-        get_quote
-    ) 
-    get_quote_receipt = web3.eth.wait_for_transaction_receipt(get_quote_hash, timeout=60)
-    
-    print(f"get_quote_receipt: ", get_quote_receipt)
-    
-    # start_challenge = deployed_contract.functions.startChallenge(
-    #     (erc20_token_mint, spl_token_mint_addr, sol_test_eid),
-    #     index
-    # )
-    
-    # start_challenge_hash = await safe_build_and_send_tx(
-    #     web3,
-    #     private_key,
-    #     web3.eth.default_account,
-    #     start_challenge
-    # )
-    # start_challenge_receipt = web3.eth.wait_for_transaction_receipt(start_challenge_hash, timeout=60)
-    
-    # print(f"start_challenge_receipt: ", start_challenge_receipt)
-
-async def arb_finish_challenge(deployed_contract, index):
-    print("----------------------------ArbFinishChallenge----------------------------------")
-    finish_challenge = deployed_contract.functions.finishChallenge(
-        (erc20_token_mint, spl_token_mint_addr, sol_test_eid),
-        index
-    )
-    
-    finish_challenge_hash = await safe_build_and_send_tx(
-        web3,
-        private_key,
-        web3.eth.default_account,
-        finish_challenge,
-        # fee,
-        # fee
-    )
-    finish_challenge_receipt = web3.eth.wait_for_transaction_receipt(finish_challenge_hash, timeout=60)
-    
-    print(f"finish_challenge_receipt: ", finish_challenge_receipt)
-
-async def main():    
-    # Read the generated IDL.
-    with Path("./target/idl/tristero.json").open() as f:
-        raw_idl = f.read()
-    idl = Idl.from_json(raw_idl)
-    
-    with Path("./test-python/arb-contract/SimpleTradeContract.json").open() as f:
-        file_str = f.read()
-    json_object = json.loads(file_str)
-    
-    deployed_contract = web3.eth.contract(
-        address=contract_address, abi=json_object["abi"]
-    )
-    oapp_addr_uint8_array = base58_to_uint8_array(str(tristero_oapp_pubkey))
-    imported_account = web3.eth.account.from_key(private_key)
-    web3.eth.default_account = imported_account.address
-    
-    
-    client = AsyncClient(solana_url)
-    provider = Provider(client, Wallet.local())
-    
-    async with Program(idl, tristero_program_id, provider) as program:
-        print(f"program: ", program)
-        admin_panel_account = await program.account["AdminPanel"].fetch(admin_panel_pda)
-        
-        order_id = admin_panel_account.order_count
-        trade_match_id = admin_panel_account.match_count
-        # await sol_place_order(order_id)
-        # await sol_create_match(order_id, trade_match_id)
-        # await ensure_approval(web3, web3.eth.default_account, contract_address, erc20_token_mint, 1000, private_key)
-        # await arb_execute_match(deployed_contract, trade_match_id)
-        # await sol_confirm_match(order_id, trade_match_id)
-        
-        
-        # await arb_place_order(deployed_contract)
-        # await ensure_approval(web3, web3.eth.default_account, contract_address, erc20_token_mint, 1000, private_key)
-        # await arb_create_match(deployed_contract)
-        # await sol_execute_match(0)
-        # await arb_confirm_match(deployed_contract)
-        
-        # await sol_init_nonce()
-        # await arb_set_peer(deployed_contract, oapp_addr_uint8_array)
-        # await sol_start_challenge(client, 2)
-        # await arb_finish_challenge(deployed_contract, 2)
-        
-        await arb_start_challenge(deployed_contract, 0)
-        # await sol_finish_challenge(deployed_contract, 0)
-        
-        
-asyncio.run(main())
