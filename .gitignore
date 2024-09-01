@@ -6,6 +6,4 @@ target/tmp/
 .anchor
 test-ledger
 
-tests/main_id.json
-tests/lz_receive_test.ts
-test-python/test-case1.py
+tests/

@@ -58,7 +58,7 @@ async def arb_place_order(web3: Web3, deployed_contract, erc20_token_addr, spl_t
     
     print(f"place_order_receipt: ", place_order_receipt)
     
-async def arb_create_match(web3: Web3, deployed_contract, erc20_token_addr, spl_token_addr, dest_eid, dest_account_addr, private_key, match_id):
+async def arb_create_match(web3: Web3, deployed_contract, erc20_token_addr, spl_token_addr, dest_eid, dest_account_addr, private_key,  match_id):
     imported_account = web3.eth.account.from_key(private_key)
     
     print("----------------------------ArbCreateMatch----------------------------------")
@@ -118,6 +118,13 @@ async def arb_confirm_match(web3: Web3, deployed_contract, erc20_token_addr, spl
 async def arb_start_challenge(web3: Web3, deployed_contract, erc20_token_addr, spl_token_addr, dest_eid, match_id, private_key):
     imported_account = web3.eth.account.from_key(private_key)
     
+    get_quote = deployed_contract.functions.getQuote(
+        (erc20_token_addr, spl_token_addr, dest_eid),
+        match_id
+    ).call()
+    
+    print(f"get_quote: {get_quote}")
+    
     print("----------------------------ArbStartChallenge----------------------------------")
     start_challenge = deployed_contract.functions.startChallenge(
         (erc20_token_addr, spl_token_addr, dest_eid),
@@ -129,8 +136,10 @@ async def arb_start_challenge(web3: Web3, deployed_contract, erc20_token_addr, s
         private_key,
         imported_account.address,
         start_challenge,
-        100000000,
-        10000000
+        0,
+        None,
+        False,
+        get_quote
     )
     start_challenge_receipt = web3.eth.wait_for_transaction_receipt(start_challenge_hash, timeout=60)
     
@@ -138,6 +147,12 @@ async def arb_start_challenge(web3: Web3, deployed_contract, erc20_token_addr, s
 
 async def arb_finish_challenge(web3: Web3, deployed_contract, erc20_token_addr, spl_token_addr, dest_eid, match_id, private_key):
     imported_account = web3.eth.account.from_key(private_key)
+    get_quote = deployed_contract.functions.getQuote(
+        (erc20_token_addr, spl_token_addr, dest_eid),
+        match_id
+    ).call()
+    
+    print(f"get_quote: {get_quote}")
     
     print("----------------------------ArbFinishChallenge----------------------------------")
     finish_challenge = deployed_contract.functions.finishChallenge(
@@ -150,8 +165,10 @@ async def arb_finish_challenge(web3: Web3, deployed_contract, erc20_token_addr, 
         private_key,
         imported_account.address,
         finish_challenge,
-        100000000,
-        10000000
+        0,
+        None,
+        False,
+        get_quote
     )
     finish_challenge_receipt = web3.eth.wait_for_transaction_receipt(finish_challenge_hash, timeout=60)
     

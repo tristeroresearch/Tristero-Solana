@@ -113,6 +113,7 @@ describe("# test scenario - tristero ", () => {
             // console.log("adminPanelUpdateTx = ", adminPanelUpdateTx)
 
             const tristeroOappPubkey = getTristeroOapp();
+            console.log("tristeroOappPubkey => ", tristeroOappPubkey)
             const endpointEventPdaDeriver = new EventPDADeriver(endpoint)
             const ulnEventPdaDeriver = new EventPDADeriver(sendLibraryProgram)
 
@@ -418,114 +419,114 @@ describe("# test scenario - tristero ", () => {
             //     console.log("SetSendLibraryTx = ", setSendTx)
             // }
 
-            // console.log("-------------------------Set Config-----------------------------")
-            // {
-            //     const setConfigRemainingAccounts = [
-            //         { //2
-            //             pubkey: getUlnPDA(),
-            //             isSigner: false,
-            //             isWritable: false
-            //         },
-            //         { //3
-            //             pubkey: sendConfigPDA(arbitrumEID, tristeroOappPubkey),
-            //             isSigner: false,
-            //             isWritable: true
-            //         },
-            //         { //4
-            //             pubkey: receiveConfigPDA(arbitrumEID, tristeroOappPubkey),
-            //             isSigner: false,
-            //             isWritable: true
-            //         },
-            //         { //5
-            //             pubkey: getDefaultSendConfig(arbitrumEID),
-            //             isSigner: false,
-            //             isWritable: false
-            //         },
-            //         { //6
-            //             pubkey: getDefaultReceiveConfig(arbitrumEID),
-            //             isSigner: false,
-            //             isWritable: false
-            //         },
-            //         { //7
-            //             pubkey: ulnEventPdaDeriver.eventAuthority()[0],
-            //             isSigner: false,
-            //             isWritable: false,
-            //         },
-            //         { //8
-            //             pubkey: ulnProgramId,
-            //             isSigner: false,
-            //             isWritable: false,
-            //         }
-            //     ]
-            //     console.log("setConfigRemainingAccounts: ", JSON.stringify(setConfigRemainingAccounts))
-            //     const setConfigAccounts = {
-            //         signer: user.publicKey,
-            //         oappRegistry: getOappPDA(tristeroOappPubkey),
-            //         messageLibInfo: getMessageLibInfoPDA(messageLib),
-            //         messageLib: messageLib,
-            //         messageLibProgram: ulnProgramId,
-            //         anchorRemainingAccounts: setConfigRemainingAccounts
-            //     }
+            console.log("-------------------------Set Config-----------------------------")
+            {
+                const setConfigRemainingAccounts = [
+                    { //2
+                        pubkey: getUlnPDA(),
+                        isSigner: false,
+                        isWritable: false
+                    },
+                    { //3
+                        pubkey: sendConfigPDA(arbitrumEID, tristeroOappPubkey),
+                        isSigner: false,
+                        isWritable: true
+                    },
+                    { //4
+                        pubkey: receiveConfigPDA(arbitrumEID, tristeroOappPubkey),
+                        isSigner: false,
+                        isWritable: true
+                    },
+                    { //5
+                        pubkey: getDefaultSendConfig(arbitrumEID),
+                        isSigner: false,
+                        isWritable: false
+                    },
+                    { //6
+                        pubkey: getDefaultReceiveConfig(arbitrumEID),
+                        isSigner: false,
+                        isWritable: false
+                    },
+                    { //7
+                        pubkey: ulnEventPdaDeriver.eventAuthority()[0],
+                        isSigner: false,
+                        isWritable: false,
+                    },
+                    { //8
+                        pubkey: ulnProgramId,
+                        isSigner: false,
+                        isWritable: false,
+                    }
+                ]
+                console.log("setConfigRemainingAccounts: ", JSON.stringify(setConfigRemainingAccounts))
+                const setConfigAccounts = {
+                    signer: user.publicKey,
+                    oappRegistry: getOappPDA(tristeroOappPubkey),
+                    messageLibInfo: getMessageLibInfoPDA(messageLib),
+                    messageLib: messageLib,
+                    messageLibProgram: ulnProgramId,
+                    anchorRemainingAccounts: setConfigRemainingAccounts
+                }
 
-            //     const executorConfig = UlnProgram.executorConfigBeet.serialize({
-            //         executor: PublicKey.findProgramAddressSync(
-            //             [Buffer.from(EXECUTOR_CONFIG_SEED, 'utf8')],
-            //             executorProgramId,
-            //         )[0],
-            //         maxMessageSize: 10000,
-            //     })[0];
+                const executorConfig = UlnProgram.executorConfigBeet.serialize({
+                    executor: PublicKey.findProgramAddressSync(
+                        [Buffer.from(EXECUTOR_CONFIG_SEED, 'utf8')],
+                        executorProgramId,
+                    )[0],
+                    maxMessageSize: 10000,
+                })[0];
 
-            //     const setConfigExecutorParams = {
-            //         params: {
-            //             oapp: tristeroOappPubkey,
-            //             eid: arbitrumEID,
-            //             configType: OftTools.ConfigType.Executor,
-            //             config: executorConfig,
-            //         }
-            //     }
+                const setConfigExecutorParams = {
+                    params: {
+                        oapp: tristeroOappPubkey,
+                        eid: arbitrumEID,
+                        configType: OftTools.ConfigType.Executor,
+                        config: executorConfig,
+                    }
+                }
 
-            //     const ulnReceiveConfig = UlnProgram.types.ulnConfigBeet.serialize({
-            //         confirmations: 10,
-            //         requiredDvnCount: 1,
-            //         optionalDvnCount: 0,
-            //         optionalDvnThreshold: 0,
-            //         requiredDvns: [new PublicKey("4VDjp6XQaxoZf5RGwiPU9NR1EXSZn2TP4ATMmiSzLfhb")].sort(),
-            //         optionalDvns: [].sort(),
-            //     })[0];
+                const ulnReceiveConfig = UlnProgram.types.ulnConfigBeet.serialize({
+                    confirmations: 1,
+                    requiredDvnCount: 1,
+                    optionalDvnCount: 0,
+                    optionalDvnThreshold: 0,
+                    requiredDvns: [new PublicKey("4VDjp6XQaxoZf5RGwiPU9NR1EXSZn2TP4ATMmiSzLfhb")].sort(),
+                    optionalDvns: [].sort(),
+                })[0];
 
-            //     const setConfigReceiveParams = {
-            //         params: {
-            //             oapp: tristeroOappPubkey,
-            //             eid: arbitrumEID,
-            //             configType: OftTools.ConfigType.ReceiveUln,
-            //             config: ulnReceiveConfig,
-            //         }
-            //     }
+                const setConfigReceiveParams = {
+                    params: {
+                        oapp: tristeroOappPubkey,
+                        eid: arbitrumEID,
+                        configType: OftTools.ConfigType.ReceiveUln,
+                        config: ulnReceiveConfig,
+                    }
+                }
 
-            //     const setConfigExecutorInstruction = await OftTools.createSetConfigIx(
-            //         admin.publicKey,
-            //         tristeroOappPubkey,
-            //         arbitrumEID,
-            //         1,
-            //         new Uint8Array(executorConfig)
-            //     )
-            //     const setConfigReceiveInstruction = await OftTools.createSetConfigIx(
-            //         admin.publicKey,
-            //         tristeroOappPubkey,
-            //         arbitrumEID,
-            //         3,
-            //         new Uint8Array(ulnReceiveConfig)
-            //     )
+                const setConfigExecutorInstruction = await OftTools.createSetConfigIx(
+                    admin.publicKey,
+                    tristeroOappPubkey,
+                    arbitrumEID,
+                    1,
+                    new Uint8Array(executorConfig)
+                )
+                const setConfigReceiveInstruction = await OftTools.createSetConfigIx(
+                    admin.publicKey,
+                    tristeroOappPubkey,
+                    arbitrumEID,
+                    3,
+                    new Uint8Array(ulnReceiveConfig)
+                )
 
-            //     //     console.log("setConfig well done")
-            //     const transSetConfigExecutor = new Transaction().add(setConfigExecutorInstruction);
-            //     const transSetConfigReceive = new Transaction().add(setConfigReceiveInstruction);
-            //     const setConfigExecutorTx = await sendAndConfirmTransaction(connection, transSetConfigExecutor, [admin])
-            //     console.log("setConfigExecutorTx = ", setConfigExecutorTx)
-            //     const setConfigReceiveTx = await sendAndConfirmTransaction(connection, transSetConfigReceive, [admin])
-            //     console.log("setConfigReceiveTx = ", setConfigReceiveTx)
-            //     console.log("-------------------------------------------------------------------------------")
-            // }
+                //     console.log("setConfig well done")
+                const transSetConfigExecutor = new Transaction().add(setConfigExecutorInstruction);
+                const transSetConfigReceive = new Transaction().add(setConfigReceiveInstruction);
+                const setConfigExecutorTx = await sendAndConfirmTransaction(connection, transSetConfigExecutor, [admin])
+                console.log("setConfigExecutorTx = ", setConfigExecutorTx)
+                const setConfigReceiveTx = await sendAndConfirmTransaction(connection, transSetConfigReceive, [admin])
+                console.log("setConfigReceiveTx = ", setConfigReceiveTx)
+                console.log("-------------------------------------------------------------------------------")
+            }
 
 
             console.log("------------------------------mint new spl token(only need in localnet)-------------------------------------------------");
@@ -1110,31 +1111,31 @@ function hexToUint8Array(hex: string): Uint8Array {
     return uint8Array;
 }
 
-const setReceiveConfig = async (tristeroOApp: PublicKey, adminKeypair: Keypair) => {
-    const dvn1 = new anchor.web3.PublicKey("4VDjp6XQaxoZf5RGwiPU9NR1EXSZn2TP4ATMmiSzLfhb")
-    const dvn2 = new anchor.web3.PublicKey("F7gu9kLcpn4bSTZn183mhn2RXUuMy7zckdxJZdUjuALw")
-    const ulnConfig = {
-        confirmations: 10,
-        requiredDvnCount: 2,
-        optionalDvnCount: 0,
-        optionalDvnThreshold: 0,
-        requiredDvns: [dvn1, dvn2].sort(),
-        optionalDvns: [],
-    }
+// const setReceiveConfig = async (tristeroOApp: PublicKey, adminKeypair: Keypair) => {
+//     const dvn1 = new anchor.web3.PublicKey("4VDjp6XQaxoZf5RGwiPU9NR1EXSZn2TP4ATMmiSzLfhb")
+//     const dvn2 = new anchor.web3.PublicKey("F7gu9kLcpn4bSTZn183mhn2RXUuMy7zckdxJZdUjuALw")
+//     const ulnConfig = {
+//         confirmations: 10,
+//         requiredDvnCount: 2,
+//         optionalDvnCount: 0,
+//         optionalDvnThreshold: 0,
+//         requiredDvns: [dvn1, dvn2].sort(),
+//         optionalDvns: [],
+//     }
 
-    // Set the receive uln config for the pathway.
-    const setReceiveUlnConfigTransaction = new anchor.web3.Transaction().add(
-        await OftTools.createSetConfigIx(
-            adminKeypair.publicKey,
-            tristeroOApp,
-            arbitrumEID,
-            3,
-            new Uint8Array(ulnConfig),
-        ),
-    );
+//     // Set the receive uln config for the pathway.
+//     const setReceiveUlnConfigTransaction = new anchor.web3.Transaction().add(
+//         await OftTools.createSetConfigIx(
+//             adminKeypair.publicKey,
+//             tristeroOApp,
+//             arbitrumEID,
+//             3,
+//             new Uint8Array(ulnConfig),
+//         ),
+//     );
 
-    const txHash = await sendAndConfirmTransaction(connection, setReceiveUlnConfigTransaction, [adminKeypair]);
-    console.log(
-        `✅ Set receive configuration for dstEid ${arbitrumEID}! View the transaction here: ${txHash}`,
-    );
-}
+//     const txHash = await sendAndConfirmTransaction(connection, setReceiveUlnConfigTransaction, [adminKeypair]);
+//     console.log(
+//         `✅ Set receive configuration for dstEid ${arbitrumEID}! View the transaction here: ${txHash}`,
+//     );
+// }
