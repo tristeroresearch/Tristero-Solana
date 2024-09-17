@@ -385,6 +385,15 @@
           ]
         },
         {
+          "name": "matchAccount",
+          "isMut": true,
+          "isSigner": false,
+          "isOptional": true,
+          "docs": [
+            "Match Account"
+          ]
+        },
+        {
           "name": "stakingAccount",
           "isMut": true,
           "isSigner": false
@@ -492,6 +501,12 @@
           {
             "name": "sourceTokenMint",
             "type": "publicKey"
+          },
+          {
+            "name": "matchPubkey",
+            "type": {
+              "option": "publicKey"
+            }
           },
           {
             "name": "destTokenMint",
@@ -1128,8 +1143,5 @@
       "code": 6033,
       "name": "WritableAccountNotAllowed"
     }
-  ],
-  "metadata": {
-    "address": "E2okPYndsWqtniTNnoK2YHdZUwMEWpN1PtPW3woaY5Lm"
-  }
+  ]
 }

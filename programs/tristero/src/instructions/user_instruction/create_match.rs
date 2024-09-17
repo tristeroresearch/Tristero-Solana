@@ -48,12 +48,15 @@ pub struct CreateMatchParams {
 }
 
 pub fn create_match(ctx: Context<CreateMatch>, params: &CreateMatchParams) -> Result<()>  {
+    
+
     let admin_panel = ctx.accounts.admin_panel.as_mut();
     let order = ctx.accounts.order.as_mut();
     let trade_match = ctx.accounts.trade_match.as_mut();
 
     require!(params.src_quantity >= order.min_sell_amount, CustomError::MinSellAmountConflict);
     require!(order.source_sell_amount - order.settled >= params.src_quantity, CustomError::InSufficientFundsOfOrder);
+    require!(order.match_pubkey!=None && order.match_pubkey == Some(ctx.accounts.authority.key()), CustomError::InvalidAuthority);
 
     trade_match.authority = ctx.accounts.authority.key();
     trade_match.user_token_addr = order.user_token_addr;

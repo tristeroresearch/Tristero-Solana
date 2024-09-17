@@ -385,6 +385,15 @@ export type Tristero = {
           ]
         },
         {
+          "name": "matchAccount",
+          "isMut": true,
+          "isSigner": false,
+          "isOptional": true,
+          "docs": [
+            "Match Account"
+          ]
+        },
+        {
           "name": "stakingAccount",
           "isMut": true,
           "isSigner": false
@@ -492,6 +501,12 @@ export type Tristero = {
           {
             "name": "sourceTokenMint",
             "type": "publicKey"
+          },
+          {
+            "name": "matchPubkey",
+            "type": {
+              "option": "publicKey"
+            }
           },
           {
             "name": "destTokenMint",
@@ -1518,6 +1533,15 @@ export const IDL: Tristero = {
           ]
         },
         {
+          "name": "matchAccount",
+          "isMut": true,
+          "isSigner": false,
+          "isOptional": true,
+          "docs": [
+            "Match Account"
+          ]
+        },
+        {
           "name": "stakingAccount",
           "isMut": true,
           "isSigner": false
@@ -1625,6 +1649,12 @@ export const IDL: Tristero = {
           {
             "name": "sourceTokenMint",
             "type": "publicKey"
+          },
+          {
+            "name": "matchPubkey",
+            "type": {
+              "option": "publicKey"
+            }
           },
           {
             "name": "destTokenMint",
