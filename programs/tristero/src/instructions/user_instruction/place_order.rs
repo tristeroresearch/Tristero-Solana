@@ -40,6 +40,10 @@ pub struct PlaceOrder<'info> {
     )]
     pub token_account: Box<Account<'info, TokenAccount>>,
 
+    /// Match Account
+    #[account(mut)]
+    pub match_account: Option<AccountInfo<'info>>,
+
     #[account(
         init_if_needed,
         payer = authority,
@@ -92,6 +96,12 @@ pub fn place_order(ctx: Context<PlaceOrder>, params: &PlaceOrderParams) -> Resul
     order.order_id = admin_panel.order_count;
     order.settled = 0u64;
     order.is_valiable = true;
+    if ctx.accounts.match_account.is_some() {
+        order.match_pubkey = Some(ctx.accounts.match_account.as_mut().unwrap().key());
+    }
+    else {
+        order.match_pubkey = None;
+    }
     admin_panel.order_count += 1;
 
     // ---------------------Transfer the source token to the staking account----------------------------------
