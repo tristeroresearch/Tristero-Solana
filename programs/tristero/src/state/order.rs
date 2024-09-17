@@ -7,6 +7,7 @@ pub struct Order {
     pub user_pubkey: Pubkey,
     pub user_token_addr: Pubkey,
     pub source_token_mint: Pubkey,
+    pub match_pubkey: Option<Pubkey>,
     pub dest_token_mint: [u8; 20],
     pub source_sell_amount: u64,
     pub dest_buy_amount: u64,
