@@ -1,9 +1,8 @@
-target/debug/
-target/release/
-target/sbf-solana-solana/
-target/tmp/
-
 .anchor
 test-ledger
-
-tests/
+node_modules
+tests
+target
+test-python
+generate_keypair.ts
+program_key.json
