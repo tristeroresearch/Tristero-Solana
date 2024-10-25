@@ -45,6 +45,10 @@ anchor test --skip-build
 anchor deploy -p tristero
 ```
 
+Or 
+```shell
+solana program deploy --program-id ./target/deploy/tristero-keypair.json ./target/deploy/tristero.so --keypair ./program_authority.json [--upgrade-authority ./program_authority.json]
+```
 
 ## test with python
 python3.10 ./test-python/test.py
