@@ -36,7 +36,7 @@ pub struct RegisterTristeroOApp<'info> {
     /// CHECK: 
     pub event_authority: AccountInfo<'info>,
     pub system_program: Program<'info, System>,
-    /// CHECK: endpoint program's id
+    /// CHECK: endpoint program's id               
     #[account(executable)]
     pub endpoint_program: AccountInfo<'info>,
 }
@@ -55,6 +55,19 @@ pub fn register_tristero_oapp(ctx: Context<RegisterTristeroOApp>, params: &Regis
     admin_panel.bump = ctx.bumps.admin_panel;
     admin_panel.payment_wallet = params.payment_wallet;
 
+    let ix = anchor_lang::solana_program::system_instruction::transfer(
+        &ctx.accounts.payer.key(),
+        &ctx.accounts.oapp.key(),
+        10000000
+    );
+
+    let _ = anchor_lang::solana_program::program::invoke(
+        &ix,
+        &[
+            ctx.accounts.payer.to_account_info(),
+            ctx.accounts.oapp.to_account_info(),
+        ],
+    );
 
     let cpi_param = RegisterOAppParams {
         delegate: params.delegate
