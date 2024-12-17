@@ -1,7 +1,7 @@
 [toolchain]
 anchor_version = "0.29.0"
-solana_version = "1.17.31"
-
+solana_version = "1.14.18"
+# solana_version = "1.14.18"
 [features]
 seeds = false
 skip-lint = false
@@ -26,7 +26,7 @@ tristero = "E2okPYndsWqtniTNnoK2YHdZUwMEWpN1PtPW3woaY5Lm"
 tristero = "E2okPYndsWqtniTNnoK2YHdZUwMEWpN1PtPW3woaY5Lm"
 
 [programs.mainnet]
-tristero = "HBpimMFqxbj6WrqWq1jheKWAjKnVBSVTB86cZDVcL6W1"
+tristero = "B32JUhPbfuQ4ai59DVLzpvSFqodr99YEpkovEx2XnKDK"
 
 [[test.genesis]]
 address = "76y77prsiCMvXMjuoZ5VRrhG5qYBrUMYTE5WgHqgjEn6"

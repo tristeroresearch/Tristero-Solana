@@ -21,7 +21,7 @@ pub struct ConfirmMatch<'info> {
     /// token account address
     #[account(
         mut,
-        seeds = [b"order", &trade_match.src_index.to_be_bytes()],
+        seeds = [b"order", &trade_match.order_idx.to_be_bytes()],
         bump = order.bump
     )]
     pub order: Box<Account<'info, Order>>,

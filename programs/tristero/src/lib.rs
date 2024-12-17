@@ -15,7 +15,7 @@ use myutils::*;
 use oapp::endpoint_cpi::LzAccount;
 
 // declare_id!("E2okPYndsWqtniTNnoK2YHdZUwMEWpN1PtPW3woaY5Lm"); // for devnet
-declare_id!("HBpimMFqxbj6WrqWq1jheKWAjKnVBSVTB86cZDVcL6W1"); // for mainnet
+declare_id!("B32JUhPbfuQ4ai59DVLzpvSFqodr99YEpkovEx2XnKDK"); // for mainnet
 
 pub const ENDPOINT_SEED: &[u8] = b"Endpoint";
 pub const MESSAGE_LIB_SEED: &[u8] = b"MessageLib";

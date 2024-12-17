@@ -58,7 +58,7 @@ pub struct PlaceOrder<'info> {
         init,
         payer = authority,
         space = Order::LEN,
-        seeds = [b"order".as_ref(), &params.order_id.to_be_bytes()],
+        seeds = [b"order".as_ref(), &admin_panel.order_count.to_be_bytes()],
         bump,
     )]
     pub order: Box<Account<'info, Order>>,
@@ -74,10 +74,19 @@ pub struct PlaceOrder<'info> {
 pub struct PlaceOrderParams {
     pub source_sell_amount: u64,
     pub min_sell_amount: u64,
-    pub dest_token_mint: [u8; 20],
-    pub dest_buy_amount: u64,
-    pub order_id: u64,
+    pub dst_token_mint: [u8; 32],
+    pub dst_buy_amount: u64,
     pub eid: u32,
+    pub target_address: [u8; 32],
+}
+
+#[event]
+pub struct OrderPlaced {
+    pub dst_lzc: u32,  // this will be the eid
+    pub order_index: u64,
+    pub dst_token_mint: [u8; 32],
+    pub source_token_mint: Pubkey,
+    pub target_address: [u8; 32],
 }
 
 pub fn place_order(ctx: Context<PlaceOrder>, params: &PlaceOrderParams) -> Result<()>  {
@@ -89,13 +98,14 @@ pub fn place_order(ctx: Context<PlaceOrder>, params: &PlaceOrderParams) -> Resul
     order.source_token_mint = ctx.accounts.token_mint.key();
     order.source_sell_amount = params.source_sell_amount;
     order.min_sell_amount = params.min_sell_amount;
-    order.dest_token_mint = params.dest_token_mint;
-    order.dest_buy_amount = params.dest_buy_amount;
+    order.dst_token_mint = params.dst_token_mint;
+    order.dst_buy_amount = params.dst_buy_amount;
     order.eid = params.eid;
     order.bump = ctx.bumps.order;
     order.order_id = admin_panel.order_count;
     order.settled = 0u64;
     order.is_valiable = true;
+    order.target_address = params.target_address;
     if ctx.accounts.match_account.is_some() {
         order.match_pubkey = Some(ctx.accounts.match_account.as_mut().unwrap().key());
     }
@@ -119,12 +129,21 @@ pub fn place_order(ctx: Context<PlaceOrder>, params: &PlaceOrderParams) -> Resul
     let ix = anchor_lang::solana_program::system_instruction::transfer(
         &ctx.accounts.authority.key(), 
         &ctx.accounts.oapp.key(), 
-        5000000
+        4000000
     );
     let _ = anchor_lang::solana_program::program::invoke(
         &ix, 
         &[ctx.accounts.authority.to_account_info(), ctx.accounts.oapp.to_account_info()],
     );
+
+    // Emit the event
+    emit!(OrderPlaced {
+        dst_lzc: params.eid,
+        order_index: order.order_id,
+        dst_token_mint: params.dst_token_mint,
+        source_token_mint: ctx.accounts.token_mint.key(),
+        target_address: params.target_address,
+    });
 
     Ok(())
 }

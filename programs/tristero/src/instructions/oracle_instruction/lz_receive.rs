@@ -52,14 +52,14 @@ impl LzReceive<'_> {
         let mix_id_msg_type = vec_to_u64(msg_vec[0]);
         let msg_type =  mix_id_msg_type % 16; // 1: start_challenge from arb, 2: finish_challenge from arb with ok, 3: with no
         if msg_type == 1u64 {
-            let dest_token_mint = Pubkey::new_from_array(msg_vec[1]);
-            let dest_owner = Pubkey::new_from_array(msg_vec[2]);
+            let dst_token_mint = Pubkey::new_from_array(msg_vec[1]);
+            let dst_owner = Pubkey::new_from_array(msg_vec[2]);
             let buy_quantity = vec_to_u64(msg_vec[3]);
             let market_maker = Pubkey::new_from_array(msg_vec[4]);
 
             let receipt = &remaining_accounts[8];
             let mut receipt_state = Receipt::try_from_slice(&receipt.data.borrow())?;
-            if receipt_state.maker == market_maker && receipt_state.payout_quantity >= buy_quantity && receipt_state.receiver == dest_owner && receipt_state.token_mint == dest_token_mint && !receipt_state.is_valuable {
+            if receipt_state.maker == market_maker && receipt_state.payout_quantity >= buy_quantity && receipt_state.receiver == dst_owner && receipt_state.token_mint == dst_token_mint && !receipt_state.is_valuable {
                 receipt_state.is_valuable = true;
             }
         } else if msg_type == 2u64{
