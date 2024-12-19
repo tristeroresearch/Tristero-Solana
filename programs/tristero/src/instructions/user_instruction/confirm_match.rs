@@ -58,7 +58,7 @@ pub struct ConfirmMatchParams {
     pub trade_match_id: u64
 }
 
-pub fn confirm_match(ctx: Context<ConfirmMatch>, _params: &ConfirmMatchParams) -> Result<()>  {
+pub fn confirm_match(ctx: Context<ConfirmMatch>) -> Result<()>  {
     let trade_match = ctx.accounts.trade_match.as_mut();
     let order = ctx.accounts.order.as_mut();
 

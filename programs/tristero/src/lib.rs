@@ -50,8 +50,8 @@ pub mod tristero {
         instructions::execute_match(ctx, &params)
     }
 
-    pub fn confirm_match(ctx: Context<ConfirmMatch>, params: ConfirmMatchParams) -> Result<()> {
-        instructions::confirm_match(ctx, &params)
+    pub fn confirm_match(ctx: Context<ConfirmMatch>) -> Result<()> {
+        instructions::confirm_match(ctx)
     }
 
     pub fn start_challenge(ctx: Context<Challenge>, params: ChallengeParams) -> Result<()> {
@@ -79,6 +79,14 @@ pub mod tristero {
 
     pub fn place_order(ctx: Context<PlaceOrder>, params: PlaceOrderParams) -> Result<()> {
         instructions::place_order(ctx, &params)
+    }
+
+    pub fn cancel_order(ctx: Context<CancelOrder>) -> Result<()> {
+        instructions::cancel_order(ctx)
+    }
+
+    pub fn unwind_match(ctx: Context<UnwindMatch>) -> Result<()> {
+        instructions::unwind_match(ctx)
     }
 } 
 

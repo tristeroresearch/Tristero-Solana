@@ -53,6 +53,24 @@ pub enum CustomError {
     #[msg("Insufficient Funds of Order")]
     InSufficientFundsOfOrder,
 
+    #[msg("Token Not Approved")]
+    TokenNotApproved,
+
+    #[msg("Insufficient Approval")]
+    InsufficientApproval,
+
+    #[msg("Order Not Valid")]
+    OrderNotValid,
+
+    #[msg("Order Already Matched")]
+    OrderAlreadyMatched,
+
+    #[msg("Match Already Finalized")]
+    MatchAlreadyFinalized,
+
+    #[msg("Arithmetic Error")]
+    ArithmeticError,
+
     InvalidSendLibrary,
     InvalidReceiveLibrary,
     SameValue,

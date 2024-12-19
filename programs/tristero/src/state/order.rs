@@ -12,8 +12,8 @@ pub struct Order {
     pub source_sell_amount: u64,
     pub dst_buy_amount: u64,
     pub min_sell_amount: u64,
-    pub settled: u64, // settled amount
-    pub eid: u32, //which eco system
+    pub settled: u64,
+    pub eid: u32,
     pub bump: u8,
     pub is_valiable: bool,
     pub target_address: [u8; 32],

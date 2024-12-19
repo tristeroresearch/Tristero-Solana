@@ -28,31 +28,19 @@ pub struct PlaceOrder<'info> {
     )]
     pub admin_panel: Box<Account<'info, AdminPanel>>,
 
-    /// token mint address
     pub token_mint: Box<Account<'info, Mint>>,
 
-    /// token account address
     #[account(
         mut,
-        constraint = token_account.owner == authority.key() @ CustomError::InvalidTokenOwner,
         constraint = token_account.mint == token_mint.key() @ CustomError::InvalidTokenMintAddress,
-        constraint = token_account.amount > params.source_sell_amount @ CustomError::InvalidTokenAmount,
+        constraint = token_account.amount >= params.source_sell_amount @ CustomError::InvalidTokenAmount,
+        constraint = token_account.delegate.unwrap_or(Pubkey::default()) == oapp.key() @ CustomError::TokenNotApproved,
+        constraint = token_account.delegated_amount >= params.source_sell_amount @ CustomError::InsufficientApproval,
     )]
     pub token_account: Box<Account<'info, TokenAccount>>,
 
-    /// Match Account
     #[account(mut)]
     pub match_account: Option<AccountInfo<'info>>,
-
-    #[account(
-        init_if_needed,
-        payer = authority,
-        token::mint = token_mint,
-        token::authority = oapp,
-        seeds = [b"staking_account", token_mint.key().as_ref()],
-        bump,
-    )]
-    pub staking_account: Box<Account<'info, TokenAccount>>,
 
     #[account(
         init,
@@ -91,8 +79,9 @@ pub struct OrderPlaced {
 
 pub fn place_order(ctx: Context<PlaceOrder>, params: &PlaceOrderParams) -> Result<()>  {
     let admin_panel = ctx.accounts.admin_panel.as_mut();
-
     let order = ctx.accounts.order.as_mut();
+    
+    // Set order details
     order.user_pubkey = ctx.accounts.authority.key();
     order.user_token_addr = ctx.accounts.token_account.key();
     order.source_token_mint = ctx.accounts.token_mint.key();
@@ -106,37 +95,26 @@ pub fn place_order(ctx: Context<PlaceOrder>, params: &PlaceOrderParams) -> Resul
     order.settled = 0u64;
     order.is_valiable = true;
     order.target_address = params.target_address;
+
     if ctx.accounts.match_account.is_some() {
         order.match_pubkey = Some(ctx.accounts.match_account.as_mut().unwrap().key());
-    }
-    else {
+    } else {
         order.match_pubkey = None;
     }
+    
     admin_panel.order_count += 1;
 
-    // ---------------------Transfer the source token to the staking account----------------------------------
-    let cpi_accounts = Transfer {
-        from: ctx.accounts.token_account.to_account_info(),
-        to: ctx.accounts.staking_account.to_account_info(),
-        authority: ctx.accounts.authority.to_account_info(),
-    };
-
-    let cpi_context = CpiContext::new(ctx.accounts.token_program.to_account_info(), cpi_accounts);
-    
-    token::transfer(cpi_context, params.source_sell_amount)?;
-
-    // ---------------------Transfer the sol for fee to the sol staking account----------------------------------
+    // Only transfer SOL fee
     let ix = anchor_lang::solana_program::system_instruction::transfer(
         &ctx.accounts.authority.key(), 
         &ctx.accounts.oapp.key(), 
         4000000
     );
-    let _ = anchor_lang::solana_program::program::invoke(
+    anchor_lang::solana_program::program::invoke(
         &ix, 
         &[ctx.accounts.authority.to_account_info(), ctx.accounts.oapp.to_account_info()],
-    );
+    )?;
 
-    // Emit the event
     emit!(OrderPlaced {
         dst_lzc: params.eid,
         order_index: order.order_id,

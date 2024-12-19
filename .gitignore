@@ -11,3 +11,5 @@ target/verifiable
 test-python
 generate_keypair.ts
 program_key.json
+client_gen
+anchorpy-env
