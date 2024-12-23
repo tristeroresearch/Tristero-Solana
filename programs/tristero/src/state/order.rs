@@ -8,14 +8,18 @@ pub struct Order {
     pub user_token_addr: Pubkey,
     pub source_token_mint: Pubkey,
     pub match_pubkey: Option<Pubkey>,
-    pub dest_token_mint: [u8; 20],
+    pub dst_token_mint: [u8; 32],
     pub source_sell_amount: u64,
-    pub dest_buy_amount: u64,
+    pub dst_buy_amount: u64,
     pub min_sell_amount: u64,
-    pub settled: u64, // settled amount
-    pub eid: u32, //which eco system
+    pub settled: u64,
+    pub eid: u32,
     pub bump: u8,
     pub is_valiable: bool,
+    pub target_address: [u8; 32],
+    pub bond_asset_mint: Pubkey,  // The mint of the bond token
+    pub bond_amount: u64,         // How many bond tokens must be locked by bonder
+    pub bond_fee: u16,            // Fee in basis points applied to the source tokens
 }
 
 impl anchor_lang::Id for Order {

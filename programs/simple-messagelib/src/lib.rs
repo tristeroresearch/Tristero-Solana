@@ -11,7 +11,6 @@ use messagelib_helper::messagelib_interface::{
     SetConfigParams, Version,
 };
 use revert_call_test::*;
-use solana_helper::program_id_from_env;
 use state::*;
 
 // declare_id!(Pubkey::new_from_array(program_id_from_env!(

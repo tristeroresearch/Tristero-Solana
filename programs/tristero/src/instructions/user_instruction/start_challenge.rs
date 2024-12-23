@@ -52,7 +52,7 @@ pub fn start_challenge(ctx: Context<Challenge>, params: &ChallengeParams) -> Res
             0, 0, 0, 0,  0, 7, 161,
             32]; // For lzReceiveOption
 
-    //message: to send to arbitrum(trade_match_id, spltoken_mint_addr, erc20token_mint_addr, dest_owner, buy_quantity, msg_type)
+    //message: to send to arbitrum(trade_match_id, spltoken_mint_addr, erc20token_mint_addr, dst_owner, buy_quantity, msg_type)
     let mut message_to_send = Vec::<u8>::new();
     
     for _ in 0..24 {
@@ -65,7 +65,7 @@ pub fn start_challenge(ctx: Context<Challenge>, params: &ChallengeParams) -> Res
     for _ in 0..12 {
         message_to_send.push(0u8);
     }
-    trade_match.dest_token_mint.map(|value| message_to_send.push(value));
+    trade_match.dst_token_mint.map(|value| message_to_send.push(value));
 
     for _ in 0..12 {
         message_to_send.push(0u8);
@@ -75,7 +75,7 @@ pub fn start_challenge(ctx: Context<Challenge>, params: &ChallengeParams) -> Res
     for _ in 0..24 {
         message_to_send.push(0u8);
     }
-    trade_match.dest_buy_amount.to_be_bytes().map(|value| message_to_send.push(value));
+    trade_match.dst_buy_amount.to_be_bytes().map(|value| message_to_send.push(value));
 
     for _ in 0..31 {
         message_to_send.push(0u8);
