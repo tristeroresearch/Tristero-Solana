@@ -66,6 +66,9 @@ pub struct PlaceOrderParams {
     pub dst_buy_amount: u64,
     pub eid: u32,
     pub target_address: [u8; 32],
+    pub bond_asset_mint: Pubkey,
+    pub bond_amount: u64,
+    pub bond_fee: u16,
 }
 
 #[event]
@@ -95,6 +98,9 @@ pub fn place_order(ctx: Context<PlaceOrder>, params: &PlaceOrderParams) -> Resul
     order.settled = 0u64;
     order.is_valiable = true;
     order.target_address = params.target_address;
+    order.bond_asset_mint = params.bond_asset_mint;
+    order.bond_amount = params.bond_amount;
+    order.bond_fee = params.bond_fee;
 
     if ctx.accounts.match_account.is_some() {
         order.match_pubkey = Some(ctx.accounts.match_account.as_mut().unwrap().key());

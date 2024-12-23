@@ -1,7 +1,8 @@
 [toolchain]
 anchor_version = "0.29.0"
-solana_version = "1.14.18"
+solana_version = "1.17.31"
 # solana_version = "1.14.18"
+# solana_version = "1.17.31"
 [features]
 seeds = false
 skip-lint = false

@@ -17,6 +17,9 @@ pub struct Order {
     pub bump: u8,
     pub is_valiable: bool,
     pub target_address: [u8; 32],
+    pub bond_asset_mint: Pubkey,  // The mint of the bond token
+    pub bond_amount: u64,         // How many bond tokens must be locked by bonder
+    pub bond_fee: u16,            // Fee in basis points applied to the source tokens
 }
 
 impl anchor_lang::Id for Order {

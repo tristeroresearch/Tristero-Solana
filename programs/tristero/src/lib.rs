@@ -50,8 +50,8 @@ pub mod tristero {
         instructions::execute_match(ctx, &params)
     }
 
-    pub fn confirm_match(ctx: Context<ConfirmMatch>) -> Result<()> {
-        instructions::confirm_match(ctx)
+    pub fn confirm_match(ctx: Context<ConfirmMatch>, params: ConfirmMatchParams) -> Result<()> {
+        instructions::confirm_match(ctx, &params)
     }
 
     pub fn start_challenge(ctx: Context<Challenge>, params: ChallengeParams) -> Result<()> {

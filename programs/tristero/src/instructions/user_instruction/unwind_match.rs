@@ -43,13 +43,27 @@ pub struct UnwindMatch<'info> {
 
     #[account(
         mut,
+        seeds = [b"staking_bond_account", order.bond_asset_mint.as_ref()],
+        bump,
+    )]
+    pub staking_bond_account: Box<Account<'info, TokenAccount>>,
+
+    #[account(
+        mut,
         constraint = user_token_account.owner == order.user_pubkey @ CustomError::InvalidTokenOwner,
         constraint = user_token_account.mint == order.source_token_mint @ CustomError::InvalidTokenMintAddress,
     )]
     pub user_token_account: Box<Account<'info, TokenAccount>>,
 
-    /// CHECK: This is not dangerous because we don't read or write from this account
-    #[account(constraint = token_program.key() == TOKEN_PROGRAM_ID @ CustomError::InvalidTokenStandard)]
+    #[account(
+        mut,
+        constraint = bonder_bond_token_account.owner == authority.key() @ CustomError::InvalidAuthority,
+        constraint = bonder_bond_token_account.mint == order.bond_asset_mint @ CustomError::InvalidTokenMintAddress,
+    )]
+    pub bonder_bond_token_account: Box<Account<'info, TokenAccount>>,
+
+    /// CHECK:
+    #[account(constraint = token_program.key() == TOKEN_PROGRAM_ID)]
     pub token_program: AccountInfo<'info>,
 }
 
@@ -60,25 +74,49 @@ pub fn unwind_match(ctx: Context<UnwindMatch>) -> Result<()> {
     // Mark match as finalized
     trade_match.status = 1; // 1 = finalized
 
-    // Return tokens from staking account to user
-    let cpi_accounts = Transfer {
-        from: ctx.accounts.staking_account.to_account_info(),
-        to: ctx.accounts.user_token_account.to_account_info(),
-        authority: ctx.accounts.oapp.to_account_info(),
-    };
+    // Return source tokens to the user
+    {
+        let cpi_accounts = Transfer {
+            from: ctx.accounts.staking_account.to_account_info(),
+            to: ctx.accounts.user_token_account.to_account_info(),
+            authority: ctx.accounts.oapp.to_account_info(),
+        };
 
-    let seeds = &[b"TristeroOapp".as_ref(), &[ctx.bumps.oapp]];
-    let signer_seeds = &[&seeds[..]];
+        let seeds = &[b"TristeroOapp".as_ref(), &[ctx.bumps.oapp]];
+        let signer_seeds = &[&seeds[..]];
 
-    token::transfer(
-        CpiContext::new_with_signer(
-            ctx.accounts.token_program.to_account_info(),
-            cpi_accounts,
-            signer_seeds
-        ),
-        trade_match.source_sell_amount
-    )?;
+        token::transfer(
+            CpiContext::new_with_signer(
+                ctx.accounts.token_program.to_account_info(),
+                cpi_accounts,
+                signer_seeds
+            ),
+            trade_match.source_sell_amount
+        )?;
+    }
 
+
+    // Return bond tokens to the bonder
+    {
+        let cpi_accounts = Transfer {
+            from: ctx.accounts.staking_bond_account.to_account_info(),
+            to: ctx.accounts.bonder_bond_token_account.to_account_info(),
+            authority: ctx.accounts.oapp.to_account_info(),
+        };
+
+        let seeds = &[b"TristeroOapp".as_ref(), &[ctx.bumps.oapp]];
+        let signer_seeds = &[&seeds[..]];
+
+        token::transfer(
+            CpiContext::new_with_signer(
+                ctx.accounts.token_program.to_account_info(),
+                cpi_accounts,
+                signer_seeds
+            ),
+            order.bond_amount
+        )?;
+    }
+    
     // Update order settled amount
     order.settled = order.settled.checked_sub(trade_match.source_sell_amount)
         .ok_or(CustomError::ArithmeticError)?;

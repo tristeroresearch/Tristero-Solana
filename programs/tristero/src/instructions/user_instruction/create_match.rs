@@ -1,17 +1,14 @@
 use anchor_lang::prelude::*;
-use {crate::error::*, crate::state::*};
-use anchor_spl::{
-    token::{self, Token, Transfer, TokenAccount, Mint},
-};
-use {crate::error::*, crate::state::*};
+use anchor_spl::token::{self, Mint, Token, TokenAccount, Transfer};
 use spl_token::ID as TOKEN_PROGRAM_ID;
-
+use {crate::error::*, crate::state::*};
+use {crate::error::*, crate::state::*};
 
 #[derive(Accounts)]
 #[instruction(params: CreateMatchParams)]
 pub struct CreateMatch<'info> {
     #[account(mut)]
-    pub authority: Signer<'info>,
+    pub authority: Signer<'info>, // This is the bonder
 
     /// CHECK: PDA for OApp
     #[account(
@@ -44,6 +41,16 @@ pub struct CreateMatch<'info> {
     )]
     pub token_account: Box<Account<'info, TokenAccount>>,
 
+    // Bond token mint & accounts
+    pub bond_asset_mint: Box<Account<'info, Mint>>,
+
+    #[account(
+        mut,
+        constraint = bonder_bond_token_account.owner == authority.key() @ CustomError::InvalidAuthority,
+        constraint = bonder_bond_token_account.mint == order.bond_asset_mint @ CustomError::InvalidTokenMintAddress,
+    )]
+    pub bonder_bond_token_account: Box<Account<'info, TokenAccount>>,
+
     #[account(
         init_if_needed,
         payer = authority,
@@ -53,6 +60,16 @@ pub struct CreateMatch<'info> {
         token::authority = oapp,
     )]
     pub staking_account: Box<Account<'info, TokenAccount>>,
+
+    #[account(
+        init_if_needed,
+        payer = authority,
+        seeds = [b"staking_bond_account", order.bond_asset_mint.as_ref()],
+        bump,
+        token::mint = bond_asset_mint,
+        token::authority = oapp,
+    )]
+    pub staking_bond_account: Box<Account<'info, TokenAccount>>,
 
     #[account(
         init,
@@ -81,8 +98,14 @@ pub fn create_match(ctx: Context<CreateMatch>, params: &CreateMatchParams) -> Re
     let trade_match = ctx.accounts.trade_match.as_mut();
 
     require!(params.src_quantity >= order.min_sell_amount, CustomError::MinSellAmountConflict);
-    require!(order.source_sell_amount - order.settled >= params.src_quantity, CustomError::InSufficientFundsOfOrder);
-    require!(order.match_pubkey!=None && order.match_pubkey == Some(ctx.accounts.authority.key()), CustomError::InvalidAuthority);
+    require!(
+        order.source_sell_amount - order.settled >= params.src_quantity,
+        CustomError::InSufficientFundsOfOrder
+    );
+    require!(
+        order.match_pubkey != None && order.match_pubkey == Some(ctx.accounts.authority.key()),
+        CustomError::InvalidAuthority
+    );
 
     // ---------------------Transfer the source token to the staking account----------------------------------
     let cpi_accounts = Transfer {
@@ -98,9 +121,20 @@ pub fn create_match(ctx: Context<CreateMatch>, params: &CreateMatchParams) -> Re
         CpiContext::new_with_signer(
             ctx.accounts.token_program.to_account_info(),
             cpi_accounts,
-            signer_seeds
+            signer_seeds,
         ),
-        params.src_quantity
+        params.src_quantity,
+    )?;
+
+    // Transfer the bond token from bonder to the staking bond account
+    let cpi_accounts_bond = Transfer {
+        from: ctx.accounts.bonder_bond_token_account.to_account_info(),
+        to: ctx.accounts.staking_bond_account.to_account_info(),
+        authority: ctx.accounts.authority.to_account_info(),
+    };
+    token::transfer(
+        CpiContext::new(ctx.accounts.token_program.to_account_info(), cpi_accounts_bond),
+        order.bond_amount,
     )?;
 
     // Set trade match details
