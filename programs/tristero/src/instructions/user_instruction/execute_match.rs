@@ -28,7 +28,7 @@ pub struct ExecuteMatch<'info> {
         init,
         payer = authority,
         space = Receipt::LEN,
-        seeds = [b"receipt".as_ref(), params.sender.as_ref(), &params.trade_match_id.to_be_bytes()],
+        seeds = [b"receipt".as_ref(), params.sender.as_ref(), &params.dst_eid.to_be_bytes(), &params.trade_match_id.to_be_bytes()],
         bump
     )]
     pub receipt: Box<Account<'info, Receipt>>,
