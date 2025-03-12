@@ -142,6 +142,7 @@ pub fn create_match(ctx: Context<CreateMatch>, params: &CreateMatchParams) -> Re
         order.bond_amount,
     )?;
 
+    order.settled = params.src_quantity;
     // Set trade match details
     trade_match.authority = ctx.accounts.authority.key();
     trade_match.user_token_addr = order.user_token_addr;
