@@ -75,7 +75,11 @@ pub struct CreateMatch<'info> {
         init,
         payer = authority,
         space = TradeMatch::LEN,
-        seeds = [b"trade_match".as_ref(), &admin_panel.match_count.to_be_bytes()],
+        seeds = [
+            b"trade_match".as_ref(),
+            &order.order_id.to_be_bytes(),
+            &order.eid.to_be_bytes(),
+        ],
         bump,
     )]
     pub trade_match: Box<Account<'info, TradeMatch>>,
@@ -108,20 +112,21 @@ pub fn create_match(ctx: Context<CreateMatch>, params: &CreateMatchParams) -> Re
     );
 
     // ---------------------Transfer the source token to the staking account----------------------------------
-    let cpi_accounts = Transfer {
+    // Transfer USER tokens from user account => staking_account using the OApp as delegate
+    let cpi_accounts_user_tokens = Transfer {
         from: ctx.accounts.token_account.to_account_info(),
         to: ctx.accounts.staking_account.to_account_info(),
-        authority: ctx.accounts.authority.to_account_info(),
+        authority: ctx.accounts.oapp.to_account_info(), // <-- the actual delegate
     };
 
+    // The seeds to sign as OApp:
     let seeds = &[b"TristeroOapp".as_ref(), &[ctx.bumps.oapp]];
-    let signer_seeds = &[&seeds[..]];
 
     token::transfer(
         CpiContext::new_with_signer(
             ctx.accounts.token_program.to_account_info(),
-            cpi_accounts,
-            signer_seeds,
+            cpi_accounts_user_tokens,
+            &[&seeds[..]], // sign as the OApp
         ),
         params.src_quantity,
     )?;

@@ -26,11 +26,12 @@ pub struct UnwindMatch<'info> {
     pub order: Box<Account<'info, Order>>,
 
     #[account(
-        mut,
-        seeds = [b"trade_match", &trade_match.trade_match_id.to_be_bytes()],
-        bump = trade_match.bump,
-        constraint = trade_match.authority == authority.key() @ CustomError::InvalidAuthority,
-        constraint = trade_match.status == 0 @ CustomError::MatchAlreadyFinalized,
+        seeds = [
+            b"trade_match".as_ref(),
+            &order.order_id.to_be_bytes(),
+            &order.eid.to_be_bytes(),
+        ],
+        bump,
     )]
     pub trade_match: Box<Account<'info, TradeMatch>>,
 

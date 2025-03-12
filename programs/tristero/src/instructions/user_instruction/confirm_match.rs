@@ -6,7 +6,6 @@ use {crate::error::*, crate::state::*};
 use spl_token::ID as TOKEN_PROGRAM_ID;
 
 #[derive(Accounts)]
-#[instruction(params: ConfirmMatchParams)]
 pub struct ConfirmMatch<'info> {
     #[account(mut)]
     pub signer: Signer<'info>,
@@ -27,7 +26,11 @@ pub struct ConfirmMatch<'info> {
 
     #[account(
         mut,
-        seeds = [b"trade_match".as_ref(), &params.trade_match_id.to_be_bytes()],
+        seeds = [
+            b"trade_match".as_ref(),
+            &trade_match.order_idx.to_be_bytes(),
+            &trade_match.eid.to_be_bytes()
+        ],
         bump = trade_match.bump,
     )]
     pub trade_match: Box<Account<'info, TradeMatch>>,
@@ -63,12 +66,7 @@ pub struct ConfirmMatch<'info> {
     pub token_program: AccountInfo<'info>,
 }
 
-#[derive(AnchorSerialize, AnchorDeserialize, Clone, Copy)]
-pub struct ConfirmMatchParams {
-    pub trade_match_id: u64
-}
-
-pub fn confirm_match(ctx: Context<ConfirmMatch>, params: &ConfirmMatchParams) -> Result<()>  {
+pub fn confirm_match(ctx: Context<ConfirmMatch>) -> Result<()>  {
     let trade_match = ctx.accounts.trade_match.as_mut();
     let order = ctx.accounts.order.as_mut();
 

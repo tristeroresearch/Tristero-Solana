@@ -25,10 +25,16 @@ pub struct ExecuteMatch<'info> {
     pub arb_user_token_account: Box<Account<'info, TokenAccount>>,
 
     #[account(
-        init,
+        init_if_needed,
         payer = authority,
         space = Receipt::LEN,
-        seeds = [b"receipt".as_ref(), params.sender.as_ref(), &params.dst_eid.to_be_bytes(), &params.trade_match_id.to_be_bytes()],
+        seeds = [
+            b"receipt".as_ref(),
+            params.sender.as_ref(),
+            &params.dst_eid.to_be_bytes(),
+            &params.trade_match_id.to_be_bytes(),
+            params.src_asset.as_ref()
+        ],
         bump
     )]
     pub receipt: Box<Account<'info, Receipt>>,
@@ -45,7 +51,8 @@ pub struct ExecuteMatchParams {
     pub dst_eid: u32,
     pub trade_match_id: u64,
     pub source_sell_amount: u64,
-    pub sender: [u8; 20]
+    pub sender: [u8; 20],
+    pub src_asset: [u8; 32]
 }
 
 pub fn execute_match(ctx: Context<ExecuteMatch>, params: &ExecuteMatchParams) -> Result<()>  {

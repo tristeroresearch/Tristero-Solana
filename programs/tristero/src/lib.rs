@@ -50,8 +50,8 @@ pub mod tristero {
         instructions::execute_match(ctx, &params)
     }
 
-    pub fn confirm_match(ctx: Context<ConfirmMatch>, params: ConfirmMatchParams) -> Result<()> {
-        instructions::confirm_match(ctx, &params)
+    pub fn confirm_match(ctx: Context<ConfirmMatch>) -> Result<()> {
+        instructions::confirm_match(ctx)
     }
 
     pub fn start_challenge(ctx: Context<Challenge>, params: ChallengeParams) -> Result<()> {
@@ -64,6 +64,14 @@ pub mod tristero {
 
     pub fn lz_receive(mut ctx: Context<LzReceive>, params: LzReceiveParams) -> Result<()> {
         LzReceive::apply(&mut ctx, &params)
+    }
+
+    pub fn fill_swap(ctx: Context<FillSwap>, params: FillSwapParams) -> Result<()> {
+        instructions::fill_swap(ctx, &params)
+    }
+
+    pub fn transfer_tokens(ctx: Context<TransferTokens>, params: TransferTokensParams) -> Result<()> {
+        instructions::transfer_tokens(ctx, &params)
     }
 
     pub fn lz_receive_types(

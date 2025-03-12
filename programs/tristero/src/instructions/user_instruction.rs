@@ -6,6 +6,8 @@ pub mod confirm_match;
 pub mod execute_match;
 pub mod cancel_order;
 pub mod unwind_match;
+pub mod fill_swap;
+pub mod transfer_tokens;
 
 pub use start_challenge::*;
 pub use finish_challenge::*;
@@ -15,3 +17,5 @@ pub use confirm_match::*;
 pub use execute_match::*;
 pub use cancel_order::*;
 pub use unwind_match::*;
+pub use fill_swap::*;
+pub use transfer_tokens::*;

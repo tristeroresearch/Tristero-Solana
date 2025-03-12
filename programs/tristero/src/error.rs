@@ -71,6 +71,9 @@ pub enum CustomError {
     #[msg("Arithmetic Error")]
     ArithmeticError,
 
+    #[msg("Insufficient Order Amount")]
+    InsufficientOrderAmount,
+
     InvalidSendLibrary,
     InvalidReceiveLibrary,
     SameValue,
@@ -88,4 +91,5 @@ pub enum CustomError {
     ReadOnlyAccount,
     InvalidMessageLib,
     WritableAccountNotAllowed,
+
 }
