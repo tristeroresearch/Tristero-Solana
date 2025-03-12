@@ -26,12 +26,13 @@ pub struct UnwindMatch<'info> {
     pub order: Box<Account<'info, Order>>,
 
     #[account(
+        mut,
         seeds = [
             b"trade_match".as_ref(),
-            &order.order_id.to_be_bytes(),
-            &order.eid.to_be_bytes(),
+            &trade_match.order_idx.to_be_bytes(),
+            &trade_match.eid.to_be_bytes()
         ],
-        bump,
+        bump = trade_match.bump,
     )]
     pub trade_match: Box<Account<'info, TradeMatch>>,
 
