@@ -74,7 +74,7 @@ pub fn unwind_match(ctx: Context<UnwindMatch>) -> Result<()> {
     let order = &mut ctx.accounts.order;
 
     // Mark match as finalized
-    trade_match.status = 1; // 1 = finalized
+    trade_match.status = 2; // 1 = finalized
 
     // Return source tokens to the user
     {

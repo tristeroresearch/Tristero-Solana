@@ -54,21 +54,21 @@ pub mod tristero {
         instructions::confirm_match(ctx)
     }
 
-    pub fn start_challenge(ctx: Context<Challenge>, params: ChallengeParams) -> Result<()> {
-        instructions::start_challenge(ctx, &params)
-    }
+    // pub fn start_challenge(ctx: Context<Challenge>, params: ChallengeParams) -> Result<()> {
+    //     instructions::start_challenge(ctx, &params)
+    // }
 
-    pub fn finish_challenge(ctx: Context<FinishChallenge>, params: FinishChallengeParams) -> Result<()> {
-        instructions::finish_challenge(ctx, &params)
-    }
+    // pub fn finish_challenge(ctx: Context<FinishChallenge>, params: FinishChallengeParams) -> Result<()> {
+    //     instructions::finish_challenge(ctx, &params)
+    // }
 
     pub fn lz_receive(mut ctx: Context<LzReceive>, params: LzReceiveParams) -> Result<()> {
         LzReceive::apply(&mut ctx, &params)
     }
 
-    pub fn fill_swap(ctx: Context<FillSwap>, params: FillSwapParams) -> Result<()> {
-        instructions::fill_swap(ctx, &params)
-    }
+    // pub fn fill_swap(ctx: Context<FillSwap>, params: FillSwapParams) -> Result<()> {
+    //     instructions::fill_swap(ctx, &params)
+    // }
 
     pub fn transfer_tokens(ctx: Context<TransferTokens>, params: TransferTokensParams) -> Result<()> {
         instructions::transfer_tokens(ctx, &params)
