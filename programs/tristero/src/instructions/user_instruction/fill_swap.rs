@@ -28,7 +28,11 @@ pub struct FillSwap<'info> {
         init,
         payer = authority,
         space = TradeMatch::LEN,
-        seeds = [b"trade_match".as_ref(), &params.trade_match_id.to_be_bytes()],
+        seeds = [
+            b"trade_match".as_ref(),
+            &params.order_idx.to_be_bytes(),
+            &order.eid.to_be_bytes(),
+        ],
         bump,
     )]
     pub trade_match: Box<Account<'info, TradeMatch>>,
@@ -41,34 +45,46 @@ pub struct FillSwap<'info> {
         token::mint = source_token_mint,
         token::authority = oapp,
     )]
-    pub staking_account: Box<Account<'info, TokenAccount>>,
-
-    pub bond_asset_mint: Box<Account<'info, Mint>>,
-    pub source_token_mint: Box<Account<'info, Mint>>,
+    pub src_asset_staking_account: Box<Account<'info, TokenAccount>>,
 
     #[account(
         init_if_needed,
         payer = authority,
-        seeds = [b"staking_bond_account", order.bond_asset_mint.as_ref()],
+        seeds = [b"staking_account", dst_token_mint.key().as_ref()],
         bump,
-        token::mint = bond_asset_mint,
+        token::mint = dst_token_mint,
         token::authority = oapp,
     )]
-    pub staking_bond_account: Box<Account<'info, TokenAccount>>,
+    pub dst_asset_staking_account: Box<Account<'info, TokenAccount>>,
+
+    pub source_token_mint: Box<Account<'info, Mint>>,
 
     #[account(
         mut,
-        constraint = user_token_account.owner == order.user_pubkey @ CustomError::InvalidTokenOwner,
-        constraint = user_token_account.mint == order.source_token_mint @ CustomError::InvalidTokenMintAddress,
+        constraint = source_user_token_account.owner == order.user_pubkey @ CustomError::InvalidTokenOwner,
+        constraint = source_user_token_account.mint == order.source_token_mint @ CustomError::InvalidTokenMintAddress,
     )]
-    pub user_token_account: Box<Account<'info, TokenAccount>>,
+    pub source_user_token_account: Box<Account<'info, TokenAccount>>,
 
     #[account(
         mut,
-        constraint = bonder_bond_token_account.owner == authority.key() @ CustomError::InvalidAuthority,
-        constraint = bonder_bond_token_account.mint == order.bond_asset_mint @ CustomError::InvalidTokenMintAddress,
+        constraint = dst_user_token_account.mint == order.dst_token_mint.into() @ CustomError::InvalidTokenMintAddress,
     )]
-    pub bonder_bond_token_account: Box<Account<'info, TokenAccount>>,
+    pub dst_user_token_account: Box<Account<'info, TokenAccount>>,
+
+    #[account(
+        mut,
+        constraint = source_user_token_account.mint == order.source_token_mint @ CustomError::InvalidTokenMintAddress,
+    )]
+    pub source_taker_token_account: Box<Account<'info, TokenAccount>>,
+
+    pub dst_token_mint: Box<Account<'info, Mint>>,
+
+    #[account(
+        mut,
+        constraint = dst_taker_token_account.mint == dst_token_mint.key() @ CustomError::InvalidTokenMintAddress,
+    )]
+    pub dst_taker_token_account: Box<Account<'info, TokenAccount>>,
 
     /// CHECK: This is not dangerous because we don't read or write from this account
     #[account(constraint = token_program.key() == TOKEN_PROGRAM_ID @ CustomError::InvalidTokenStandard)]
@@ -83,7 +99,7 @@ pub struct FillSwapParams {
     pub trade_match_id: u64,
 }
 
-pub fn fill_swap(ctx: Context<FillSwap>, params: &FillSwapParams) -> Result<()> {
+pub fn fill_swap(ctx: Context<FillSwap>, _params: &FillSwapParams) -> Result<()> {
     let order = ctx.accounts.order.as_mut();
     let trade_match = ctx.accounts.trade_match.as_mut();
 
@@ -96,17 +112,18 @@ pub fn fill_swap(ctx: Context<FillSwap>, params: &FillSwapParams) -> Result<()> 
 
     // Update order and trade match
     order.settled += order.source_sell_amount;
-    trade_match.status = 1; // Mark as filled
+    trade_match.status = 2; // Mark as filled
 
-    // Transfer tokens
     let cpi_accounts = Transfer {
-        from: ctx.accounts.user_token_account.to_account_info(),
-        to: ctx.accounts.staking_account.to_account_info(),
+        from: ctx.accounts.source_user_token_account.to_account_info(),
+        to: ctx.accounts.src_asset_staking_account.to_account_info(),
         authority: ctx.accounts.oapp.to_account_info(),
     };
+
     let seeds = &[b"TristeroOapp".as_ref(), &[ctx.bumps.oapp]];
     let signer_seeds = &[&seeds[..]];
 
+    // Transfer source tokens from user to staking account
     token::transfer(
         CpiContext::new_with_signer(
             ctx.accounts.token_program.to_account_info(),
@@ -116,19 +133,48 @@ pub fn fill_swap(ctx: Context<FillSwap>, params: &FillSwapParams) -> Result<()> 
         order.source_sell_amount,
     )?;
 
-    // Transfer bond tokens back to bonder
-    let cpi_accounts_bond = Transfer {
-        from: ctx.accounts.staking_bond_account.to_account_info(),
-        to: ctx.accounts.bonder_bond_token_account.to_account_info(),
+    let cpi_accounts = Transfer {
+        from: ctx.accounts.dst_taker_token_account.to_account_info(),
+        to: ctx.accounts.dst_asset_staking_account.to_account_info(),
+        authority: ctx.accounts.authority.to_account_info(), 
+    };
+    // Transfer destination tokens from taker token account to staking account
+    token::transfer(
+        CpiContext::new(
+            ctx.accounts.token_program.to_account_info(),
+            cpi_accounts,
+        ),
+        order.dst_buy_amount,
+    )?;
+
+    let cpi_accounts = Transfer {
+        from: ctx.accounts.dst_asset_staking_account.to_account_info(),
+        to: ctx.accounts.dst_user_token_account.to_account_info(),
         authority: ctx.accounts.oapp.to_account_info(),
     };
+    // Tranfer dst token from staking token account to dst user token account
     token::transfer(
         CpiContext::new_with_signer(
             ctx.accounts.token_program.to_account_info(),
-            cpi_accounts_bond,
+            cpi_accounts,
             signer_seeds,
         ),
-        order.bond_amount,
+        order.dst_buy_amount,
+    )?;
+
+    let cpi_accounts = Transfer {
+        from: ctx.accounts.src_asset_staking_account.to_account_info(),
+        to: ctx.accounts.source_taker_token_account.to_account_info(),
+        authority: ctx.accounts.oapp.to_account_info(),
+    };
+    // Tranfer src token from staking token account to maker user token account
+    token::transfer(
+        CpiContext::new_with_signer(
+            ctx.accounts.token_program.to_account_info(),
+            cpi_accounts,
+            signer_seeds,
+        ),
+        order.source_sell_amount,
     )?;
 
     Ok(())

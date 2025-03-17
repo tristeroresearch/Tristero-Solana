@@ -66,9 +66,9 @@ pub mod tristero {
         LzReceive::apply(&mut ctx, &params)
     }
 
-    // pub fn fill_swap(ctx: Context<FillSwap>, params: FillSwapParams) -> Result<()> {
-    //     instructions::fill_swap(ctx, &params)
-    // }
+    pub fn fill_swap(ctx: Context<FillSwap>, params: FillSwapParams) -> Result<()> {
+        instructions::fill_swap(ctx, &params)
+    }
 
     pub fn transfer_tokens(ctx: Context<TransferTokens>, params: TransferTokensParams) -> Result<()> {
         instructions::transfer_tokens(ctx, &params)
